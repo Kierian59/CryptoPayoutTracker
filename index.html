@@ -757,115 +757,125 @@
 
     <script>
         // ============================================
-        // DEFINE ALL GLOBAL FUNCTIONS FIRST
+        // ATTACH ALL FUNCTIONS TO WINDOW IMMEDIATELY
         // ============================================
 
-        function hideAuthMessages() {
+        window.hideAuthMessages = function() {
             document.getElementById('auth-error').style.display = 'none';
             document.getElementById('auth-success').style.display = 'none';
-        }
+        };
 
-        function showAuthError(message) {
-            const el = document.getElementById('auth-error');
+        window.showAuthError = function(message) {
+            var el = document.getElementById('auth-error');
             el.textContent = message;
             el.style.display = 'block';
-        }
+        };
 
-        function showAuthSuccess(message) {
-            const el = document.getElementById('auth-success');
+        window.showAuthSuccess = function(message) {
+            var el = document.getElementById('auth-success');
             el.textContent = message;
             el.style.display = 'block';
-        }
+        };
 
-        function showAuthTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector(`.auth-tab:${tab === 'login' ? 'first-child' : 'last-child'}`).classList.add('active');
+        window.showAuthTab = function(tab) {
+            document.querySelectorAll('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
+            if (tab === 'login') {
+                document.querySelector('.auth-tab:first-child').classList.add('active');
+            } else {
+                document.querySelector('.auth-tab:last-child').classList.add('active');
+            }
             document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
             document.getElementById('signup-form').classList.toggle('hidden', tab !== 'signup');
-            hideAuthMessages();
-        }
+            window.hideAuthMessages();
+        };
 
-        async function handleLogin(e) {
+        window.handleLogin = function(e) {
             e.preventDefault();
-            hideAuthMessages();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            if (error) showAuthError(error.message);
-        }
+            window.hideAuthMessages();
+            var email = document.getElementById('login-email').value;
+            var password = document.getElementById('login-password').value;
+            window.supabaseClient.auth.signInWithPassword({ email: email, password: password })
+                .then(function(result) {
+                    if (result.error) window.showAuthError(result.error.message);
+                });
+        };
 
-        async function handleSignup(e) {
+        window.handleSignup = function(e) {
             e.preventDefault();
-            hideAuthMessages();
-            const email = document.getElementById('signup-email').value;
-            const password = document.getElementById('signup-password').value;
-            const confirm = document.getElementById('signup-confirm').value;
+            window.hideAuthMessages();
+            var email = document.getElementById('signup-email').value;
+            var password = document.getElementById('signup-password').value;
+            var confirm = document.getElementById('signup-confirm').value;
             if (password !== confirm) {
-                showAuthError('Passwords do not match');
+                window.showAuthError('Passwords do not match');
                 return;
             }
-            const { data, error } = await supabase.auth.signUp({ email, password });
-            if (error) {
-                showAuthError(error.message);
-            } else {
-                showAuthSuccess('Account created! Please check your email to verify your account.');
-                document.getElementById('signup-form').reset();
-            }
-        }
+            window.supabaseClient.auth.signUp({ email: email, password: password })
+                .then(function(result) {
+                    if (result.error) {
+                        window.showAuthError(result.error.message);
+                    } else {
+                        window.showAuthSuccess('Account created! Please check your email to verify your account.');
+                        document.getElementById('signup-form').reset();
+                    }
+                });
+        };
 
-        async function handleGoogleLogin() {
-            hideAuthMessages();
-            const { data, error } = await supabase.auth.signInWithOAuth({
+        window.handleGoogleLogin = function() {
+            window.hideAuthMessages();
+            window.supabaseClient.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: window.location.origin + window.location.pathname
                 }
+            }).then(function(result) {
+                if (result.error) window.showAuthError(result.error.message);
             });
-            if (error) showAuthError(error.message);
-        }
+        };
 
-        async function handleLogout() {
-            await supabase.auth.signOut();
-        }
+        window.handleLogout = function() {
+            window.supabaseClient.auth.signOut();
+        };
 
         // ============================================
         // SUPABASE INITIALIZATION
         // ============================================
 
-        const SUPABASE_URL = 'https://ivjxsidujcnfeaxgrtch.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2anhzaWR1amNuZmVheGdydGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MzExODAsImV4cCI6MjA4MzEwNzE4MH0.Hl85howprQbotsHTlTHW0g8tyXwhZAgxedGTZ8lT6Jw';
+        var SUPABASE_URL = 'https://ivjxsidujcnfeaxgrtch.supabase.co';
+        var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2anhzaWR1amNuZmVheGdydGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MzExODAsImV4cCI6MjA4MzEwNzE4MH0.Hl85howprQbotsHTlTHW0g8tyXwhZAgxedGTZ8lT6Jw';
 
-        let supabase;
+        window.supabaseClient = null;
 
         // Data storage
-        let payouts = [];
-        let currentUser = null;
-        let sortField = 'date';
-        let sortDirection = 'desc';
-        let selectedMonth = 'all';
+        var payouts = [];
+        var currentUser = null;
+        var sortField = 'date';
+        var sortDirection = 'desc';
+        var selectedMonth = 'all';
 
         // Chart instances
-        let timelineChart, companyChart, cryptoChart;
+        var timelineChart, companyChart, cryptoChart;
 
         // Chart colors
-        const chartColors = [
+        var chartColors = [
             '#00d9ff', '#ff6b6b', '#4ecdc4', '#ffe66d', '#95e1d3',
             '#f38181', '#aa96da', '#fcbad3', '#a8d8ea', '#ffd93d'
         ];
 
         // Initialize app after Supabase is ready
-        async function initApp() {
-            if (!supabase) return;
+        function initApp() {
+            if (!window.supabaseClient) return;
 
             // Check for existing session
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                showApp();
-            }
+            window.supabaseClient.auth.getSession().then(function(result) {
+                if (result.data && result.data.session) {
+                    currentUser = result.data.session.user;
+                    showApp();
+                }
+            });
 
             // Listen for auth changes
-            supabase.auth.onAuthStateChange((event, session) => {
+            window.supabaseClient.auth.onAuthStateChange(function(event, session) {
                 if (event === 'SIGNED_IN' && session) {
                     currentUser = session.user;
                     showApp();
@@ -877,16 +887,16 @@
         }
 
         // Initialize Supabase when library loads
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             if (window.supabase) {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 initApp();
             } else {
                 // Wait for Supabase library
-                const check = setInterval(() => {
+                var check = setInterval(function() {
                     if (window.supabase) {
                         clearInterval(check);
-                        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                        window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                         initApp();
                     }
                 }, 100);
@@ -910,23 +920,23 @@
 
         // Database functions
         async function loadPayouts() {
-            const { data, error } = await supabase
+            var result = await window.supabaseClient
                 .from('payouts')
                 .select('*')
                 .order('date', { ascending: false });
 
-            if (error) {
-                console.error('Error loading payouts:', error);
+            if (result.error) {
+                console.error('Error loading payouts:', result.error);
                 return;
             }
 
-            payouts = data || [];
+            payouts = result.data || [];
             updateMonthTabs();
             renderAll();
         }
 
         async function savePayout(payout) {
-            const { data, error } = await supabase
+            var result = await window.supabaseClient
                 .from('payouts')
                 .insert([{
                     user_id: currentUser.id,
@@ -940,17 +950,17 @@
                 }])
                 .select();
 
-            if (error) {
-                console.error('Error saving payout:', error);
-                alert('Error saving payout: ' + error.message);
+            if (result.error) {
+                console.error('Error saving payout:', result.error);
+                alert('Error saving payout: ' + result.error.message);
                 return null;
             }
 
-            return data[0];
+            return result.data[0];
         }
 
         async function updatePayout(id, payout) {
-            const { data, error } = await supabase
+            var result = await window.supabaseClient
                 .from('payouts')
                 .update({
                     company: payout.company,
@@ -964,24 +974,24 @@
                 .eq('id', id)
                 .select();
 
-            if (error) {
-                console.error('Error updating payout:', error);
-                alert('Error updating payout: ' + error.message);
+            if (result.error) {
+                console.error('Error updating payout:', result.error);
+                alert('Error updating payout: ' + result.error.message);
                 return null;
             }
 
-            return data[0];
+            return result.data[0];
         }
 
         async function deletePayoutFromDB(id) {
-            const { error } = await supabase
+            var result = await window.supabaseClient
                 .from('payouts')
                 .delete()
                 .eq('id', id);
 
-            if (error) {
-                console.error('Error deleting payout:', error);
-                alert('Error deleting payout: ' + error.message);
+            if (result.error) {
+                console.error('Error deleting payout:', result.error);
+                alert('Error deleting payout: ' + result.error.message);
                 return false;
             }
 
