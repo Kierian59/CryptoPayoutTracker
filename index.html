@@ -402,10 +402,6 @@
                         <label for="wallet">Wallet Address (optional)</label>
                         <input type="text" id="wallet" placeholder="0x... or wallet address">
                     </div>
-                    <div class="form-group full-width">
-                        <label for="notes">Notes</label>
-                        <textarea id="notes" rows="2" placeholder="Optional notes..."></textarea>
-                    </div>
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary" id="submit-btn">Add Payout</button>
@@ -495,7 +491,6 @@
                             <th onclick="sortTable('chain')">Chain</th>
                             <th onclick="sortTable('usdSold')">USD Sold</th>
                             <th>Wallet</th>
-                            <th>Notes</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -718,8 +713,7 @@
                 crypto: document.getElementById('crypto').value.toUpperCase(),
                 usdSold: parseFloat(document.getElementById('usd-sold').value) || 0,
                 chain: document.getElementById('chain').value.trim(),
-                wallet: document.getElementById('wallet').value.trim(),
-                notes: document.getElementById('notes').value.trim()
+                wallet: document.getElementById('wallet').value.trim()
             };
 
             if (editId) {
@@ -753,8 +747,7 @@
             let filtered = getFilteredPayouts().filter(p =>
                 p.company.toLowerCase().includes(searchTerm) ||
                 p.crypto.toLowerCase().includes(searchTerm) ||
-                (p.chain || '').toLowerCase().includes(searchTerm) ||
-                (p.notes || '').toLowerCase().includes(searchTerm)
+                (p.chain || '').toLowerCase().includes(searchTerm)
             );
 
             filtered.sort((a, b) => {
@@ -787,7 +780,6 @@
                     <td>${escapeHtml(p.chain) || '-'}</td>
                     <td class="usd-value">${p.usdSold ? '$' + formatUSD(p.usdSold) : '-'}</td>
                     <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(p.wallet) || ''}">${escapeHtml(p.wallet) || '-'}</td>
-                    <td>${escapeHtml(p.notes) || '-'}</td>
                     <td>
                         <button class="btn btn-edit" onclick="editPayout('${p.id}')">Edit</button>
                         <button class="btn btn-danger" onclick="deletePayout('${p.id}')">Delete</button>
@@ -919,7 +911,6 @@
             document.getElementById('usd-sold').value = payout.usdSold || '';
             document.getElementById('chain').value = payout.chain || '';
             document.getElementById('wallet').value = payout.wallet || '';
-            document.getElementById('notes').value = payout.notes;
 
             document.getElementById('form-title').textContent = 'Edit Payout';
             document.getElementById('submit-btn').textContent = 'Update Payout';
@@ -961,7 +952,7 @@
                 return;
             }
 
-            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'Wallet', 'Notes'];
+            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'Wallet'];
             const rows = filtered.map(p => [
                 p.date,
                 `"${p.company.replace(/"/g, '""')}"`,
@@ -969,8 +960,7 @@
                 p.crypto,
                 `"${(p.chain || '').replace(/"/g, '""')}"`,
                 (p.usdSold || 0).toFixed(2),
-                `"${(p.wallet || '').replace(/"/g, '""')}"`,
-                `"${(p.notes || '').replace(/"/g, '""')}"`
+                `"${(p.wallet || '').replace(/"/g, '""')}"`
             ]);
 
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
