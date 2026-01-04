@@ -800,7 +800,7 @@
         });
 
         // Auth functions
-        function showAuthTab(tab) {
+        window.showAuthTab = function(tab) {
             document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
             document.querySelector(`.auth-tab:${tab === 'login' ? 'first-child' : 'last-child'}`).classList.add('active');
 
@@ -827,7 +827,7 @@
             el.style.display = 'block';
         }
 
-        async function handleLogin(e) {
+        window.handleLogin = async function(e) {
             e.preventDefault();
             hideAuthMessages();
 
@@ -844,7 +844,7 @@
             }
         }
 
-        async function handleSignup(e) {
+        window.handleSignup = async function(e) {
             e.preventDefault();
             hideAuthMessages();
 
@@ -870,7 +870,7 @@
             }
         }
 
-        async function handleGoogleLogin() {
+        window.handleGoogleLogin = async function() {
             hideAuthMessages();
             const { data, error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
@@ -884,7 +884,7 @@
             }
         }
 
-        async function handleLogout() {
+        window.handleLogout = async function() {
             await supabase.auth.signOut();
         }
 
