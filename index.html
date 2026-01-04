@@ -140,17 +140,6 @@
             background: #7bed9f;
         }
 
-        .btn-refresh {
-            background: #a55eea;
-            color: #fff;
-            padding: 8px 16px;
-            font-size: 0.85rem;
-        }
-
-        .btn-refresh:hover {
-            background: #8854d0;
-        }
-
         .form-actions {
             margin-top: 20px;
             display: flex;
@@ -305,67 +294,9 @@
             height: calc(100% - 30px);
         }
 
-        /* Price status */
-        .price-status {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-size: 0.85rem;
-        }
-
-        .price-status .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #2ed573;
-        }
-
-        .price-status .dot.loading {
-            background: #ffa502;
-            animation: pulse 1s infinite;
-        }
-
-        .price-status .dot.error {
-            background: #ff4757;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
         .usd-value {
             color: #2ed573;
             font-weight: 500;
-        }
-
-        /* Price list */
-        .price-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .price-item {
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-        }
-
-        .price-item .crypto {
-            color: #00d9ff;
-            font-weight: 600;
-        }
-
-        .price-item .price {
-            color: #2ed573;
-            margin-left: 8px;
         }
 
         /* Monthly totals list */
@@ -437,19 +368,6 @@
     <div class="container">
         <h1>Crypto Payout Tracker</h1>
 
-        <!-- Price Status -->
-        <div class="card">
-            <div class="header-actions">
-                <h2>Live Crypto Prices</h2>
-                <button class="btn btn-refresh" onclick="fetchPrices()">Refresh Prices</button>
-            </div>
-            <div class="price-status">
-                <div class="dot loading" id="price-dot"></div>
-                <span id="price-status-text">Loading prices...</span>
-            </div>
-            <div class="price-list" id="price-list"></div>
-        </div>
-
         <!-- Entry Form -->
         <div class="card">
             <h2 id="form-title">Add New Payout</h2>
@@ -465,29 +383,24 @@
                         <input type="date" id="date" required>
                     </div>
                     <div class="form-group">
-                        <label for="amount">Amount</label>
+                        <label for="amount">Amount of Tokens</label>
                         <input type="number" id="amount" step="any" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label for="crypto">Cryptocurrency</label>
-                        <select id="crypto" required>
-                            <option value="">Select...</option>
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                            <option value="USDT">Tether (USDT)</option>
-                            <option value="USDC">USD Coin (USDC)</option>
-                            <option value="BNB">Binance Coin (BNB)</option>
-                            <option value="XRP">Ripple (XRP)</option>
-                            <option value="ADA">Cardano (ADA)</option>
-                            <option value="SOL">Solana (SOL)</option>
-                            <option value="DOGE">Dogecoin (DOGE)</option>
-                            <option value="DOT">Polkadot (DOT)</option>
-                            <option value="MATIC">Polygon (MATIC)</option>
-                            <option value="LTC">Litecoin (LTC)</option>
-                            <option value="AVAX">Avalanche (AVAX)</option>
-                            <option value="LINK">Chainlink (LINK)</option>
-                            <option value="OTHER">Other</option>
-                        </select>
+                        <input type="text" id="crypto" required placeholder="e.g., BTC, ETH, SOL...">
+                    </div>
+                    <div class="form-group">
+                        <label for="usd-sold">Amount Sold (USD)</label>
+                        <input type="number" id="usd-sold" step="any" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="chain">Chain (optional)</label>
+                        <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC...">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="wallet">Wallet Address (optional)</label>
+                        <input type="text" id="wallet" placeholder="0x... or wallet address">
                     </div>
                     <div class="form-group full-width">
                         <label for="notes">Notes</label>
@@ -518,8 +431,8 @@
                     <div class="label">Total Payouts</div>
                 </div>
                 <div class="stat-box">
-                    <div class="value usd" id="total-usd">$0.00</div>
-                    <div class="label">Total USD Value</div>
+                    <div class="value usd" id="total-usd-sold">$0.00</div>
+                    <div class="label">Total USD Sold</div>
                 </div>
                 <div class="stat-box">
                     <div class="value" id="unique-companies">0</div>
@@ -577,9 +490,11 @@
                         <tr>
                             <th onclick="sortTable('date')">Date</th>
                             <th onclick="sortTable('company')">Project</th>
-                            <th onclick="sortTable('amount')">Amount</th>
+                            <th onclick="sortTable('amount')">Tokens</th>
                             <th onclick="sortTable('crypto')">Crypto</th>
-                            <th onclick="sortTable('usdValue')">USD Value</th>
+                            <th onclick="sortTable('chain')">Chain</th>
+                            <th onclick="sortTable('usdSold')">USD Sold</th>
+                            <th>Wallet</th>
                             <th>Notes</th>
                             <th>Actions</th>
                         </tr>
@@ -599,25 +514,6 @@
         let sortDirection = 'desc';
         let selectedMonth = 'all';
 
-        // Crypto prices
-        let cryptoPrices = {};
-        const COINGECKO_IDS = {
-            'BTC': 'bitcoin',
-            'ETH': 'ethereum',
-            'USDT': 'tether',
-            'USDC': 'usd-coin',
-            'BNB': 'binancecoin',
-            'XRP': 'ripple',
-            'ADA': 'cardano',
-            'SOL': 'solana',
-            'DOGE': 'dogecoin',
-            'DOT': 'polkadot',
-            'MATIC': 'matic-network',
-            'LTC': 'litecoin',
-            'AVAX': 'avalanche-2',
-            'LINK': 'chainlink',
-            'OTHER': null
-        };
 
         // Chart instances
         let timelineChart, companyChart, cryptoChart;
@@ -633,102 +529,8 @@
             document.getElementById('date').valueAsDate = new Date();
             initCharts();
             updateMonthTabs();
-            fetchPrices();
-        });
-
-        // Fetch crypto prices from CoinGecko
-        async function fetchPrices() {
-            const dot = document.getElementById('price-dot');
-            const statusText = document.getElementById('price-status-text');
-            const priceList = document.getElementById('price-list');
-
-            dot.className = 'dot loading';
-            statusText.textContent = 'Fetching prices...';
-
-            try {
-                const ids = Object.values(COINGECKO_IDS).filter(id => id !== null).join(',');
-                const response = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd`);
-
-                if (!response.ok) throw new Error('API error');
-
-                const data = await response.json();
-
-                // Map prices back to symbols
-                for (const [symbol, id] of Object.entries(COINGECKO_IDS)) {
-                    if (id && data[id]) {
-                        cryptoPrices[symbol] = data[id].usd;
-                    }
-                }
-
-                // Stablecoins default to $1
-                if (!cryptoPrices['USDT']) cryptoPrices['USDT'] = 1;
-                if (!cryptoPrices['USDC']) cryptoPrices['USDC'] = 1;
-                cryptoPrices['OTHER'] = 0;
-
-                // Update UI
-                dot.className = 'dot';
-                const now = new Date().toLocaleTimeString();
-                statusText.textContent = `Prices updated at ${now}`;
-
-                // Show price list
-                priceList.innerHTML = Object.entries(cryptoPrices)
-                    .filter(([symbol, price]) => price > 0)
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([symbol, price]) => `
-                        <div class="price-item">
-                            <span class="crypto">${symbol}</span>
-                            <span class="price">$${formatUSD(price)}</span>
-                        </div>
-                    `).join('');
-
-                // Save to localStorage for offline use
-                localStorage.setItem('cryptoPrices', JSON.stringify(cryptoPrices));
-                localStorage.setItem('pricesUpdated', Date.now());
-
-            } catch (error) {
-                console.error('Price fetch error:', error);
-
-                // Try to load cached prices
-                const cached = localStorage.getItem('cryptoPrices');
-                if (cached) {
-                    cryptoPrices = JSON.parse(cached);
-                    const cachedTime = localStorage.getItem('pricesUpdated');
-                    const cachedDate = cachedTime ? new Date(parseInt(cachedTime)).toLocaleTimeString() : 'unknown';
-
-                    dot.className = 'dot error';
-                    statusText.textContent = `Using cached prices from ${cachedDate} (API unavailable)`;
-
-                    priceList.innerHTML = Object.entries(cryptoPrices)
-                        .filter(([symbol, price]) => price > 0)
-                        .sort((a, b) => b[1] - a[1])
-                        .map(([symbol, price]) => `
-                            <div class="price-item">
-                                <span class="crypto">${symbol}</span>
-                                <span class="price">$${formatUSD(price)}</span>
-                            </div>
-                        `).join('');
-                } else {
-                    dot.className = 'dot error';
-                    statusText.textContent = 'Failed to fetch prices. Using defaults.';
-
-                    // Set defaults
-                    cryptoPrices = {
-                        'BTC': 0, 'ETH': 0, 'USDT': 1, 'USDC': 1,
-                        'BNB': 0, 'XRP': 0, 'ADA': 0, 'SOL': 0,
-                        'DOGE': 0, 'DOT': 0, 'MATIC': 0, 'LTC': 0,
-                        'AVAX': 0, 'LINK': 0, 'OTHER': 0
-                    };
-                }
-            }
-
             renderAll();
-        }
-
-        // Get USD value for a payout
-        function getUSDValue(amount, crypto) {
-            const price = cryptoPrices[crypto] || 0;
-            return amount * price;
-        }
+        });
 
         // Format USD
         function formatUSD(value) {
@@ -882,7 +684,7 @@
 
             sortedMonths.forEach(month => {
                 const [year, monthNum] = month.split('-');
-                const monthName = new Date(year, monthNum - 1).toLocaleString('default', { month: 'short', year: 'numeric' });
+                const monthName = new Date(year, monthNum - 1).toLocaleString('en-US', { month: 'short', year: 'numeric' });
                 tabsContainer.innerHTML += `<button class="month-tab ${selectedMonth === month ? 'active' : ''}" data-month="${month}">${monthName}</button>`;
             });
 
@@ -914,7 +716,10 @@
                 company: document.getElementById('company').value.trim(),
                 date: document.getElementById('date').value,
                 amount: parseFloat(document.getElementById('amount').value),
-                crypto: document.getElementById('crypto').value,
+                crypto: document.getElementById('crypto').value.toUpperCase(),
+                usdSold: parseFloat(document.getElementById('usd-sold').value) || 0,
+                chain: document.getElementById('chain').value.trim(),
+                wallet: document.getElementById('wallet').value.trim(),
                 notes: document.getElementById('notes').value.trim()
             };
 
@@ -949,22 +754,17 @@
             let filtered = getFilteredPayouts().filter(p =>
                 p.company.toLowerCase().includes(searchTerm) ||
                 p.crypto.toLowerCase().includes(searchTerm) ||
-                p.notes.toLowerCase().includes(searchTerm)
+                (p.chain || '').toLowerCase().includes(searchTerm) ||
+                (p.notes || '').toLowerCase().includes(searchTerm)
             );
-
-            // Add USD value for sorting
-            filtered = filtered.map(p => ({
-                ...p,
-                usdValue: getUSDValue(p.amount, p.crypto)
-            }));
 
             filtered.sort((a, b) => {
                 let aVal = a[sortField];
                 let bVal = b[sortField];
 
-                if (sortField === 'amount' || sortField === 'usdValue') {
-                    aVal = parseFloat(aVal);
-                    bVal = parseFloat(bVal);
+                if (sortField === 'amount' || sortField === 'usdSold') {
+                    aVal = parseFloat(aVal) || 0;
+                    bVal = parseFloat(bVal) || 0;
                 }
 
                 if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
@@ -983,9 +783,11 @@
                 <tr>
                     <td>${formatDate(p.date)}</td>
                     <td>${escapeHtml(p.company)}</td>
-                    <td>${p.amount} ${p.crypto}</td>
+                    <td>${p.amount}</td>
                     <td>${p.crypto}</td>
-                    <td class="usd-value">$${formatUSD(p.usdValue)}</td>
+                    <td>${escapeHtml(p.chain) || '-'}</td>
+                    <td class="usd-value">${p.usdSold ? '$' + formatUSD(p.usdSold) : '-'}</td>
+                    <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(p.wallet) || ''}">${escapeHtml(p.wallet) || '-'}</td>
                     <td>${escapeHtml(p.notes) || '-'}</td>
                     <td>
                         <button class="btn btn-edit" onclick="editPayout('${p.id}')">Edit</button>
@@ -999,10 +801,10 @@
         function updateStats() {
             const filtered = getFilteredPayouts();
 
-            const totalUSD = filtered.reduce((sum, p) => sum + getUSDValue(p.amount, p.crypto), 0);
+            const totalUSDSold = filtered.reduce((sum, p) => sum + (p.usdSold || 0), 0);
 
             document.getElementById('total-payouts').textContent = filtered.length;
-            document.getElementById('total-usd').textContent = '$' + formatUSD(totalUSD);
+            document.getElementById('total-usd-sold').textContent = '$' + formatUSD(totalUSDSold);
             document.getElementById('unique-companies').textContent =
                 new Set(filtered.map(p => p.company.toLowerCase())).size;
             document.getElementById('unique-cryptos').textContent =
@@ -1014,7 +816,7 @@
                 periodLabel.textContent = '';
             } else {
                 const [year, month] = selectedMonth.split('-');
-                periodLabel.textContent = `- ${new Date(year, month - 1).toLocaleString('default', { month: 'long', year: 'numeric' })}`;
+                periodLabel.textContent = `- ${new Date(year, month - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' })}`;
             }
         }
 
@@ -1022,11 +824,10 @@
         function updateCharts() {
             const filtered = getFilteredPayouts();
 
-            // Timeline chart - USD payouts over time
+            // Timeline chart - USD Sold over time
             const timelineData = {};
             filtered.forEach(p => {
-                const usd = getUSDValue(p.amount, p.crypto);
-                timelineData[p.date] = (timelineData[p.date] || 0) + usd;
+                timelineData[p.date] = (timelineData[p.date] || 0) + (p.usdSold || 0);
             });
             const sortedDates = Object.keys(timelineData).sort();
 
@@ -1040,11 +841,10 @@
             }];
             timelineChart.update();
 
-            // Company chart - USD by company
+            // Company chart - USD Sold by project
             const companyData = {};
             filtered.forEach(p => {
-                const usd = getUSDValue(p.amount, p.crypto);
-                companyData[p.company] = (companyData[p.company] || 0) + usd;
+                companyData[p.company] = (companyData[p.company] || 0) + (p.usdSold || 0);
             });
             const sortedCompanies = Object.entries(companyData)
                 .sort((a, b) => b[1] - a[1])
@@ -1060,8 +860,7 @@
             // Crypto chart - USD by crypto
             const cryptoData = {};
             filtered.forEach(p => {
-                const usd = getUSDValue(p.amount, p.crypto);
-                cryptoData[p.crypto] = (cryptoData[p.crypto] || 0) + usd;
+                cryptoData[p.crypto] = (cryptoData[p.crypto] || 0) + (p.usdSold || 0);
             });
 
             cryptoChart.data.labels = Object.keys(cryptoData);
@@ -1075,8 +874,7 @@
             const monthlyData = {};
             payouts.forEach(p => {
                 const month = p.date.substring(0, 7);
-                const usd = getUSDValue(p.amount, p.crypto);
-                monthlyData[month] = (monthlyData[month] || 0) + usd;
+                monthlyData[month] = (monthlyData[month] || 0) + (p.usdSold || 0);
             });
             const sortedMonths = Object.keys(monthlyData).sort().reverse();
 
@@ -1086,7 +884,7 @@
             } else {
                 monthlyList.innerHTML = sortedMonths.map(m => {
                     const [year, monthNum] = m.split('-');
-                    const monthName = new Date(year, monthNum - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+                    const monthName = new Date(year, monthNum - 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
                     const isActive = m === selectedMonth;
                     return `
                         <div class="monthly-total-item ${isActive ? 'active' : ''}">
@@ -1119,6 +917,9 @@
             document.getElementById('date').value = payout.date;
             document.getElementById('amount').value = payout.amount;
             document.getElementById('crypto').value = payout.crypto;
+            document.getElementById('usd-sold').value = payout.usdSold || '';
+            document.getElementById('chain').value = payout.chain || '';
+            document.getElementById('wallet').value = payout.wallet || '';
             document.getElementById('notes').value = payout.notes;
 
             document.getElementById('form-title').textContent = 'Edit Payout';
@@ -1161,14 +962,16 @@
                 return;
             }
 
-            const headers = ['Date', 'Project', 'Amount', 'Cryptocurrency', 'USD Value', 'Notes'];
+            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'Wallet', 'Notes'];
             const rows = filtered.map(p => [
                 p.date,
                 `"${p.company.replace(/"/g, '""')}"`,
                 p.amount,
                 p.crypto,
-                getUSDValue(p.amount, p.crypto).toFixed(2),
-                `"${p.notes.replace(/"/g, '""')}"`
+                `"${(p.chain || '').replace(/"/g, '""')}"`,
+                (p.usdSold || 0).toFixed(2),
+                `"${(p.wallet || '').replace(/"/g, '""')}"`,
+                `"${(p.notes || '').replace(/"/g, '""')}"`
             ]);
 
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
