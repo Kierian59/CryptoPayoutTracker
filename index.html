@@ -760,7 +760,26 @@
         const SUPABASE_URL = 'https://ivjxsidujcnfeaxgrtch.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml2anhzaWR1amNuZmVheGdydGNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc1MzExODAsImV4cCI6MjA4MzEwNzE4MH0.Hl85howprQbotsHTlTHW0g8tyXwhZAgxedGTZ8lT6Jw';
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        let supabase;
+
+        // Wait for Supabase library to load
+        function initSupabase() {
+            if (window.supabase) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                return true;
+            }
+            return false;
+        }
+
+        if (!initSupabase()) {
+            // If not loaded yet, wait for it
+            const checkSupabase = setInterval(() => {
+                if (initSupabase()) {
+                    clearInterval(checkSupabase);
+                    initApp();
+                }
+            }, 100);
+        }
 
         // Data storage
         let payouts = [];
@@ -778,8 +797,10 @@
             '#f38181', '#aa96da', '#fcbad3', '#a8d8ea', '#ffd93d'
         ];
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', async () => {
+        // Initialize app after Supabase is ready
+        async function initApp() {
+            if (!supabase) return;
+
             // Check for existing session
             const { data: { session } } = await supabase.auth.getSession();
             if (session) {
@@ -797,6 +818,13 @@
                     showAuth();
                 }
             });
+        }
+
+        // Start when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            if (supabase) {
+                initApp();
+            }
         });
 
         // Auth functions
