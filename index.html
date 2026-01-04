@@ -586,19 +586,18 @@
                 }
             });
 
-            // Company chart (horizontal bar - x axis has values, y axis has labels)
+            // Company chart (vertical bar)
             companyChart = new Chart(document.getElementById('companyChart'), {
                 type: 'bar',
                 data: { labels: [], datasets: [] },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    indexAxis: 'y',
                     plugins: {
                         legend: { display: false },
                         datalabels: {
                             anchor: 'end',
-                            align: 'end',
+                            align: 'top',
                             color: '#2ed573',
                             font: { weight: 'bold', size: 11 },
                             formatter: function(value) {
@@ -615,16 +614,16 @@
                     },
                     scales: {
                         x: {
+                            ticks: { color: '#aaa' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y: {
                             ticks: {
                                 color: '#aaa',
                                 callback: function(value) {
                                     return '$' + formatUSD(value);
                                 }
                             },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
-                        },
-                        y: {
-                            ticks: { color: '#aaa' },
                             grid: { color: 'rgba(255,255,255,0.1)' }
                         }
                     }
