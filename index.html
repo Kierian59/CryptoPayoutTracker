@@ -932,7 +932,7 @@
                 return;
             }
 
-            payouts = result.data || [];
+            payouts = (result.data || []).map(p => ({ ...p, amount: parseFloat(p.amount) || 0, usd_sold: parseFloat(p.usd_sold) || 0 }));
             updateMonthTabs();
             renderAll();
         }
@@ -958,7 +958,7 @@
                 return null;
             }
 
-            return result.data[0];
+            const saved = result.data[0]; return { ...saved, amount: parseFloat(saved.amount) || 0, usd_sold: parseFloat(saved.usd_sold) || 0 };
         }
 
         async function updatePayout(id, payout) {
@@ -982,7 +982,7 @@
                 return null;
             }
 
-            return result.data[0];
+            const updated = result.data[0]; return { ...updated, amount: parseFloat(updated.amount) || 0, usd_sold: parseFloat(updated.usd_sold) || 0 };
         }
 
         async function deletePayoutFromDB(id) {
