@@ -517,21 +517,6 @@
             border: 2px solid #00d9ff;
         }
 
-        .btn-connect-x {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #000;
-            color: #fff;
-            padding: 8px 14px;
-            font-size: 0.85rem;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-connect-x:hover {
-            background: #333;
-        }
-
         .hidden {
             display: none !important;
         }
@@ -644,12 +629,6 @@
         <div class="user-bar">
             <img id="user-avatar" class="user-avatar hidden" src="" alt="Profile">
             <span class="user-email" id="user-email"></span>
-            <button class="btn btn-connect-x" id="connect-x-btn" onclick="handleConnectX()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                Connect X
-            </button>
             <button class="btn btn-logout" onclick="handleLogout()">Logout</button>
         </div>
 
@@ -865,19 +844,6 @@
             });
         };
 
-        window.handleConnectX = function() {
-            window.supabaseClient.auth.linkIdentity({
-                provider: 'twitter',
-                options: {
-                    redirectTo: window.location.origin + window.location.pathname
-                }
-            }).then(function(result) {
-                if (result.error) {
-                    alert('Error connecting X: ' + result.error.message);
-                }
-            });
-        };
-
         window.handleLogout = function() {
             window.supabaseClient.auth.signOut();
         };
@@ -968,7 +934,6 @@
 
         function updateXProfile() {
             var avatar = document.getElementById('user-avatar');
-            var connectBtn = document.getElementById('connect-x-btn');
 
             // Check if user has Twitter identity linked
             var twitterIdentity = null;
@@ -986,14 +951,11 @@
                     avatarUrl = avatarUrl.replace('_normal', '_bigger');
                     avatar.src = avatarUrl;
                     avatar.classList.remove('hidden');
-                    connectBtn.classList.add('hidden');
                 } else {
                     avatar.classList.add('hidden');
-                    connectBtn.classList.remove('hidden');
                 }
             } else {
                 avatar.classList.add('hidden');
-                connectBtn.classList.remove('hidden');
             }
         }
 
