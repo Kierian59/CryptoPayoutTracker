@@ -509,14 +509,6 @@
             background: rgba(255, 71, 87, 0.3);
         }
 
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #00d9ff;
-        }
-
         .hidden {
             display: none !important;
         }
@@ -627,7 +619,6 @@
 
         <!-- User Bar -->
         <div class="user-bar">
-            <img id="user-avatar" class="user-avatar hidden" src="" alt="Profile">
             <span class="user-email" id="user-email"></span>
             <button class="btn btn-logout" onclick="handleLogout()">Logout</button>
         </div>
@@ -924,39 +915,9 @@
             document.getElementById('app-section').classList.remove('hidden');
             document.getElementById('user-email').textContent = currentUser.email;
 
-            // Check for X/Twitter identity and display profile picture
-            updateXProfile();
-
             document.getElementById('date').valueAsDate = new Date();
             initCharts();
             await loadPayouts();
-        }
-
-        function updateXProfile() {
-            var avatar = document.getElementById('user-avatar');
-
-            // Check if user has Twitter identity linked
-            var twitterIdentity = null;
-            if (currentUser.identities) {
-                twitterIdentity = currentUser.identities.find(function(id) {
-                    return id.provider === 'twitter';
-                });
-            }
-
-            if (twitterIdentity && twitterIdentity.identity_data) {
-                var avatarUrl = twitterIdentity.identity_data.avatar_url ||
-                               twitterIdentity.identity_data.picture;
-                if (avatarUrl) {
-                    // Twitter returns _normal size, replace with bigger version
-                    avatarUrl = avatarUrl.replace('_normal', '_bigger');
-                    avatar.src = avatarUrl;
-                    avatar.classList.remove('hidden');
-                } else {
-                    avatar.classList.add('hidden');
-                }
-            } else {
-                avatar.classList.add('hidden');
-            }
         }
 
         // Database functions
