@@ -236,6 +236,13 @@
             transform: scale(1.05);
         }
 
+        .eur-preview {
+            font-size: 0.85rem;
+            color: #2ed573;
+            margin-top: 6px;
+            min-height: 20px;
+        }
+
         .no-data {
             text-align: center;
             padding: 40px;
@@ -665,7 +672,8 @@
                     </div>
                     <div class="form-group">
                         <label for="usd-sold">Amount Sold (USD)</label>
-                        <input type="number" id="usd-sold" step="any" placeholder="0.00">
+                        <input type="number" id="usd-sold" step="any" placeholder="0.00" oninput="updateEurPreview()">
+                        <div class="eur-preview" id="eur-preview"></div>
                     </div>
                     <div class="form-group">
                         <label for="chain">Chain (optional)</label>
@@ -929,6 +937,20 @@
         function getCurrencySymbol() {
             return selectedCurrency === 'EUR' ? '€' : '$';
         }
+
+        // Update EUR preview in form
+        window.updateEurPreview = function() {
+            const usdInput = document.getElementById('usd-sold');
+            const eurPreview = document.getElementById('eur-preview');
+            const usdValue = parseFloat(usdInput.value) || 0;
+
+            if (usdValue > 0 && eurExchangeRate) {
+                const eurValue = usdValue * eurExchangeRate;
+                eurPreview.textContent = '≈ €' + formatUSD(eurValue) + ' EUR';
+            } else {
+                eurPreview.textContent = '';
+            }
+        };
 
         // Initialize app after Supabase is ready
         function initApp() {
