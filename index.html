@@ -727,7 +727,7 @@
 
         <!-- Charts Section -->
         <div class="card">
-            <h2>Analytics (USD Values)</h2>
+            <h2>Analytics (<span id="analytics-currency">USD</span> Values)</h2>
             <div class="charts-grid">
                 <div class="chart-container">
                     <h3>Payouts Over Time (USD)</h3>
@@ -914,6 +914,7 @@
         window.toggleCurrency = function() {
             selectedCurrency = selectedCurrency === 'USD' ? 'EUR' : 'USD';
             updateStats();
+            updateCharts();
             updateCurrencyToggleButton();
         };
 
@@ -1120,7 +1121,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return '$' + formatUSD(context.raw);
+                                    return getCurrencySymbol() + formatUSD(context.raw);
                                 }
                             }
                         }
@@ -1134,7 +1135,7 @@
                             ticks: {
                                 color: '#aaa',
                                 callback: function(value) {
-                                    return '$' + formatUSD(value);
+                                    return getCurrencySymbol() + formatUSD(value);
                                 }
                             },
                             grid: { color: 'rgba(255,255,255,0.1)' }
@@ -1158,13 +1159,13 @@
                             color: '#2ed573',
                             font: { weight: 'bold', size: 11 },
                             formatter: function(value) {
-                                return '$' + formatUSD(value);
+                                return getCurrencySymbol() + formatUSD(value);
                             }
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return '$' + formatUSD(context.raw);
+                                    return getCurrencySymbol() + formatUSD(context.raw);
                                 }
                             }
                         }
@@ -1178,7 +1179,7 @@
                             ticks: {
                                 color: '#aaa',
                                 callback: function(value) {
-                                    return '$' + formatUSD(value);
+                                    return getCurrencySymbol() + formatUSD(value);
                                 }
                             },
                             grid: { color: 'rgba(255,255,255,0.1)' }
@@ -1206,7 +1207,7 @@
                                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percentage = ((value / total) * 100).toFixed(1);
                                 if (percentage < 5) return '';
-                                return '$' + formatUSD(value);
+                                return getCurrencySymbol() + formatUSD(value);
                             }
                         },
                         tooltip: {
@@ -1214,7 +1215,7 @@
                                 label: function(context) {
                                     const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                     const percentage = ((context.raw / total) * 100).toFixed(1);
-                                    return context.label + ': $' + formatUSD(context.raw) + ' (' + percentage + '%)';
+                                    return context.label + ': ' + getCurrencySymbol() + formatUSD(context.raw) + ' (' + percentage + '%)';
                                 }
                             }
                         }
@@ -1377,7 +1378,9 @@
         function updateCharts() {
             const filtered = getFilteredPayouts();
 
-            // Timeline chart - USD Sold over time
+            const currencySymbol = getCurrencySymbol();
+
+            // Timeline chart - values over time
             const timelineData = {};
             filtered.forEach(p => {
                 timelineData[p.date] = (timelineData[p.date] || 0) + (p.usd_sold || 0);
@@ -1386,7 +1389,7 @@
 
             timelineChart.data.labels = sortedDates.map(d => formatDate(d));
             timelineChart.data.datasets = [{
-                data: sortedDates.map(d => timelineData[d]),
+                data: sortedDates.map(d => convertCurrency(timelineData[d])),
                 borderColor: '#2ed573',
                 backgroundColor: 'rgba(46, 213, 115, 0.1)',
                 fill: true,
@@ -1394,7 +1397,7 @@
             }];
             timelineChart.update();
 
-            // Company chart - USD Sold by project
+            // Company chart - values by project
             const companyData = {};
             filtered.forEach(p => {
                 companyData[p.company] = (companyData[p.company] || 0) + (p.usd_sold || 0);
@@ -1405,12 +1408,12 @@
 
             companyChart.data.labels = sortedCompanies.map(c => c[0]);
             companyChart.data.datasets = [{
-                data: sortedCompanies.map(c => c[1]),
+                data: sortedCompanies.map(c => convertCurrency(c[1])),
                 backgroundColor: chartColors
             }];
             companyChart.update();
 
-            // Crypto chart - USD by crypto
+            // Crypto chart - values by crypto
             const cryptoData = {};
             filtered.forEach(p => {
                 cryptoData[p.crypto] = (cryptoData[p.crypto] || 0) + (p.usd_sold || 0);
@@ -1418,12 +1421,12 @@
 
             cryptoChart.data.labels = Object.keys(cryptoData);
             cryptoChart.data.datasets = [{
-                data: Object.values(cryptoData),
+                data: Object.values(cryptoData).map(v => convertCurrency(v)),
                 backgroundColor: chartColors
             }];
             cryptoChart.update();
 
-            // Monthly totals list - USD by month (shows all months)
+            // Monthly totals list - values by month (shows all months)
             const monthlyData = {};
             payouts.forEach(p => {
                 const month = p.date.substring(0, 7);
@@ -1442,11 +1445,18 @@
                     return `
                         <div class="monthly-total-item ${isActive ? 'active' : ''}">
                             <span class="month-name">${monthName}</span>
-                            <span class="month-amount">$${formatUSD(monthlyData[m])}</span>
+                            <span class="month-amount">${currencySymbol}${formatUSD(convertCurrency(monthlyData[m]))}</span>
                         </div>
                     `;
                 }).join('');
             }
+
+            // Update chart titles and analytics header
+            document.getElementById('analytics-currency').textContent = selectedCurrency;
+            document.querySelector('#timelineChart').closest('.chart-container').querySelector('h3').textContent = 'Payouts Over Time (' + selectedCurrency + ')';
+            document.querySelector('#companyChart').closest('.chart-container').querySelector('h3').textContent = 'Payouts by Project (' + selectedCurrency + ')';
+            document.querySelector('#cryptoChart').closest('.chart-container').querySelector('h3').textContent = 'Payouts by Cryptocurrency (' + selectedCurrency + ')';
+            document.querySelector('#monthly-totals-list').closest('.chart-container').querySelector('h3').textContent = 'Monthly Totals (' + selectedCurrency + ')';
         }
 
         // Sort table
