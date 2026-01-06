@@ -218,6 +218,24 @@
             margin-top: 5px;
         }
 
+        .currency-toggle-btn {
+            background: rgba(0, 217, 255, 0.2);
+            border: 1px solid rgba(0, 217, 255, 0.4);
+            color: #00d9ff;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin-left: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .currency-toggle-btn:hover {
+            background: rgba(0, 217, 255, 0.4);
+            transform: scale(1.05);
+        }
+
         .no-data {
             text-align: center;
             padding: 40px;
@@ -683,7 +701,10 @@
                 </div>
                 <div class="stat-box">
                     <div class="value usd" id="total-usd-sold">$0.00</div>
-                    <div class="label">Total USD Sold</div>
+                    <div class="label">
+                        Total <span id="currency-label">USD</span> Sold
+                        <button id="currency-toggle" class="currency-toggle-btn" onclick="toggleCurrency()" title="Switch to EUR">€</button>
+                    </div>
                 </div>
                 <div class="stat-box">
                     <div class="value" id="unique-companies">0</div>
@@ -858,11 +879,56 @@
         // Chart instances
         var timelineChart, companyChart, cryptoChart;
 
+        // Currency settings
+        var selectedCurrency = 'USD';
+        var eurExchangeRate = null;
+
         // Chart colors
         var chartColors = [
             '#00d9ff', '#ff6b6b', '#4ecdc4', '#ffe66d', '#95e1d3',
             '#f38181', '#aa96da', '#fcbad3', '#a8d8ea', '#ffd93d'
         ];
+
+        // Fetch EUR exchange rate
+        async function fetchExchangeRate() {
+            try {
+                const response = await fetch('https://api.frankfurter.app/latest?from=USD&to=EUR');
+                const data = await response.json();
+                eurExchangeRate = data.rates.EUR;
+                console.log('EUR exchange rate loaded:', eurExchangeRate);
+            } catch (error) {
+                console.error('Failed to fetch exchange rate:', error);
+                eurExchangeRate = 0.92; // Fallback rate
+            }
+        }
+
+        // Toggle currency display
+        window.toggleCurrency = function() {
+            selectedCurrency = selectedCurrency === 'USD' ? 'EUR' : 'USD';
+            updateStats();
+            updateCurrencyToggleButton();
+        };
+
+        function updateCurrencyToggleButton() {
+            const btn = document.getElementById('currency-toggle');
+            if (btn) {
+                btn.textContent = selectedCurrency === 'USD' ? '€' : '$';
+                btn.title = selectedCurrency === 'USD' ? 'Switch to EUR' : 'Switch to USD';
+            }
+        }
+
+        // Convert USD to selected currency
+        function convertCurrency(usdValue) {
+            if (selectedCurrency === 'EUR' && eurExchangeRate) {
+                return usdValue * eurExchangeRate;
+            }
+            return usdValue;
+        }
+
+        // Get currency symbol
+        function getCurrencySymbol() {
+            return selectedCurrency === 'EUR' ? '€' : '$';
+        }
 
         // Initialize app after Supabase is ready
         function initApp() {
@@ -917,6 +983,7 @@
 
             document.getElementById('date').valueAsDate = new Date();
             initCharts();
+            await fetchExchangeRate();
             await loadPayouts();
         }
 
@@ -1264,9 +1331,11 @@
             const filtered = getFilteredPayouts();
 
             const totalUSDSold = filtered.reduce((sum, p) => sum + (p.usd_sold || 0), 0);
+            const displayValue = convertCurrency(totalUSDSold);
 
             document.getElementById('total-payouts').textContent = filtered.length;
-            document.getElementById('total-usd-sold').textContent = '$' + formatUSD(totalUSDSold);
+            document.getElementById('total-usd-sold').textContent = getCurrencySymbol() + formatUSD(displayValue);
+            document.getElementById('currency-label').textContent = selectedCurrency;
             document.getElementById('unique-companies').textContent =
                 new Set(filtered.map(p => p.company.toLowerCase())).size;
             document.getElementById('unique-cryptos').textContent =
