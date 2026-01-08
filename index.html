@@ -2066,6 +2066,178 @@
         .calendar-legend-dot.today {
             border: 2px solid var(--accent);
         }
+
+        /* Settings Styles */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .settings-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-section h3 {
+            color: var(--accent);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .setting-label span {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .setting-label small {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .setting-control {
+            min-width: 140px;
+        }
+
+        .setting-control select,
+        .setting-control input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .setting-control select:focus,
+        .setting-control input[type="number"]:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #ff6b7a;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .settings-actions .btn {
+            flex: 1;
+        }
+
+        .confirm-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+        }
+
+        .confirm-dialog.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .confirm-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .confirm-content h3 {
+            color: var(--accent-red);
+            margin-bottom: 15px;
+        }
+
+        .confirm-content p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--accent-green);
+            color: #000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: 500;
+            z-index: 3001;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast.error {
+            background: var(--accent-red);
+            color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -2141,6 +2313,10 @@
             <div class="nav-item" data-tab="vesting" onclick="switchMainTab('vesting')">
                 <span class="nav-icon">&#9203;</span>
                 <span class="nav-label">Vesting</span>
+            </div>
+            <div class="nav-item" data-tab="settings" onclick="switchMainTab('settings')">
+                <span class="nav-icon">&#9881;</span>
+                <span class="nav-label">Settings</span>
             </div>
             <div class="notification-bell" onclick="toggleNotifications()">
                 <span class="nav-icon">&#128276;</span>
@@ -2250,6 +2426,7 @@
             <button class="main-tab" data-tab="analytics" onclick="switchMainTab('analytics')">Analytics</button>
             <button class="main-tab" data-tab="history" onclick="switchMainTab('history')">History</button>
             <button class="main-tab" data-tab="vesting" onclick="switchMainTab('vesting')">Vesting</button>
+            <button class="main-tab" data-tab="settings" onclick="switchMainTab('settings')">Settings</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -2748,7 +2925,166 @@
             </div>
         </div>
         <!-- End Vesting Tab -->
+
+        <!-- Settings Tab -->
+        <div class="tab-content" id="tab-settings">
+            <div class="settings-grid">
+                <!-- Display Settings -->
+                <div class="settings-section">
+                    <h3>&#9881; Display Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Default Currency</span>
+                            <small>Currency used for displaying values</small>
+                        </div>
+                        <div class="setting-control">
+                            <select id="setting-currency" onchange="saveSetting('currency', this.value)">
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Date Format</span>
+                            <small>How dates are displayed throughout the app</small>
+                        </div>
+                        <div class="setting-control">
+                            <select id="setting-dateformat" onchange="saveSetting('dateFormat', this.value)">
+                                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Number Format</span>
+                            <small>How numbers are formatted (thousands separator)</small>
+                        </div>
+                        <div class="setting-control">
+                            <select id="setting-numberformat" onchange="saveSetting('numberFormat', this.value)">
+                                <option value="1,234.56">1,234.56 (US)</option>
+                                <option value="1.234,56">1.234,56 (EU)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Goals Settings -->
+                <div class="settings-section">
+                    <h3>&#127919; Goals Settings</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Monthly Revenue Goal</span>
+                            <small>Target revenue for the month (USD)</small>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="setting-revenue-goal" min="0" step="100" value="10000" onchange="saveSetting('revenueGoal', this.value)">
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Monthly Payouts Goal</span>
+                            <small>Target number of payouts for the month</small>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="setting-payouts-goal" min="0" step="1" value="50" onchange="saveSetting('payoutsGoal', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Settings -->
+                <div class="settings-section">
+                    <h3>&#128276; Notifications</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Vesting Unlock Alerts</span>
+                            <small>Get notified before token unlocks</small>
+                        </div>
+                        <div class="setting-control">
+                            <select id="setting-unlock-alerts" onchange="saveSetting('unlockAlerts', this.value)">
+                                <option value="1">1 day before</option>
+                                <option value="3">3 days before</option>
+                                <option value="7">7 days before</option>
+                                <option value="0">Disabled</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="btn btn-secondary" onclick="clearNotifications()">Clear All Notifications</button>
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div class="settings-section">
+                    <h3>&#128190; Data Management</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Export All Data</span>
+                            <small>Download your payouts and vesting data as JSON</small>
+                        </div>
+                        <div class="setting-control">
+                            <button class="btn btn-secondary" onclick="exportAllData()">Export</button>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Import Data</span>
+                            <small>Restore data from a JSON backup file</small>
+                        </div>
+                        <div class="setting-control">
+                            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+                            <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Import</button>
+                        </div>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="btn btn-secondary" onclick="resetTour()">Restart Tour</button>
+                        <button class="btn btn-danger" onclick="showClearDataConfirm()">Clear All Data</button>
+                    </div>
+                </div>
+
+                <!-- About -->
+                <div class="settings-section">
+                    <h3>&#9432; About</h3>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Version</span>
+                            <small>Current application version</small>
+                        </div>
+                        <div class="setting-control" style="text-align: right; color: var(--text-secondary);">
+                            v1.0.0
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Keyboard Shortcuts</span>
+                            <small>Quick actions for power users</small>
+                        </div>
+                        <div class="setting-control" style="text-align: right; color: var(--text-secondary); font-size: 0.85rem;">
+                            N: Quick Add | ESC: Close
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Settings Tab -->
     </div>
+
+    <!-- Clear Data Confirmation Dialog -->
+    <div class="confirm-dialog" id="clear-data-confirm">
+        <div class="confirm-content">
+            <h3>Clear All Data?</h3>
+            <p>This will permanently delete all your payouts and vesting schedules. This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" onclick="hideClearDataConfirm()">Cancel</button>
+                <button class="btn btn-danger" onclick="clearAllData()">Delete Everything</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
 
     <script>
         // ============================================
@@ -2783,6 +3119,204 @@
             const label = document.querySelector('.theme-label');
             if (label) label.textContent = savedTheme === 'light' ? 'Light Mode' : 'Dark Mode';
         }
+
+        // ============================================
+        // SETTINGS FUNCTIONALITY
+        // ============================================
+
+        // Default settings
+        var appSettings = {
+            currency: 'USD',
+            dateFormat: 'YYYY-MM-DD',
+            numberFormat: '1,234.56',
+            revenueGoal: 10000,
+            payoutsGoal: 50,
+            unlockAlerts: 1
+        };
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const saved = localStorage.getItem('appSettings');
+            if (saved) {
+                try {
+                    appSettings = { ...appSettings, ...JSON.parse(saved) };
+                } catch (e) {
+                    console.error('Error loading settings:', e);
+                }
+            }
+            applySettingsToUI();
+        }
+
+        // Apply settings to UI elements
+        function applySettingsToUI() {
+            const currencyEl = document.getElementById('setting-currency');
+            const dateFormatEl = document.getElementById('setting-dateformat');
+            const numberFormatEl = document.getElementById('setting-numberformat');
+            const revenueGoalEl = document.getElementById('setting-revenue-goal');
+            const payoutsGoalEl = document.getElementById('setting-payouts-goal');
+            const unlockAlertsEl = document.getElementById('setting-unlock-alerts');
+
+            if (currencyEl) currencyEl.value = appSettings.currency;
+            if (dateFormatEl) dateFormatEl.value = appSettings.dateFormat;
+            if (numberFormatEl) numberFormatEl.value = appSettings.numberFormat;
+            if (revenueGoalEl) revenueGoalEl.value = appSettings.revenueGoal;
+            if (payoutsGoalEl) payoutsGoalEl.value = appSettings.payoutsGoal;
+            if (unlockAlertsEl) unlockAlertsEl.value = appSettings.unlockAlerts;
+        }
+
+        // Save individual setting
+        window.saveSetting = function(key, value) {
+            if (key === 'revenueGoal' || key === 'payoutsGoal' || key === 'unlockAlerts') {
+                value = parseInt(value) || 0;
+            }
+            appSettings[key] = value;
+            localStorage.setItem('appSettings', JSON.stringify(appSettings));
+            showToast('Setting saved');
+
+            // Re-render dashboard if goals changed
+            if (key === 'revenueGoal' || key === 'payoutsGoal') {
+                if (typeof updateDashboard === 'function') {
+                    updateDashboard();
+                }
+            }
+        };
+
+        // Show toast notification
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = message;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // Clear all notifications
+        window.clearNotifications = function() {
+            notifications = [];
+            updateNotificationBadge();
+            renderNotifications();
+            localStorage.setItem('notifications', JSON.stringify(notifications));
+            showToast('Notifications cleared');
+        };
+
+        // Reset onboarding tour
+        window.resetTour = function() {
+            localStorage.removeItem('tourCompleted');
+            showToast('Tour reset. Refresh to see the tour again.');
+        };
+
+        // Export all data
+        window.exportAllData = function() {
+            const data = {
+                payouts: payouts || [],
+                vestings: vestings || [],
+                settings: appSettings,
+                exportDate: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'crypto-tracker-backup-' + new Date().toISOString().split('T')[0] + '.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('Data exported successfully');
+        };
+
+        // Import data
+        window.importData = function(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+
+                    // Import vestings to localStorage
+                    if (data.vestings && Array.isArray(data.vestings) && currentUser) {
+                        vestings = data.vestings;
+                        localStorage.setItem('vestings_' + currentUser.id, JSON.stringify(vestings));
+                    }
+
+                    // Import settings
+                    if (data.settings) {
+                        appSettings = { ...appSettings, ...data.settings };
+                        localStorage.setItem('appSettings', JSON.stringify(appSettings));
+                        applySettingsToUI();
+                    }
+
+                    // Refresh UI
+                    if (typeof renderVestings === 'function') renderVestings();
+                    if (typeof updateDashboard === 'function') updateDashboard();
+
+                    showToast('Data imported successfully');
+                } catch (err) {
+                    showToast('Error importing data: Invalid file format', true);
+                }
+            };
+            reader.readAsText(file);
+            input.value = ''; // Reset file input
+        };
+
+        // Show clear data confirmation
+        window.showClearDataConfirm = function() {
+            document.getElementById('clear-data-confirm').classList.add('active');
+        };
+
+        // Hide clear data confirmation
+        window.hideClearDataConfirm = function() {
+            document.getElementById('clear-data-confirm').classList.remove('active');
+        };
+
+        // Clear all data
+        window.clearAllData = async function() {
+            try {
+                // Clear vestings from localStorage
+                if (currentUser) {
+                    localStorage.removeItem('vestings_' + currentUser.id);
+                    vestings = [];
+                }
+
+                // Clear payouts from database
+                if (currentUser) {
+                    const { error } = await supabase
+                        .from('payouts')
+                        .delete()
+                        .eq('user_id', currentUser.id);
+
+                    if (error) throw error;
+                    payouts = [];
+                }
+
+                // Clear notifications
+                notifications = [];
+                localStorage.setItem('notifications', JSON.stringify(notifications));
+
+                // Clear milestones
+                localStorage.removeItem('milestone_10_payouts');
+                localStorage.removeItem('milestone_50_payouts');
+                localStorage.removeItem('milestone_100_payouts');
+                localStorage.removeItem('milestone_1k_revenue');
+                localStorage.removeItem('milestone_10k_revenue');
+
+                // Refresh UI
+                if (typeof renderVestings === 'function') renderVestings();
+                if (typeof updateDashboard === 'function') updateDashboard();
+                if (typeof renderPayoutsTable === 'function') renderPayoutsTable();
+                updateNotificationBadge();
+                renderNotifications();
+
+                hideClearDataConfirm();
+                showToast('All data has been cleared');
+            } catch (err) {
+                showToast('Error clearing data: ' + err.message, true);
+            }
+        };
 
         // Main Tab Switching
         window.switchMainTab = function(tabName) {
@@ -3113,8 +3647,8 @@
             const monthPayouts = payouts.filter(p => p.date.startsWith(thisMonth));
             const monthRevenue = monthPayouts.reduce((s, p) => s + (p.usd_sold || 0), 0);
 
-            const revenueGoal = 10000;
-            const payoutsGoal = 50;
+            const revenueGoal = appSettings.revenueGoal || 10000;
+            const payoutsGoal = appSettings.payoutsGoal || 50;
 
             document.getElementById('goal-progress-text').textContent = '$' + formatUSD(monthRevenue) + ' / $' + formatUSD(revenueGoal);
             document.getElementById('goal-bar').style.width = Math.min(100, (monthRevenue / revenueGoal) * 100) + '%';
@@ -3469,8 +4003,9 @@
             document.getElementById('fab').classList.remove('hidden');
             document.body.classList.add('has-sidebar');
 
-            // Initialize theme
+            // Initialize theme and settings
             initTheme();
+            loadSettings();
 
             // Check if sidebar should be collapsed
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
@@ -4611,14 +5146,18 @@
                     </div>
                 `).join('');
 
-                // Add notification
-                upcoming.forEach(u => {
-                    const daysUntil = Math.ceil((new Date(u.date) - today) / (1000 * 60 * 60 * 24));
-                    if (daysUntil <= 1 && !localStorage.getItem('notified_' + u.project + '_' + u.date)) {
-                        addNotification('Unlock Tomorrow!', `${formatNumber(u.amount)} ${u.token} from ${u.project} unlocks tomorrow!`, 'warning');
-                        localStorage.setItem('notified_' + u.project + '_' + u.date, 'true');
-                    }
-                });
+                // Add notification based on settings
+                const alertDays = appSettings.unlockAlerts || 1;
+                if (alertDays > 0) {
+                    upcoming.forEach(u => {
+                        const daysUntil = Math.ceil((new Date(u.date) - today) / (1000 * 60 * 60 * 24));
+                        if (daysUntil <= alertDays && !localStorage.getItem('notified_' + u.project + '_' + u.date)) {
+                            const timeText = daysUntil <= 1 ? 'tomorrow' : `in ${daysUntil} days`;
+                            addNotification('Upcoming Unlock!', `${formatNumber(u.amount)} ${u.token} from ${u.project} unlocks ${timeText}!`, 'warning');
+                            localStorage.setItem('notified_' + u.project + '_' + u.date, 'true');
+                        }
+                    });
+                }
             } else {
                 banner.style.display = 'none';
             }
