@@ -1576,6 +1576,276 @@
             font-size: 24px;
             cursor: pointer;
         }
+
+        /* Category Badges */
+        .category-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .category-badge.airdrop {
+            background: rgba(155, 89, 182, 0.2);
+            color: #9b59b6;
+        }
+
+        .category-badge.paid-deal {
+            background: rgba(46, 213, 115, 0.2);
+            color: var(--accent-green);
+        }
+
+        .category-badge.staking {
+            background: rgba(0, 217, 255, 0.2);
+            color: var(--accent);
+        }
+
+        .category-badge.mining {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .category-badge.trading {
+            background: rgba(52, 152, 219, 0.2);
+            color: #3498db;
+        }
+
+        .category-badge.other {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+        }
+
+        /* Vesting Tracker Styles */
+        .vesting-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .vesting-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .vesting-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .vesting-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .vesting-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .vesting-info h3 {
+            color: var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .vesting-info p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .vesting-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .vesting-progress-section {
+            margin-bottom: 15px;
+        }
+
+        .vesting-progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .vesting-progress-bar {
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .vesting-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-green));
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+
+        .vesting-schedule {
+            border-top: 1px solid var(--border-color);
+            padding-top: 15px;
+        }
+
+        .vesting-schedule h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .unlock-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .unlock-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        .unlock-item.unlocked {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .unlock-item.upcoming {
+            border-left: 3px solid var(--accent-green);
+            background: rgba(46, 213, 115, 0.1);
+        }
+
+        .unlock-item.next {
+            border-left: 3px solid var(--accent);
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .unlock-date {
+            color: var(--text-secondary);
+        }
+
+        .unlock-amount {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .unlock-status {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .unlock-status.claimed {
+            background: rgba(46, 213, 115, 0.2);
+            color: var(--accent-green);
+        }
+
+        .unlock-status.pending {
+            background: rgba(255, 165, 2, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .vesting-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .vesting-stat {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .vesting-stat .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .vesting-stat .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .add-unlock-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .add-unlock-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .unlock-input-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .unlock-input-row input {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .unlock-input-row input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .upcoming-unlocks {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.1), rgba(46, 213, 115, 0.1));
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .upcoming-unlocks h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .countdown {
+            font-size: 0.85rem;
+            color: var(--accent-orange);
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -1648,6 +1918,10 @@
                 <span class="nav-icon">&#9776;</span>
                 <span class="nav-label">History</span>
             </div>
+            <div class="nav-item" data-tab="vesting" onclick="switchMainTab('vesting')">
+                <span class="nav-icon">&#9203;</span>
+                <span class="nav-label">Vesting</span>
+            </div>
             <div class="notification-bell" onclick="toggleNotifications()">
                 <span class="nav-icon">&#128276;</span>
                 <span class="nav-label">Notifications</span>
@@ -1715,6 +1989,18 @@
                     <label for="quick-usd">Amount Sold (USD)</label>
                     <input type="number" id="quick-usd" step="any" placeholder="0.00">
                 </div>
+                <div class="form-group">
+                    <label for="quick-category">Category</label>
+                    <select id="quick-category">
+                        <option value="">Select category...</option>
+                        <option value="Airdrop">Airdrop</option>
+                        <option value="Paid Deal">Paid Deal</option>
+                        <option value="Staking">Staking</option>
+                        <option value="Mining">Mining</option>
+                        <option value="Trading">Trading</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Add Payout</button>
                 </div>
@@ -1743,6 +2029,7 @@
             <button class="main-tab" data-tab="add-payout" onclick="switchMainTab('add-payout')">Add Payout</button>
             <button class="main-tab" data-tab="analytics" onclick="switchMainTab('analytics')">Analytics</button>
             <button class="main-tab" data-tab="history" onclick="switchMainTab('history')">History</button>
+            <button class="main-tab" data-tab="vesting" onclick="switchMainTab('vesting')">Vesting</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -1871,6 +2158,18 @@
                     <div class="form-group">
                         <label for="chain">Chain (optional)</label>
                         <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC...">
+                    </div>
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category">
+                            <option value="">Select category...</option>
+                            <option value="Airdrop">Airdrop</option>
+                            <option value="Paid Deal">Paid Deal</option>
+                            <option value="Staking">Staking</option>
+                            <option value="Mining">Mining</option>
+                            <option value="Trading">Trading</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                     <div class="form-group full-width">
                         <label for="wallet">Wallet Address (optional)</label>
@@ -2013,6 +2312,7 @@
                             <th onclick="sortTable('company')">Project</th>
                             <th onclick="sortTable('amount')">Tokens</th>
                             <th onclick="sortTable('crypto')">Crypto</th>
+                            <th onclick="sortTable('category')">Category</th>
                             <th onclick="sortTable('chain')">Chain</th>
                             <th onclick="sortTable('usd_sold')">USD Sold</th>
                             <th>Wallet</th>
@@ -2027,6 +2327,104 @@
         </div>
         </div>
         <!-- End History Tab -->
+
+        <!-- Vesting Tab -->
+        <div class="tab-content" id="tab-vesting">
+            <!-- Upcoming Unlocks Banner -->
+            <div class="upcoming-unlocks" id="upcoming-unlocks-banner" style="display: none;">
+                <h3>&#128276; Upcoming Unlocks</h3>
+                <div id="upcoming-unlocks-list"></div>
+            </div>
+
+            <!-- Vesting Stats -->
+            <div class="vesting-stats">
+                <div class="vesting-stat">
+                    <div class="stat-value" id="total-vesting-tokens">0</div>
+                    <div class="stat-label">Total Vesting Tokens</div>
+                </div>
+                <div class="vesting-stat">
+                    <div class="stat-value" id="unlocked-tokens">0</div>
+                    <div class="stat-label">Unlocked</div>
+                </div>
+                <div class="vesting-stat">
+                    <div class="stat-value" id="locked-tokens">0</div>
+                    <div class="stat-label">Still Locked</div>
+                </div>
+                <div class="vesting-stat">
+                    <div class="stat-value" id="active-vestings">0</div>
+                    <div class="stat-label">Active Vestings</div>
+                </div>
+            </div>
+
+            <!-- Add Vesting Form -->
+            <div class="card">
+                <h2 id="vesting-form-title">Add Vesting Schedule</h2>
+                <form id="vesting-form">
+                    <input type="hidden" id="vesting-edit-id">
+                    <div class="vesting-form">
+                        <div class="form-group">
+                            <label for="vesting-project">Project Name</label>
+                            <input type="text" id="vesting-project" required placeholder="e.g., LayerZero">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-token">Token Symbol</label>
+                            <input type="text" id="vesting-token" required placeholder="e.g., ZRO">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-total">Total Tokens</label>
+                            <input type="number" id="vesting-total" step="any" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-tge">TGE Date (Token Generation)</label>
+                            <input type="date" id="vesting-tge" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-tge-percent">TGE Unlock %</label>
+                            <input type="number" id="vesting-tge-percent" step="any" placeholder="e.g., 10" min="0" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-cliff">Cliff (months)</label>
+                            <input type="number" id="vesting-cliff" placeholder="e.g., 6" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-duration">Vesting Duration (months)</label>
+                            <input type="number" id="vesting-duration" placeholder="e.g., 12" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="vesting-frequency">Unlock Frequency</label>
+                            <select id="vesting-frequency">
+                                <option value="monthly">Monthly</option>
+                                <option value="quarterly">Quarterly</option>
+                                <option value="daily">Daily</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="custom">Custom Dates</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom Unlock Dates Section -->
+                    <div id="custom-unlocks-section" style="display: none; margin-bottom: 20px;">
+                        <h3 style="color: var(--accent); font-size: 1rem; margin-bottom: 15px;">Custom Unlock Dates</h3>
+                        <div id="custom-unlocks-list"></div>
+                        <button type="button" class="add-unlock-btn" onclick="addCustomUnlock()">+ Add Unlock Date</button>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="vesting-submit-btn">Add Vesting</button>
+                        <button type="button" class="btn" id="vesting-cancel-btn" style="display:none; background: #666;" onclick="cancelVestingEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vesting List -->
+            <div class="card">
+                <h2>Your Vesting Schedules</h2>
+                <div class="vesting-list" id="vesting-list">
+                    <div class="no-data" id="no-vesting">No vesting schedules yet. Add your first one above!</div>
+                </div>
+            </div>
+        </div>
+        <!-- End Vesting Tab -->
     </div>
 
     <script>
@@ -2779,6 +3177,7 @@
             initDragDrop();
             await fetchExchangeRate();
             await loadPayouts();
+            loadVestings();
 
             // Start tour for first-time users
             setTimeout(() => startTour(), 1000);
@@ -2812,7 +3211,8 @@
                     crypto: payout.crypto,
                     usd_sold: payout.usd_sold,
                     chain: payout.chain,
-                    wallet: payout.wallet
+                    wallet: payout.wallet,
+                    category: payout.category || null
                 }])
                 .select();
 
@@ -2835,7 +3235,8 @@
                     crypto: payout.crypto,
                     usd_sold: payout.usd_sold,
                     chain: payout.chain,
-                    wallet: payout.wallet
+                    wallet: payout.wallet,
+                    category: payout.category || null
                 })
                 .eq('id', id)
                 .select();
@@ -3035,7 +3436,7 @@
             updateStats();
             updateCharts();
             updateDashboard();
-            updateCryptoFilterChips();
+            updateCategoryFilterChips();
             updateComparisonSelects();
         }
 
@@ -3051,7 +3452,8 @@
                 crypto: document.getElementById('crypto').value.toUpperCase(),
                 usd_sold: parseFloat(document.getElementById('usd-sold').value) || 0,
                 chain: document.getElementById('chain').value.trim(),
-                wallet: document.getElementById('wallet').value.trim()
+                wallet: document.getElementById('wallet').value.trim(),
+                category: document.getElementById('category').value || ''
             };
 
             if (editId) {
@@ -3082,11 +3484,15 @@
             const tbody = document.getElementById('payout-body');
             const noData = document.getElementById('no-data');
 
-            let filtered = getFilteredPayouts().filter(p =>
-                p.company.toLowerCase().includes(searchTerm) ||
-                p.crypto.toLowerCase().includes(searchTerm) ||
-                (p.chain || '').toLowerCase().includes(searchTerm)
-            );
+            let filtered = getFilteredPayouts().filter(p => {
+                const matchesSearch = p.company.toLowerCase().includes(searchTerm) ||
+                    p.crypto.toLowerCase().includes(searchTerm) ||
+                    (p.chain || '').toLowerCase().includes(searchTerm) ||
+                    (p.category || '').toLowerCase().includes(searchTerm);
+                const matchesCrypto = selectedCryptoFilter === 'all' || p.crypto === selectedCryptoFilter;
+                const matchesCategory = selectedCategoryFilter === 'all' || p.category === selectedCategoryFilter;
+                return matchesSearch && matchesCrypto && matchesCategory;
+            });
 
             filtered.sort((a, b) => {
                 let aVal = a[sortField];
@@ -3109,12 +3515,15 @@
             }
 
             noData.style.display = 'none';
-            tbody.innerHTML = filtered.map(p => `
+            tbody.innerHTML = filtered.map(p => {
+                const categoryClass = (p.category || '').toLowerCase().replace(' ', '-');
+                return `
                 <tr>
                     <td>${formatDate(p.date)}</td>
                     <td>${escapeHtml(p.company)}</td>
                     <td>${p.amount}</td>
                     <td>${p.crypto}</td>
+                    <td>${p.category ? `<span class="category-badge ${categoryClass}">${p.category}</span>` : '-'}</td>
                     <td>${escapeHtml(p.chain) || '-'}</td>
                     <td class="usd-value">${p.usd_sold ? '$' + formatUSD(p.usd_sold) : '-'}</td>
                     <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(p.wallet) || ''}">${escapeHtml(p.wallet) || '-'}</td>
@@ -3123,7 +3532,7 @@
                         <button class="btn btn-danger" onclick="deletePayout('${p.id}')">Delete</button>
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
 
         // Update statistics
@@ -3260,6 +3669,7 @@
             document.getElementById('usd-sold').value = payout.usd_sold || '';
             document.getElementById('chain').value = payout.chain || '';
             document.getElementById('wallet').value = payout.wallet || '';
+            document.getElementById('category').value = payout.category || '';
 
             document.getElementById('form-title').textContent = 'Edit Payout';
             document.getElementById('submit-btn').textContent = 'Update Payout';
@@ -3347,7 +3757,8 @@
                 crypto: document.getElementById('quick-crypto').value.toUpperCase(),
                 usd_sold: parseFloat(document.getElementById('quick-usd').value) || 0,
                 chain: '',
-                wallet: ''
+                wallet: '',
+                category: document.getElementById('quick-category').value || ''
             };
 
             const saved = await savePayout(payout);
@@ -3391,6 +3802,397 @@
                 openQuickAdd();
             }
         });
+
+        // ============================================
+        // VESTING TRACKER FUNCTIONALITY
+        // ============================================
+
+        var vestings = [];
+        var customUnlocks = [];
+
+        // Load vestings from localStorage
+        function loadVestings() {
+            try {
+                const saved = localStorage.getItem('vestings_' + currentUser.id);
+                if (saved) {
+                    vestings = JSON.parse(saved);
+                }
+            } catch (e) {
+                vestings = [];
+            }
+            renderVestings();
+            updateVestingStats();
+            checkUpcomingUnlocks();
+        }
+
+        // Save vestings to localStorage
+        function saveVestingsToStorage() {
+            localStorage.setItem('vestings_' + currentUser.id, JSON.stringify(vestings));
+        }
+
+        // Toggle custom unlocks section based on frequency selection
+        document.getElementById('vesting-frequency').addEventListener('change', function() {
+            const customSection = document.getElementById('custom-unlocks-section');
+            customSection.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+
+        // Add custom unlock row
+        window.addCustomUnlock = function() {
+            const list = document.getElementById('custom-unlocks-list');
+            const index = list.children.length;
+            const row = document.createElement('div');
+            row.className = 'unlock-input-row';
+            row.innerHTML = `
+                <input type="date" name="custom-date-${index}" required>
+                <input type="number" name="custom-amount-${index}" step="any" placeholder="Token Amount" required>
+                <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 8px 12px;">×</button>
+            `;
+            list.appendChild(row);
+        };
+
+        // Calculate unlock schedule
+        function calculateUnlockSchedule(vesting) {
+            const unlocks = [];
+            const tgeDate = new Date(vesting.tgeDate);
+            const totalTokens = parseFloat(vesting.totalTokens);
+            const tgePercent = parseFloat(vesting.tgePercent) || 0;
+            const cliff = parseInt(vesting.cliff) || 0;
+            const duration = parseInt(vesting.duration) || 12;
+            const frequency = vesting.frequency;
+
+            // TGE unlock
+            if (tgePercent > 0) {
+                unlocks.push({
+                    date: vesting.tgeDate,
+                    amount: totalTokens * (tgePercent / 100),
+                    type: 'TGE'
+                });
+            }
+
+            // Custom unlocks
+            if (frequency === 'custom' && vesting.customUnlocks) {
+                vesting.customUnlocks.forEach(u => {
+                    unlocks.push({
+                        date: u.date,
+                        amount: parseFloat(u.amount),
+                        type: 'Custom'
+                    });
+                });
+            } else {
+                // Calculate periodic unlocks
+                const remainingTokens = totalTokens * (1 - tgePercent / 100);
+                let periods = duration;
+                let periodMonths = 1;
+
+                if (frequency === 'quarterly') periodMonths = 3;
+                else if (frequency === 'weekly') periodMonths = 0.25;
+                else if (frequency === 'daily') periodMonths = 1 / 30;
+
+                const numPeriods = Math.ceil(duration / periodMonths);
+                const tokensPerPeriod = remainingTokens / numPeriods;
+
+                for (let i = 1; i <= numPeriods; i++) {
+                    const unlockDate = new Date(tgeDate);
+                    unlockDate.setMonth(unlockDate.getMonth() + cliff + (i * periodMonths));
+
+                    unlocks.push({
+                        date: unlockDate.toISOString().split('T')[0],
+                        amount: tokensPerPeriod,
+                        type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                    });
+                }
+            }
+
+            return unlocks.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        // Vesting form submission
+        document.getElementById('vesting-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('vesting-edit-id').value;
+
+            // Collect custom unlocks if custom frequency
+            let customUnlocksData = [];
+            if (document.getElementById('vesting-frequency').value === 'custom') {
+                const rows = document.querySelectorAll('#custom-unlocks-list .unlock-input-row');
+                rows.forEach((row, i) => {
+                    const dateInput = row.querySelector('input[type="date"]');
+                    const amountInput = row.querySelector('input[type="number"]');
+                    if (dateInput.value && amountInput.value) {
+                        customUnlocksData.push({
+                            date: dateInput.value,
+                            amount: amountInput.value
+                        });
+                    }
+                });
+            }
+
+            const vesting = {
+                id: editId || Date.now().toString(),
+                project: document.getElementById('vesting-project').value.trim(),
+                token: document.getElementById('vesting-token').value.toUpperCase(),
+                totalTokens: document.getElementById('vesting-total').value,
+                tgeDate: document.getElementById('vesting-tge').value,
+                tgePercent: document.getElementById('vesting-tge-percent').value || 0,
+                cliff: document.getElementById('vesting-cliff').value || 0,
+                duration: document.getElementById('vesting-duration').value || 12,
+                frequency: document.getElementById('vesting-frequency').value,
+                customUnlocks: customUnlocksData,
+                createdAt: editId ? vestings.find(v => v.id === editId)?.createdAt : new Date().toISOString()
+            };
+
+            if (editId) {
+                const index = vestings.findIndex(v => v.id === editId);
+                if (index !== -1) vestings[index] = vesting;
+            } else {
+                vestings.push(vesting);
+            }
+
+            saveVestingsToStorage();
+            renderVestings();
+            updateVestingStats();
+            checkUpcomingUnlocks();
+            cancelVestingEdit();
+            this.reset();
+            document.getElementById('custom-unlocks-list').innerHTML = '';
+        });
+
+        // Cancel vesting edit
+        window.cancelVestingEdit = function() {
+            document.getElementById('vesting-edit-id').value = '';
+            document.getElementById('vesting-form').reset();
+            document.getElementById('vesting-form-title').textContent = 'Add Vesting Schedule';
+            document.getElementById('vesting-submit-btn').textContent = 'Add Vesting';
+            document.getElementById('vesting-cancel-btn').style.display = 'none';
+            document.getElementById('custom-unlocks-section').style.display = 'none';
+            document.getElementById('custom-unlocks-list').innerHTML = '';
+        };
+
+        // Edit vesting
+        window.editVesting = function(id) {
+            const vesting = vestings.find(v => v.id === id);
+            if (!vesting) return;
+
+            document.getElementById('vesting-edit-id').value = vesting.id;
+            document.getElementById('vesting-project').value = vesting.project;
+            document.getElementById('vesting-token').value = vesting.token;
+            document.getElementById('vesting-total').value = vesting.totalTokens;
+            document.getElementById('vesting-tge').value = vesting.tgeDate;
+            document.getElementById('vesting-tge-percent').value = vesting.tgePercent;
+            document.getElementById('vesting-cliff').value = vesting.cliff;
+            document.getElementById('vesting-duration').value = vesting.duration;
+            document.getElementById('vesting-frequency').value = vesting.frequency;
+
+            if (vesting.frequency === 'custom') {
+                document.getElementById('custom-unlocks-section').style.display = 'block';
+                const list = document.getElementById('custom-unlocks-list');
+                list.innerHTML = '';
+                vesting.customUnlocks.forEach((u, i) => {
+                    const row = document.createElement('div');
+                    row.className = 'unlock-input-row';
+                    row.innerHTML = `
+                        <input type="date" name="custom-date-${i}" value="${u.date}" required>
+                        <input type="number" name="custom-amount-${i}" step="any" value="${u.amount}" required>
+                        <button type="button" class="btn btn-danger" onclick="this.parentElement.remove()" style="padding: 8px 12px;">×</button>
+                    `;
+                    list.appendChild(row);
+                });
+            }
+
+            document.getElementById('vesting-form-title').textContent = 'Edit Vesting Schedule';
+            document.getElementById('vesting-submit-btn').textContent = 'Update Vesting';
+            document.getElementById('vesting-cancel-btn').style.display = 'inline-block';
+            switchMainTab('vesting');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Delete vesting
+        window.deleteVesting = function(id) {
+            if (confirm('Are you sure you want to delete this vesting schedule?')) {
+                vestings = vestings.filter(v => v.id !== id);
+                saveVestingsToStorage();
+                renderVestings();
+                updateVestingStats();
+            }
+        };
+
+        // Render vestings
+        function renderVestings() {
+            const list = document.getElementById('vesting-list');
+            const noData = document.getElementById('no-vesting');
+
+            if (vestings.length === 0) {
+                noData.style.display = 'block';
+                list.innerHTML = '';
+                list.appendChild(noData);
+                return;
+            }
+
+            noData.style.display = 'none';
+            const today = new Date();
+
+            list.innerHTML = vestings.map(v => {
+                const unlocks = calculateUnlockSchedule(v);
+                const totalTokens = parseFloat(v.totalTokens);
+                const unlockedTokens = unlocks
+                    .filter(u => new Date(u.date) <= today)
+                    .reduce((sum, u) => sum + u.amount, 0);
+                const progressPercent = (unlockedTokens / totalTokens * 100).toFixed(1);
+                const nextUnlock = unlocks.find(u => new Date(u.date) > today);
+
+                return `
+                    <div class="vesting-card">
+                        <div class="vesting-header">
+                            <div class="vesting-info">
+                                <h3>${escapeHtml(v.project)} (${v.token})</h3>
+                                <p>Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
+                            </div>
+                            <div class="vesting-actions">
+                                <button class="btn btn-edit" onclick="editVesting('${v.id}')">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteVesting('${v.id}')">Delete</button>
+                            </div>
+                        </div>
+                        <div class="vesting-progress-section">
+                            <div class="vesting-progress-header">
+                                <span>Progress: ${progressPercent}%</span>
+                                <span>${formatNumber(unlockedTokens)} / ${formatNumber(totalTokens)} ${v.token}</span>
+                            </div>
+                            <div class="vesting-progress-bar">
+                                <div class="vesting-progress-fill" style="width: ${progressPercent}%"></div>
+                            </div>
+                        </div>
+                        ${nextUnlock ? `
+                            <div class="countdown">
+                                Next unlock: ${formatDate(nextUnlock.date)} (${formatNumber(nextUnlock.amount)} ${v.token})
+                            </div>
+                        ` : '<div class="countdown" style="color: var(--accent-green);">Fully vested!</div>'}
+                        <div class="vesting-schedule">
+                            <h4>Unlock Schedule</h4>
+                            <div class="unlock-list">
+                                ${unlocks.map(u => {
+                                    const isUnlocked = new Date(u.date) <= today;
+                                    const isNext = nextUnlock && u.date === nextUnlock.date;
+                                    return `
+                                        <div class="unlock-item ${isUnlocked ? 'unlocked' : ''} ${isNext ? 'next' : ''}">
+                                            <span class="unlock-date">${formatDate(u.date)}</span>
+                                            <span class="unlock-amount">${formatNumber(u.amount)} ${v.token}</span>
+                                            <span class="unlock-status ${isUnlocked ? 'claimed' : 'pending'}">${isUnlocked ? 'Unlocked' : 'Pending'}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update vesting stats
+        function updateVestingStats() {
+            const today = new Date();
+            let totalTokens = 0;
+            let unlockedTokens = 0;
+
+            vestings.forEach(v => {
+                const unlocks = calculateUnlockSchedule(v);
+                totalTokens += parseFloat(v.totalTokens);
+                unlockedTokens += unlocks
+                    .filter(u => new Date(u.date) <= today)
+                    .reduce((sum, u) => sum + u.amount, 0);
+            });
+
+            document.getElementById('total-vesting-tokens').textContent = formatNumber(totalTokens);
+            document.getElementById('unlocked-tokens').textContent = formatNumber(unlockedTokens);
+            document.getElementById('locked-tokens').textContent = formatNumber(totalTokens - unlockedTokens);
+            document.getElementById('active-vestings').textContent = vestings.length;
+        }
+
+        // Check upcoming unlocks and show banner
+        function checkUpcomingUnlocks() {
+            const today = new Date();
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+
+            const upcoming = [];
+            vestings.forEach(v => {
+                const unlocks = calculateUnlockSchedule(v);
+                unlocks.forEach(u => {
+                    const unlockDate = new Date(u.date);
+                    if (unlockDate > today && unlockDate <= nextWeek) {
+                        upcoming.push({
+                            project: v.project,
+                            token: v.token,
+                            date: u.date,
+                            amount: u.amount
+                        });
+                    }
+                });
+            });
+
+            const banner = document.getElementById('upcoming-unlocks-banner');
+            const list = document.getElementById('upcoming-unlocks-list');
+
+            if (upcoming.length > 0) {
+                banner.style.display = 'block';
+                list.innerHTML = upcoming.map(u => `
+                    <div class="unlock-item upcoming">
+                        <span><strong>${u.project}</strong> - ${formatDate(u.date)}</span>
+                        <span class="unlock-amount">${formatNumber(u.amount)} ${u.token}</span>
+                    </div>
+                `).join('');
+
+                // Add notification
+                upcoming.forEach(u => {
+                    const daysUntil = Math.ceil((new Date(u.date) - today) / (1000 * 60 * 60 * 24));
+                    if (daysUntil <= 1 && !localStorage.getItem('notified_' + u.project + '_' + u.date)) {
+                        addNotification('Unlock Tomorrow!', `${formatNumber(u.amount)} ${u.token} from ${u.project} unlocks tomorrow!`, 'warning');
+                        localStorage.setItem('notified_' + u.project + '_' + u.date, 'true');
+                    }
+                });
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        // Format number helper
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(2) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(2) + 'K';
+            return parseFloat(num).toFixed(2);
+        }
+
+        // Category filter for analytics
+        var selectedCategoryFilter = 'all';
+
+        function updateCategoryFilterChips() {
+            const chipsContainer = document.getElementById('crypto-filter-chips');
+            if (!chipsContainer) return;
+
+            const categories = [...new Set(payouts.map(p => p.category).filter(c => c))];
+            const cryptos = [...new Set(payouts.map(p => p.crypto))];
+
+            let html = `<span class="filter-chip ${selectedCryptoFilter === 'all' ? 'active' : ''}" onclick="filterByCrypto('all')">All Cryptos</span>`;
+            cryptos.forEach(c => {
+                html += `<span class="filter-chip ${selectedCryptoFilter === c ? 'active' : ''}" onclick="filterByCrypto('${c}')">${c}</span>`;
+            });
+
+            if (categories.length > 0) {
+                html += `<span style="color: var(--text-secondary); margin: 0 10px;">|</span>`;
+                html += `<span class="filter-chip ${selectedCategoryFilter === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">All Categories</span>`;
+                categories.forEach(cat => {
+                    html += `<span class="filter-chip ${selectedCategoryFilter === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat}</span>`;
+                });
+            }
+
+            chipsContainer.innerHTML = html;
+        }
+
+        window.filterByCategory = function(category) {
+            selectedCategoryFilter = category;
+            updateCategoryFilterChips();
+            renderTable();
+        };
     </script>
 </body>
 </html>
