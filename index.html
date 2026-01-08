@@ -4723,12 +4723,29 @@
                     }
                 } else {
                     vestings = (result.data || []).map(v => {
-                        // Ensure tge_date is in YYYY-MM-DD string format
+                        // Ensure tge_date is in YYYY-MM-DD string format (handle timezone correctly)
                         let tgeDate = v.tge_date;
-                        if (tgeDate && typeof tgeDate !== 'string') {
-                            tgeDate = new Date(tgeDate).toISOString().split('T')[0];
-                        } else if (tgeDate && tgeDate.includes('T')) {
-                            tgeDate = tgeDate.split('T')[0];
+                        if (tgeDate) {
+                            // If it's already YYYY-MM-DD format, use it directly
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(tgeDate)) {
+                                // Already correct format
+                            } else {
+                                // Parse and format in local timezone to avoid date shift
+                                const d = new Date(tgeDate + 'T12:00:00'); // Add noon time to avoid timezone issues
+                                tgeDate = d.getFullYear() + '-' +
+                                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                                    String(d.getDate()).padStart(2, '0');
+                            }
+                        }
+
+                        // Process custom unlocks dates too
+                        let customUnlocks = v.custom_unlocks || [];
+                        if (customUnlocks && Array.isArray(customUnlocks)) {
+                            customUnlocks = customUnlocks.map(u => ({
+                                ...u,
+                                date: u.date && /^\d{4}-\d{2}-\d{2}$/.test(u.date) ? u.date :
+                                    (u.date ? new Date(u.date + 'T12:00:00').toISOString().split('T')[0] : u.date)
+                            }));
                         }
 
                         return {
@@ -4742,7 +4759,7 @@
                             cliffPercent: String(v.cliff_percent || 0),
                             duration: String(v.duration || 0),
                             frequency: v.frequency,
-                            customUnlocks: v.custom_unlocks || [],
+                            customUnlocks: customUnlocks,
                             website: v.website || '',
                             createdAt: v.created_at
                         };
