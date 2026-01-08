@@ -2712,6 +2712,7 @@
                             <th onclick="sortTable('category')">Category</th>
                             <th onclick="sortTable('chain')">Chain</th>
                             <th onclick="sortTable('usd_sold')">USD Sold</th>
+                            <th onclick="sortTable('eur_value')">EUR Value</th>
                             <th>Wallet</th>
                             <th>Actions</th>
                         </tr>
@@ -4053,7 +4054,7 @@
                 return;
             }
 
-            payouts = (result.data || []).map(p => ({ ...p, amount: parseFloat(p.amount) || 0, usd_sold: parseFloat(p.usd_sold) || 0 }));
+            payouts = (result.data || []).map(p => ({ ...p, amount: parseFloat(p.amount) || 0, usd_sold: parseFloat(p.usd_sold) || 0, eur_value: parseFloat(p.eur_value) || 0 }));
             updateMonthTabs();
             renderAll();
         }
@@ -4068,6 +4069,7 @@
                     amount: payout.amount,
                     crypto: payout.crypto,
                     usd_sold: payout.usd_sold,
+                    eur_value: payout.eur_value,
                     chain: payout.chain,
                     wallet: payout.wallet,
                     category: payout.category || null
@@ -4080,7 +4082,7 @@
                 return null;
             }
 
-            const saved = result.data[0]; return { ...saved, amount: parseFloat(saved.amount) || 0, usd_sold: parseFloat(saved.usd_sold) || 0 };
+            const saved = result.data[0]; return { ...saved, amount: parseFloat(saved.amount) || 0, usd_sold: parseFloat(saved.usd_sold) || 0, eur_value: parseFloat(saved.eur_value) || 0 };
         }
 
         async function updatePayout(id, payout) {
@@ -4092,6 +4094,7 @@
                     amount: payout.amount,
                     crypto: payout.crypto,
                     usd_sold: payout.usd_sold,
+                    eur_value: payout.eur_value,
                     chain: payout.chain,
                     wallet: payout.wallet,
                     category: payout.category || null
@@ -4105,7 +4108,7 @@
                 return null;
             }
 
-            const updated = result.data[0]; return { ...updated, amount: parseFloat(updated.amount) || 0, usd_sold: parseFloat(updated.usd_sold) || 0 };
+            const updated = result.data[0]; return { ...updated, amount: parseFloat(updated.amount) || 0, usd_sold: parseFloat(updated.usd_sold) || 0, eur_value: parseFloat(updated.eur_value) || 0 };
         }
 
         async function deletePayoutFromDB(id) {
@@ -4299,12 +4302,15 @@
             e.preventDefault();
 
             const editId = document.getElementById('edit-id').value;
+            const usdValue = parseFloat(document.getElementById('usd-sold').value) || 0;
+            const eurValue = usdValue && eurExchangeRate ? parseFloat((usdValue * eurExchangeRate).toFixed(2)) : 0;
             const payout = {
                 company: document.getElementById('company').value.trim(),
                 date: document.getElementById('date').value,
                 amount: parseFloat(document.getElementById('amount').value),
                 crypto: document.getElementById('crypto').value.toUpperCase(),
-                usd_sold: parseFloat(document.getElementById('usd-sold').value) || 0,
+                usd_sold: usdValue,
+                eur_value: eurValue,
                 chain: document.getElementById('chain').value.trim(),
                 wallet: document.getElementById('wallet').value.trim(),
                 category: document.getElementById('category').value || ''
@@ -4352,7 +4358,7 @@
                 let aVal = a[sortField];
                 let bVal = b[sortField];
 
-                if (sortField === 'amount' || sortField === 'usd_sold') {
+                if (sortField === 'amount' || sortField === 'usd_sold' || sortField === 'eur_value') {
                     aVal = parseFloat(aVal) || 0;
                     bVal = parseFloat(bVal) || 0;
                 }
@@ -4380,6 +4386,7 @@
                     <td>${p.category ? `<span class="category-badge ${categoryClass}">${p.category}</span>` : '-'}</td>
                     <td>${escapeHtml(p.chain) || '-'}</td>
                     <td class="usd-value">${p.usd_sold ? '$' + formatUSD(p.usd_sold) : '-'}</td>
+                    <td class="eur-value">${p.eur_value ? '€' + formatUSD(p.eur_value) : '-'}</td>
                     <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtml(p.wallet) || ''}">${escapeHtml(p.wallet) || '-'}</td>
                     <td>
                         <button class="btn btn-edit" onclick="editPayout('${p.id}')">Edit</button>
@@ -4567,7 +4574,7 @@
                 return;
             }
 
-            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'Wallet'];
+            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'EUR Value', 'Wallet'];
             const rows = filtered.map(p => [
                 p.date,
                 `"${p.company.replace(/"/g, '""')}"`,
@@ -4575,6 +4582,7 @@
                 p.crypto,
                 `"${(p.chain || '').replace(/"/g, '""')}"`,
                 (p.usd_sold || 0).toFixed(2),
+                (p.eur_value || 0).toFixed(2),
                 `"${(p.wallet || '').replace(/"/g, '""')}"`
             ]);
 
@@ -4604,12 +4612,15 @@
         document.getElementById('quick-payout-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
+            const usdValue = parseFloat(document.getElementById('quick-usd').value) || 0;
+            const eurValue = usdValue && eurExchangeRate ? parseFloat((usdValue * eurExchangeRate).toFixed(2)) : 0;
             const payout = {
                 company: document.getElementById('quick-company').value.trim(),
                 date: document.getElementById('quick-date').value,
                 amount: parseFloat(document.getElementById('quick-amount').value),
                 crypto: document.getElementById('quick-crypto').value.toUpperCase(),
-                usd_sold: parseFloat(document.getElementById('quick-usd').value) || 0,
+                usd_sold: usdValue,
+                eur_value: eurValue,
                 chain: '',
                 wallet: '',
                 category: document.getElementById('quick-category').value || ''
