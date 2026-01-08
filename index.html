@@ -3502,7 +3502,7 @@
                 for (let d = 0; d < 7; d++) {
                     const date = new Date(today);
                     date.setDate(date.getDate() - (w * 7 + (6 - d)));
-                    const dateStr = date.toISOString().split('T')[0];
+                    const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
                     const count = activityMap[dateStr] || 0;
                     const level = count === 0 ? 0 : Math.min(5, Math.ceil((count / maxActivity) * 5));
                     html += `<div class="heatmap-day level-${level}" title="${dateStr}: ${count} payouts"></div>`;
@@ -3554,7 +3554,7 @@
             for (let i = 29; i >= 0; i--) {
                 const date = new Date();
                 date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
+                const dateStr = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
                 days.push(dateStr);
 
                 const dayPayouts = payouts.filter(p => p.date === dateStr);
@@ -5466,7 +5466,7 @@
             const daysInPrevMonth = new Date(year, month, 0).getDate();
 
             const today = new Date();
-            const todayStr = today.toISOString().split('T')[0];
+            const todayStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
 
             // Add previous month days
             for (let i = firstDay - 1; i >= 0; i--) {
@@ -5493,10 +5493,13 @@
             }
         }
 
-        // Format date string
+        // Format date string (local timezone, not UTC)
         function formatDateStr(year, month, day) {
             const d = new Date(year, month, day);
-            return d.toISOString().split('T')[0];
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${dd}`;
         }
 
         // Create calendar day element
