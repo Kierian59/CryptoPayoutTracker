@@ -2664,6 +2664,10 @@
                                 <option value="custom">Custom Dates</option>
                             </select>
                         </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label for="vesting-website">Project Website / Claim Page (optional)</label>
+                            <input type="url" id="vesting-website" placeholder="https://app.example.com/vesting">
+                        </div>
                     </div>
 
                     <!-- Custom Unlock Dates Section -->
@@ -4204,6 +4208,7 @@
                 duration: document.getElementById('vesting-duration').value || 12,
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData,
+                website: document.getElementById('vesting-website').value.trim() || '',
                 createdAt: editId ? vestings.find(v => v.id === editId)?.createdAt : new Date().toISOString()
             };
 
@@ -4249,6 +4254,7 @@
             document.getElementById('vesting-cliff').value = vesting.cliff;
             document.getElementById('vesting-duration').value = vesting.duration;
             document.getElementById('vesting-frequency').value = vesting.frequency;
+            document.getElementById('vesting-website').value = vesting.website || '';
 
             if (vesting.frequency === 'custom') {
                 document.getElementById('custom-unlocks-section').style.display = 'block';
@@ -4314,8 +4320,10 @@
                             <div class="vesting-info">
                                 <h3>${escapeHtml(v.project)} (${v.token})</h3>
                                 <p>Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
+                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" style="color: var(--accent); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; margin-top: 5px;">&#128279; Visit Claim Page</a>` : ''}
                             </div>
                             <div class="vesting-actions">
+                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none;">Claim</a>` : ''}
                                 <button class="btn btn-edit" onclick="editVesting('${v.id}')">Edit</button>
                                 <button class="btn btn-danger" onclick="deleteVesting('${v.id}')">Delete</button>
                             </div>
@@ -4490,7 +4498,8 @@
                         amount: u.amount,
                         token: v.token,
                         project: v.project,
-                        type: u.type
+                        type: u.type,
+                        website: v.website || ''
                     });
                 });
             });
@@ -4624,9 +4633,12 @@
             document.getElementById('tooltip-date').textContent = date.toLocaleDateString('en-US', options);
 
             const unlocksHtml = unlocks.map(u => `
-                <div class="calendar-tooltip-item">
-                    <span class="calendar-tooltip-project">${escapeHtml(u.project)}</span>
-                    <span class="calendar-tooltip-amount">${formatNumber(u.amount)} ${u.token}</span>
+                <div class="calendar-tooltip-item" style="flex-wrap: wrap;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <span class="calendar-tooltip-project">${escapeHtml(u.project)}</span>
+                        <span class="calendar-tooltip-amount">${formatNumber(u.amount)} ${u.token}</span>
+                    </div>
+                    ${u.website ? `<a href="${escapeHtml(u.website)}" target="_blank" rel="noopener" style="color: var(--accent); font-size: 0.8rem; margin-top: 5px;">&#128279; Claim Page</a>` : ''}
                 </div>
             `).join('');
 
