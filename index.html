@@ -3590,12 +3590,8 @@
 
         // Format USD
         function formatUSD(value) {
-            if (value >= 1000000) {
-                return (value / 1000000).toFixed(2) + 'M';
-            } else if (value >= 1000) {
-                return (value / 1000).toFixed(2) + 'K';
-            } else if (value >= 1) {
-                return value.toFixed(2);
+            if (value >= 1) {
+                return value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             } else {
                 return value.toFixed(4);
             }
