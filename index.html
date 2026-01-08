@@ -2448,7 +2448,10 @@
                 <div class="dashboard-card draggable" draggable="true" data-widget="revenue">
                     <div class="dashboard-card-header">
                         <span class="dashboard-card-title">Total Revenue</span>
-                        <span class="trend up" id="revenue-trend">+0%</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button id="dash-currency-toggle" class="currency-toggle-btn" onclick="toggleDashboardCurrency()" title="Switch to EUR">€</button>
+                            <span class="trend up" id="revenue-trend">+0%</span>
+                        </div>
                     </div>
                     <div class="dashboard-card-value green" id="dash-total-revenue">$0</div>
                     <div class="mini-chart">
@@ -3572,8 +3575,9 @@
             const uniqueProjects = new Set(payouts.map(p => p.company.toLowerCase())).size;
 
             document.getElementById('dash-total-payouts').textContent = totalPayouts;
-            document.getElementById('dash-total-revenue').textContent = '$' + formatUSD(totalRevenue);
+            document.getElementById('dash-total-revenue').textContent = getCurrencySymbol() + formatUSD(convertCurrency(totalRevenue));
             document.getElementById('dash-projects').textContent = uniqueProjects;
+            updateDashboardCurrencyButton();
 
             // Calculate trends (compare to previous month)
             const now = new Date();
@@ -3624,7 +3628,7 @@
                             <div class="activity-title">${p.company} - ${p.crypto}</div>
                             <div class="activity-time">${formatDate(p.date)}</div>
                         </div>
-                        <div class="activity-amount">${p.usd_sold ? '$' + formatUSD(p.usd_sold) : '-'}</div>
+                        <div class="activity-amount">${p.usd_sold ? getCurrencySymbol() + formatUSD(convertCurrency(p.usd_sold)) : '-'}</div>
                     </div>
                 `).join('') || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No activity yet</div>';
             }
@@ -3651,7 +3655,9 @@
             const revenueGoal = appSettings.revenueGoal || 10000;
             const payoutsGoal = appSettings.payoutsGoal || 50;
 
-            document.getElementById('goal-progress-text').textContent = '$' + formatUSD(monthRevenue) + ' / $' + formatUSD(revenueGoal);
+            const displayRevenue = convertCurrency(monthRevenue);
+            const displayGoal = convertCurrency(revenueGoal);
+            document.getElementById('goal-progress-text').textContent = getCurrencySymbol() + formatUSD(displayRevenue) + ' / ' + getCurrencySymbol() + formatUSD(displayGoal);
             document.getElementById('goal-bar').style.width = Math.min(100, (monthRevenue / revenueGoal) * 100) + '%';
 
             document.getElementById('payouts-goal-text').textContent = monthPayouts.length + ' / ' + payoutsGoal;
@@ -3906,9 +3912,19 @@
             }
         }
 
-        // Toggle currency display
+        // Toggle currency display (for analytics)
         window.toggleCurrency = function() {
             selectedCurrency = selectedCurrency === 'USD' ? 'EUR' : 'USD';
+            updateStats();
+            updateCharts();
+            updateCurrencyToggleButton();
+            updateDashboard();
+        };
+
+        // Toggle currency display (for dashboard)
+        window.toggleDashboardCurrency = function() {
+            selectedCurrency = selectedCurrency === 'USD' ? 'EUR' : 'USD';
+            updateDashboard();
             updateStats();
             updateCharts();
             updateCurrencyToggleButton();
@@ -3916,6 +3932,14 @@
 
         function updateCurrencyToggleButton() {
             const btn = document.getElementById('currency-toggle');
+            if (btn) {
+                btn.textContent = selectedCurrency === 'USD' ? '€' : '$';
+                btn.title = selectedCurrency === 'USD' ? 'Switch to EUR' : 'Switch to USD';
+            }
+        }
+
+        function updateDashboardCurrencyButton() {
+            const btn = document.getElementById('dash-currency-toggle');
             if (btn) {
                 btn.textContent = selectedCurrency === 'USD' ? '€' : '$';
                 btn.title = selectedCurrency === 'USD' ? 'Switch to EUR' : 'Switch to USD';
