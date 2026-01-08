@@ -4722,21 +4722,31 @@
                         migrateVestingsToSupabase();
                     }
                 } else {
-                    vestings = (result.data || []).map(v => ({
-                        id: v.id,
-                        project: v.project,
-                        token: v.token,
-                        totalTokens: v.total_tokens,
-                        tgeDate: v.tge_date,
-                        tgePercent: v.tge_percent,
-                        cliff: v.cliff,
-                        cliffPercent: v.cliff_percent,
-                        duration: v.duration,
-                        frequency: v.frequency,
-                        customUnlocks: v.custom_unlocks || [],
-                        website: v.website || '',
-                        createdAt: v.created_at
-                    }));
+                    vestings = (result.data || []).map(v => {
+                        // Ensure tge_date is in YYYY-MM-DD string format
+                        let tgeDate = v.tge_date;
+                        if (tgeDate && typeof tgeDate !== 'string') {
+                            tgeDate = new Date(tgeDate).toISOString().split('T')[0];
+                        } else if (tgeDate && tgeDate.includes('T')) {
+                            tgeDate = tgeDate.split('T')[0];
+                        }
+
+                        return {
+                            id: v.id,
+                            project: v.project,
+                            token: v.token,
+                            totalTokens: String(v.total_tokens),
+                            tgeDate: tgeDate,
+                            tgePercent: String(v.tge_percent || 0),
+                            cliff: String(v.cliff || 0),
+                            cliffPercent: String(v.cliff_percent || 0),
+                            duration: String(v.duration || 0),
+                            frequency: v.frequency,
+                            customUnlocks: v.custom_unlocks || [],
+                            website: v.website || '',
+                            createdAt: v.created_at
+                        };
+                    });
 
                     // Check for localStorage data to migrate
                     const saved = localStorage.getItem('vestings_' + currentUser.id);
