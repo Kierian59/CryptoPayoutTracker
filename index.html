@@ -2625,59 +2625,114 @@
                 <h2 id="vesting-form-title">Add Vesting Schedule</h2>
                 <form id="vesting-form">
                     <input type="hidden" id="vesting-edit-id">
-                    <div class="vesting-form">
-                        <div class="form-group">
-                            <label for="vesting-project">Project Name</label>
-                            <input type="text" id="vesting-project" required placeholder="e.g., LayerZero">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-token">Token Symbol</label>
-                            <input type="text" id="vesting-token" required placeholder="e.g., ZRO">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-total">Total Tokens</label>
-                            <input type="number" id="vesting-total" step="any" required placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-tge">TGE Date (Token Generation)</label>
-                            <input type="date" id="vesting-tge" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-tge-percent">TGE Unlock %</label>
-                            <input type="number" id="vesting-tge-percent" step="any" placeholder="e.g., 10" min="0" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-cliff">Cliff (months)</label>
-                            <input type="number" id="vesting-cliff" placeholder="e.g., 6" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-duration">Vesting Duration (months)</label>
-                            <input type="number" id="vesting-duration" placeholder="e.g., 12" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="vesting-frequency">Unlock Frequency</label>
-                            <select id="vesting-frequency">
-                                <option value="monthly">Monthly</option>
-                                <option value="quarterly">Quarterly</option>
-                                <option value="daily">Daily</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="custom">Custom Dates</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="grid-column: span 2;">
-                            <label for="vesting-website">Project Website / Claim Page (optional)</label>
-                            <input type="url" id="vesting-website" placeholder="https://app.example.com/vesting">
+
+                    <!-- Section 1: Basic Info -->
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Basic Information</h4>
+                        <div class="vesting-form">
+                            <div class="form-group">
+                                <label for="vesting-project">Project Name</label>
+                                <input type="text" id="vesting-project" required placeholder="e.g., LayerZero">
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-token">Token Symbol</label>
+                                <input type="text" id="vesting-token" required placeholder="e.g., ZRO">
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-total">Total Tokens</label>
+                                <input type="number" id="vesting-total" step="any" required placeholder="e.g., 10000">
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-tge">TGE Date (Start Date)</label>
+                                <input type="date" id="vesting-tge" required>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Custom Unlock Dates Section -->
-                    <div id="custom-unlocks-section" style="display: none; margin-bottom: 20px;">
-                        <h3 style="color: var(--accent); font-size: 1rem; margin-bottom: 15px;">Custom Unlock Dates</h3>
+                    <!-- Section 2: TGE Unlock -->
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">TGE Unlock (Initial Release)</h4>
+                        <div class="vesting-form">
+                            <div class="form-group">
+                                <label for="vesting-tge-percent">TGE Unlock %</label>
+                                <input type="number" id="vesting-tge-percent" step="any" placeholder="0" min="0" max="100" value="0">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">% of tokens released at TGE (day 1)</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Cliff -->
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Cliff Period</h4>
+                        <div class="vesting-form">
+                            <div class="form-group">
+                                <label for="vesting-cliff">Cliff Duration (months)</label>
+                                <input type="number" id="vesting-cliff" placeholder="e.g., 12" min="0" value="0">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">Waiting period before any vesting starts</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-cliff-percent">Cliff Unlock %</label>
+                                <input type="number" id="vesting-cliff-percent" step="any" placeholder="e.g., 33.33" min="0" max="100" value="0">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">% released at end of cliff</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Linear Vesting -->
+                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Linear Vesting (After Cliff)</h4>
+                        <div class="vesting-form">
+                            <div class="form-group">
+                                <label for="vesting-duration">Vesting Duration (months)</label>
+                                <input type="number" id="vesting-duration" placeholder="e.g., 24" min="0">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">How long remaining tokens vest after cliff</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-frequency">Unlock Frequency</label>
+                                <select id="vesting-frequency">
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly (every 3 months)</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="daily">Daily</option>
+                                    <option value="custom">Custom Dates</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="vesting-preview" style="background: rgba(0,217,255,0.1); border-radius: 8px; padding: 15px; margin-top: 15px;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                                <strong style="color: var(--accent);">Preview:</strong>
+                                <span id="vesting-preview-text">Fill in the form to see the unlock schedule preview</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Custom Unlock Dates -->
+                    <div id="custom-unlocks-section" style="display: none; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Custom Unlock Dates</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 15px;">Add specific dates and amounts for each unlock:</p>
                         <div id="custom-unlocks-list"></div>
                         <button type="button" class="add-unlock-btn" onclick="addCustomUnlock()">+ Add Unlock Date</button>
                     </div>
 
-                    <div class="form-actions">
+                    <!-- Section 6: Website -->
+                    <div style="margin-bottom: 20px;">
+                        <div class="vesting-form">
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="vesting-website">Project Website / Claim Page (optional)</label>
+                                <input type="url" id="vesting-website" placeholder="https://app.example.com/vesting">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Section -->
+                    <div id="vesting-preview-section" style="margin-bottom: 20px; display: none;">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 10px;">Unlock Schedule Preview</h4>
+                        <div id="vesting-preview-content" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; max-height: 300px; overflow-y: auto;">
+                        </div>
+                    </div>
+
+                    <div class="form-actions" style="gap: 10px;">
+                        <button type="button" class="btn" id="vesting-preview-btn" style="background: var(--secondary);" onclick="previewVestingSchedule()">Preview Schedule</button>
                         <button type="submit" class="btn btn-primary" id="vesting-submit-btn">Add Vesting</button>
                         <button type="button" class="btn" id="vesting-cancel-btn" style="display:none; background: #666;" onclick="cancelVestingEdit()">Cancel</button>
                     </div>
@@ -4122,14 +4177,38 @@
         // Calculate unlock schedule
         function calculateUnlockSchedule(vesting) {
             const unlocks = [];
-            const tgeDate = new Date(vesting.tgeDate);
             const totalTokens = parseFloat(vesting.totalTokens);
             const tgePercent = parseFloat(vesting.tgePercent) || 0;
-            const cliff = parseInt(vesting.cliff) || 0;
-            const duration = parseInt(vesting.duration) || 12;
+            const cliffMonths = parseInt(vesting.cliff) || 0;
+            const cliffPercent = parseFloat(vesting.cliffPercent) || 0;
+            const duration = parseInt(vesting.duration) || 0;
             const frequency = vesting.frequency;
 
-            // TGE unlock
+            // Parse TGE date properly (avoid timezone issues)
+            const tgeParts = vesting.tgeDate.split('-');
+            const tgeYear = parseInt(tgeParts[0]);
+            const tgeMonth = parseInt(tgeParts[1]) - 1; // JS months are 0-indexed
+            const tgeDay = parseInt(tgeParts[2]);
+
+            // Helper function to add months to a date
+            function addMonths(year, month, day, monthsToAdd) {
+                const newMonth = month + monthsToAdd;
+                const newYear = year + Math.floor(newMonth / 12);
+                const adjustedMonth = ((newMonth % 12) + 12) % 12;
+                const daysInMonth = new Date(newYear, adjustedMonth + 1, 0).getDate();
+                const adjustedDay = Math.min(day, daysInMonth);
+                return new Date(newYear, adjustedMonth, adjustedDay);
+            }
+
+            // Format date as YYYY-MM-DD
+            function formatDateISO(date) {
+                const y = date.getFullYear();
+                const m = String(date.getMonth() + 1).padStart(2, '0');
+                const d = String(date.getDate()).padStart(2, '0');
+                return `${y}-${m}-${d}`;
+            }
+
+            // 1. TGE unlock (day 1)
             if (tgePercent > 0) {
                 unlocks.push({
                     date: vesting.tgeDate,
@@ -4138,8 +4217,18 @@
                 });
             }
 
-            // Custom unlocks
-            if (frequency === 'custom' && vesting.customUnlocks) {
+            // 2. Cliff unlock (at end of cliff period)
+            if (cliffMonths > 0 && cliffPercent > 0) {
+                const cliffDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths);
+                unlocks.push({
+                    date: formatDateISO(cliffDate),
+                    amount: totalTokens * (cliffPercent / 100),
+                    type: 'Cliff'
+                });
+            }
+
+            // 3. Custom unlocks OR Linear vesting
+            if (frequency === 'custom' && vesting.customUnlocks && vesting.customUnlocks.length > 0) {
                 vesting.customUnlocks.forEach(u => {
                     unlocks.push({
                         date: u.date,
@@ -4147,28 +4236,50 @@
                         type: 'Custom'
                     });
                 });
-            } else {
-                // Calculate periodic unlocks
-                const remainingTokens = totalTokens * (1 - tgePercent / 100);
-                let periods = duration;
-                let periodMonths = 1;
+            } else if (duration > 0) {
+                // Calculate remaining tokens for linear vesting
+                const usedPercent = tgePercent + cliffPercent;
+                const remainingPercent = 100 - usedPercent;
+                const remainingTokens = totalTokens * (remainingPercent / 100);
 
-                if (frequency === 'quarterly') periodMonths = 3;
-                else if (frequency === 'weekly') periodMonths = 0.25;
-                else if (frequency === 'daily') periodMonths = 1 / 30;
+                if (remainingTokens > 0) {
+                    // Calculate number of periods based on frequency
+                    let numPeriods;
+                    let periodMonths;
 
-                const numPeriods = Math.ceil(duration / periodMonths);
-                const tokensPerPeriod = remainingTokens / numPeriods;
+                    switch (frequency) {
+                        case 'quarterly':
+                            periodMonths = 3;
+                            numPeriods = Math.ceil(duration / 3);
+                            break;
+                        case 'weekly':
+                            periodMonths = 0.25; // ~1 week
+                            numPeriods = duration * 4; // 4 weeks per month
+                            break;
+                        case 'daily':
+                            periodMonths = 1 / 30;
+                            numPeriods = duration * 30;
+                            break;
+                        case 'monthly':
+                        default:
+                            periodMonths = 1;
+                            numPeriods = duration;
+                            break;
+                    }
 
-                for (let i = 1; i <= numPeriods; i++) {
-                    const unlockDate = new Date(tgeDate);
-                    unlockDate.setMonth(unlockDate.getMonth() + cliff + (i * periodMonths));
+                    const tokensPerPeriod = remainingTokens / numPeriods;
+                    const startAfterCliff = cliffMonths;
 
-                    unlocks.push({
-                        date: unlockDate.toISOString().split('T')[0],
-                        amount: tokensPerPeriod,
-                        type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
-                    });
+                    for (let i = 1; i <= numPeriods; i++) {
+                        const monthsFromTGE = startAfterCliff + (i * periodMonths);
+                        const unlockDate = addMonths(tgeYear, tgeMonth, tgeDay, Math.round(monthsFromTGE));
+
+                        unlocks.push({
+                            date: formatDateISO(unlockDate),
+                            amount: tokensPerPeriod,
+                            type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                        });
+                    }
                 }
             }
 
@@ -4205,7 +4316,8 @@
                 tgeDate: document.getElementById('vesting-tge').value,
                 tgePercent: document.getElementById('vesting-tge-percent').value || 0,
                 cliff: document.getElementById('vesting-cliff').value || 0,
-                duration: document.getElementById('vesting-duration').value || 12,
+                cliffPercent: document.getElementById('vesting-cliff-percent').value || 0,
+                duration: document.getElementById('vesting-duration').value || 0,
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData,
                 website: document.getElementById('vesting-website').value.trim() || '',
@@ -4229,6 +4341,90 @@
             document.getElementById('custom-unlocks-list').innerHTML = '';
         });
 
+        // Preview vesting schedule
+        window.previewVestingSchedule = function() {
+            const tgeDate = document.getElementById('vesting-tge').value;
+            const totalTokens = document.getElementById('vesting-total').value;
+
+            if (!tgeDate || !totalTokens) {
+                alert('Please enter TGE Date and Total Tokens to preview the schedule.');
+                return;
+            }
+
+            // Collect custom unlocks if custom frequency
+            let customUnlocksData = [];
+            if (document.getElementById('vesting-frequency').value === 'custom') {
+                const rows = document.querySelectorAll('#custom-unlocks-list .unlock-input-row');
+                rows.forEach((row, i) => {
+                    const dateInput = row.querySelector('input[type="date"]');
+                    const amountInput = row.querySelector('input[type="number"]');
+                    if (dateInput.value && amountInput.value) {
+                        customUnlocksData.push({
+                            date: dateInput.value,
+                            amount: amountInput.value
+                        });
+                    }
+                });
+            }
+
+            const previewVesting = {
+                totalTokens: totalTokens,
+                tgeDate: tgeDate,
+                tgePercent: document.getElementById('vesting-tge-percent').value || 0,
+                cliff: document.getElementById('vesting-cliff').value || 0,
+                cliffPercent: document.getElementById('vesting-cliff-percent').value || 0,
+                duration: document.getElementById('vesting-duration').value || 0,
+                frequency: document.getElementById('vesting-frequency').value,
+                customUnlocks: customUnlocksData
+            };
+
+            const unlocks = calculateUnlockSchedule(previewVesting);
+            const previewSection = document.getElementById('vesting-preview-section');
+            const previewContent = document.getElementById('vesting-preview-content');
+
+            if (unlocks.length === 0) {
+                previewContent.innerHTML = '<p style="color: var(--text-secondary);">No unlocks to show. Please fill in the vesting details.</p>';
+            } else {
+                let totalAmount = 0;
+                let html = '<table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">';
+                html += '<thead><tr style="border-bottom: 2px solid var(--border-color);">';
+                html += '<th style="text-align: left; padding: 8px;">Date</th>';
+                html += '<th style="text-align: left; padding: 8px;">Type</th>';
+                html += '<th style="text-align: right; padding: 8px;">Tokens</th>';
+                html += '<th style="text-align: right; padding: 8px;">% of Total</th>';
+                html += '</tr></thead><tbody>';
+
+                unlocks.forEach(u => {
+                    totalAmount += u.amount;
+                    const percent = (u.amount / parseFloat(totalTokens) * 100).toFixed(2);
+                    html += `<tr style="border-bottom: 1px solid var(--border-color);">`;
+                    html += `<td style="padding: 8px;">${formatDateDisplay(u.date)}</td>`;
+                    html += `<td style="padding: 8px;"><span style="background: ${u.type === 'TGE' ? 'var(--accent)' : u.type === 'Cliff' ? '#9b59b6' : '#3498db'}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem;">${u.type}</span></td>`;
+                    html += `<td style="padding: 8px; text-align: right;">${u.amount.toLocaleString(undefined, {maximumFractionDigits: 2})}</td>`;
+                    html += `<td style="padding: 8px; text-align: right;">${percent}%</td>`;
+                    html += `</tr>`;
+                });
+
+                html += '</tbody></table>';
+
+                const totalPercent = (totalAmount / parseFloat(totalTokens) * 100).toFixed(2);
+                html += `<div style="margin-top: 15px; padding-top: 10px; border-top: 2px solid var(--border-color); display: flex; justify-content: space-between;">`;
+                html += `<span><strong>Total Unlocks:</strong> ${unlocks.length}</span>`;
+                html += `<span><strong>Total Tokens:</strong> ${totalAmount.toLocaleString(undefined, {maximumFractionDigits: 2})} (${totalPercent}%)</span>`;
+                html += `</div>`;
+
+                if (Math.abs(parseFloat(totalPercent) - 100) > 0.1) {
+                    html += `<div style="margin-top: 10px; padding: 10px; background: rgba(231, 76, 60, 0.2); border-radius: 4px; color: #e74c3c;">`;
+                    html += `Warning: Total unlocks add up to ${totalPercent}%, not 100%. Please check your percentages.`;
+                    html += `</div>`;
+                }
+
+                previewContent.innerHTML = html;
+            }
+
+            previewSection.style.display = 'block';
+        };
+
         // Cancel vesting edit
         window.cancelVestingEdit = function() {
             document.getElementById('vesting-edit-id').value = '';
@@ -4238,6 +4434,7 @@
             document.getElementById('vesting-cancel-btn').style.display = 'none';
             document.getElementById('custom-unlocks-section').style.display = 'none';
             document.getElementById('custom-unlocks-list').innerHTML = '';
+            document.getElementById('vesting-preview-section').style.display = 'none';
         };
 
         // Edit vesting
@@ -4252,6 +4449,7 @@
             document.getElementById('vesting-tge').value = vesting.tgeDate;
             document.getElementById('vesting-tge-percent').value = vesting.tgePercent;
             document.getElementById('vesting-cliff').value = vesting.cliff;
+            document.getElementById('vesting-cliff-percent').value = vesting.cliffPercent || 0;
             document.getElementById('vesting-duration').value = vesting.duration;
             document.getElementById('vesting-frequency').value = vesting.frequency;
             document.getElementById('vesting-website').value = vesting.website || '';
