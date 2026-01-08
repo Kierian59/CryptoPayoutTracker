@@ -3280,15 +3280,19 @@
         // Clear all data
         window.clearAllData = async function() {
             try {
-                // Clear vestings from localStorage
+                // Clear vestings from Supabase and localStorage
                 if (currentUser) {
+                    await window.supabaseClient
+                        .from('vestings')
+                        .delete()
+                        .eq('user_id', currentUser.id);
                     localStorage.removeItem('vestings_' + currentUser.id);
                     vestings = [];
                 }
 
                 // Clear payouts from database
                 if (currentUser) {
-                    const { error } = await supabase
+                    const { error } = await window.supabaseClient
                         .from('payouts')
                         .delete()
                         .eq('user_id', currentUser.id);
@@ -4699,14 +4703,53 @@
         var vestings = [];
         var customUnlocks = [];
 
-        // Load vestings from localStorage
-        function loadVestings() {
+        // Load vestings from Supabase
+        async function loadVestings() {
             try {
-                const saved = localStorage.getItem('vestings_' + currentUser.id);
-                if (saved) {
-                    vestings = JSON.parse(saved);
+                const result = await window.supabaseClient
+                    .from('vestings')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (result.error) {
+                    console.error('Error loading vestings:', result.error);
+                    // Fallback to localStorage
+                    const saved = localStorage.getItem('vestings_' + currentUser.id);
+                    if (saved) {
+                        vestings = JSON.parse(saved);
+                        // Migrate localStorage data to Supabase
+                        migrateVestingsToSupabase();
+                    }
+                } else {
+                    vestings = (result.data || []).map(v => ({
+                        id: v.id,
+                        project: v.project,
+                        token: v.token,
+                        totalTokens: v.total_tokens,
+                        tgeDate: v.tge_date,
+                        tgePercent: v.tge_percent,
+                        cliff: v.cliff,
+                        cliffPercent: v.cliff_percent,
+                        duration: v.duration,
+                        frequency: v.frequency,
+                        customUnlocks: v.custom_unlocks || [],
+                        website: v.website || '',
+                        createdAt: v.created_at
+                    }));
+
+                    // Check for localStorage data to migrate
+                    const saved = localStorage.getItem('vestings_' + currentUser.id);
+                    if (saved && vestings.length === 0) {
+                        const localVestings = JSON.parse(saved);
+                        if (localVestings.length > 0) {
+                            vestings = localVestings;
+                            await migrateVestingsToSupabase();
+                        }
+                    }
                 }
             } catch (e) {
+                console.error('Error in loadVestings:', e);
                 vestings = [];
             }
             renderVestings();
@@ -4715,9 +4758,88 @@
             renderVestingCalendar();
         }
 
-        // Save vestings to localStorage
+        // Migrate vestings from localStorage to Supabase
+        async function migrateVestingsToSupabase() {
+            if (vestings.length === 0) return;
+
+            console.log('Migrating vestings to Supabase...');
+            for (const v of vestings) {
+                try {
+                    await window.supabaseClient
+                        .from('vestings')
+                        .upsert({
+                            id: v.id,
+                            user_id: currentUser.id,
+                            project: v.project,
+                            token: v.token,
+                            total_tokens: v.totalTokens,
+                            tge_date: v.tgeDate,
+                            tge_percent: v.tgePercent || 0,
+                            cliff: v.cliff || 0,
+                            cliff_percent: v.cliffPercent || 0,
+                            duration: v.duration || 0,
+                            frequency: v.frequency,
+                            custom_unlocks: v.customUnlocks || [],
+                            website: v.website || '',
+                            created_at: v.createdAt || new Date().toISOString()
+                        });
+                } catch (e) {
+                    console.error('Error migrating vesting:', e);
+                }
+            }
+            // Clear localStorage after successful migration
+            localStorage.removeItem('vestings_' + currentUser.id);
+            console.log('Vestings migration complete');
+        }
+
+        // Save vesting to Supabase
+        async function saveVestingToSupabase(vesting) {
+            const result = await window.supabaseClient
+                .from('vestings')
+                .upsert({
+                    id: vesting.id,
+                    user_id: currentUser.id,
+                    project: vesting.project,
+                    token: vesting.token,
+                    total_tokens: vesting.totalTokens,
+                    tge_date: vesting.tgeDate,
+                    tge_percent: vesting.tgePercent || 0,
+                    cliff: vesting.cliff || 0,
+                    cliff_percent: vesting.cliffPercent || 0,
+                    duration: vesting.duration || 0,
+                    frequency: vesting.frequency,
+                    custom_unlocks: vesting.customUnlocks || [],
+                    website: vesting.website || '',
+                    created_at: vesting.createdAt || new Date().toISOString()
+                });
+
+            if (result.error) {
+                console.error('Error saving vesting:', result.error);
+                showToast('Error saving vesting: ' + result.error.message, true);
+                return false;
+            }
+            return true;
+        }
+
+        // Delete vesting from Supabase
+        async function deleteVestingFromSupabase(id) {
+            const result = await window.supabaseClient
+                .from('vestings')
+                .delete()
+                .eq('id', id)
+                .eq('user_id', currentUser.id);
+
+            if (result.error) {
+                console.error('Error deleting vesting:', result.error);
+                showToast('Error deleting vesting: ' + result.error.message, true);
+                return false;
+            }
+            return true;
+        }
+
+        // Legacy function for compatibility
         function saveVestingsToStorage() {
-            localStorage.setItem('vestings_' + currentUser.id, JSON.stringify(vestings));
+            // No longer used - vestings are saved to Supabase
         }
 
         // Toggle custom unlocks section based on frequency selection
@@ -4853,7 +4975,7 @@
         }
 
         // Vesting form submission
-        document.getElementById('vesting-form').addEventListener('submit', function(e) {
+        document.getElementById('vesting-form').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const editId = document.getElementById('vesting-edit-id').value;
@@ -4890,14 +5012,18 @@
                 createdAt: editId ? vestings.find(v => v.id === editId)?.createdAt : new Date().toISOString()
             };
 
-            if (editId) {
-                const index = vestings.findIndex(v => v.id === editId);
-                if (index !== -1) vestings[index] = vesting;
-            } else {
-                vestings.push(vesting);
+            // Save to Supabase
+            const saved = await saveVestingToSupabase(vesting);
+            if (saved) {
+                if (editId) {
+                    const index = vestings.findIndex(v => v.id === editId);
+                    if (index !== -1) vestings[index] = vesting;
+                } else {
+                    vestings.unshift(vesting);
+                }
+                showToast('Vesting saved successfully');
             }
 
-            saveVestingsToStorage();
             renderVestings();
             updateVestingStats();
             checkUpcomingUnlocks();
@@ -5044,10 +5170,13 @@
         };
 
         // Delete vesting
-        window.deleteVesting = function(id) {
+        window.deleteVesting = async function(id) {
             if (confirm('Are you sure you want to delete this vesting schedule?')) {
-                vestings = vestings.filter(v => v.id !== id);
-                saveVestingsToStorage();
+                const deleted = await deleteVestingFromSupabase(id);
+                if (deleted) {
+                    vestings = vestings.filter(v => v.id !== id);
+                    showToast('Vesting deleted');
+                }
                 renderVestings();
                 updateVestingStats();
                 renderVestingCalendar();
