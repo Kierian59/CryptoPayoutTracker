@@ -2805,6 +2805,20 @@
                     <div class="stat-value" id="active-vestings">0</div>
                     <div class="stat-label">Active Vestings</div>
                 </div>
+                <div class="vesting-stat" style="background: rgba(46, 213, 115, 0.1);">
+                    <div class="stat-value" id="portfolio-value" style="color: var(--accent-green);">$0</div>
+                    <div class="stat-label">Portfolio Value (USD)</div>
+                </div>
+                <div class="vesting-stat" style="background: rgba(46, 213, 115, 0.1);">
+                    <div class="stat-value" id="unlocked-value" style="color: var(--accent-green);">$0</div>
+                    <div class="stat-label">Unlocked Value</div>
+                </div>
+            </div>
+            <div style="text-align: right; margin-bottom: 15px;">
+                <button class="btn btn-secondary" onclick="fetchTokenPrices()" style="padding: 6px 12px; font-size: 0.8rem;">
+                    &#x21bb; Refresh Prices
+                </button>
+                <span id="prices-updated" style="font-size: 0.75rem; color: var(--text-secondary); margin-left: 10px;"></span>
             </div>
 
             <!-- Add Vesting Form -->
@@ -2901,12 +2915,18 @@
                         <button type="button" class="add-unlock-btn" onclick="addCustomUnlock()">+ Add Unlock Date</button>
                     </div>
 
-                    <!-- Section 6: Website -->
+                    <!-- Section 6: Website & Price Tracking -->
                     <div style="margin-bottom: 20px;">
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Website & Price Tracking</h4>
                         <div class="vesting-form">
-                            <div class="form-group" style="grid-column: span 2;">
-                                <label for="vesting-website">Project Website / Claim Page (optional)</label>
+                            <div class="form-group">
+                                <label for="vesting-website">Project Website / Claim Page</label>
                                 <input type="url" id="vesting-website" placeholder="https://app.example.com/vesting">
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-coingecko-id">CoinGecko ID (for live prices)</label>
+                                <input type="text" id="vesting-coingecko-id" placeholder="e.g., ethereum, bitcoin">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">Find ID at <a href="https://www.coingecko.com" target="_blank" style="color: var(--accent);">coingecko.com</a> in the token URL</small>
                             </div>
                         </div>
                     </div>
@@ -4835,6 +4855,7 @@
                             frequency: v.frequency,
                             customUnlocks: customUnlocks,
                             website: v.website || '',
+                            coingeckoId: v.coingecko_id || '',
                             createdAt: v.created_at
                         };
                     });
@@ -4857,6 +4878,64 @@
             updateVestingStats();
             checkUpcomingUnlocks();
             renderVestingCalendar();
+            fetchTokenPrices(); // Fetch prices for tokens with CoinGecko IDs
+        }
+
+        // Token prices cache
+        var tokenPrices = {};
+        var pricesLastUpdated = null;
+
+        // Fetch token prices from CoinGecko
+        async function fetchTokenPrices() {
+            const coingeckoIds = vestings
+                .map(v => v.coingeckoId)
+                .filter(id => id && id.trim() !== '');
+
+            if (coingeckoIds.length === 0) {
+                tokenPrices = {};
+                return;
+            }
+
+            const uniqueIds = [...new Set(coingeckoIds)];
+
+            try {
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/simple/price?ids=${uniqueIds.join(',')}&vs_currencies=usd,eur`
+                );
+
+                if (!response.ok) {
+                    console.error('CoinGecko API error:', response.status);
+                    return;
+                }
+
+                tokenPrices = await response.json();
+                pricesLastUpdated = new Date();
+                console.log('Token prices updated:', tokenPrices);
+
+                // Re-render to show updated prices
+                renderVestings();
+                updateVestingStats();
+            } catch (e) {
+                console.error('Error fetching token prices:', e);
+            }
+        }
+
+        // Get price for a token
+        function getTokenPrice(coingeckoId, currency = 'usd') {
+            if (!coingeckoId || !tokenPrices[coingeckoId]) return null;
+            return tokenPrices[coingeckoId][currency.toLowerCase()] || null;
+        }
+
+        // Format currency value
+        function formatCurrencyValue(value, currency = 'USD') {
+            if (value === null || value === undefined) return 'N/A';
+            const symbol = currency === 'EUR' ? '€' : '$';
+            if (value >= 1000000) {
+                return symbol + (value / 1000000).toFixed(2) + 'M';
+            } else if (value >= 1000) {
+                return symbol + (value / 1000).toFixed(2) + 'K';
+            }
+            return symbol + value.toFixed(2);
         }
 
         // Migrate vestings from localStorage to Supabase
@@ -4911,6 +4990,7 @@
                     frequency: vesting.frequency,
                     custom_unlocks: vesting.customUnlocks || [],
                     website: vesting.website || '',
+                    coingecko_id: vesting.coingeckoId || '',
                     created_at: vesting.createdAt || new Date().toISOString()
                 });
 
@@ -5110,6 +5190,7 @@
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData,
                 website: document.getElementById('vesting-website').value.trim() || '',
+                coingeckoId: document.getElementById('vesting-coingecko-id').value.trim().toLowerCase() || '',
                 createdAt: editId ? vestings.find(v => v.id === editId)?.createdAt : new Date().toISOString()
             };
 
@@ -5246,6 +5327,7 @@
             document.getElementById('vesting-duration').value = vesting.duration;
             document.getElementById('vesting-frequency').value = vesting.frequency;
             document.getElementById('vesting-website').value = vesting.website || '';
+            document.getElementById('vesting-coingecko-id').value = vesting.coingeckoId || '';
 
             if (vesting.frequency === 'custom') {
                 document.getElementById('custom-unlocks-section').style.display = 'block';
@@ -5308,12 +5390,21 @@
                 const progressPercent = (unlockedTokens / totalTokens * 100).toFixed(1);
                 const nextUnlock = unlocks.find(u => new Date(u.date) > today);
 
+                // Get token price
+                const price = getTokenPrice(v.coingeckoId, 'usd');
+                const totalValue = price ? totalTokens * price : null;
+                const unlockedValue = price ? unlockedTokens * price : null;
+                const lockedValue = price ? (totalTokens - unlockedTokens) * price : null;
+
                 return `
                     <div class="vesting-card">
                         <div class="vesting-header">
                             <div class="vesting-info">
                                 <h3>${escapeHtml(v.project)} (${v.token})</h3>
                                 <p>Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
+                                ${price ? `<p style="color: var(--accent-green); font-size: 0.85rem; margin-top: 5px;">
+                                    Price: $${price.toFixed(price < 1 ? 4 : 2)} | Value: ${formatCurrencyValue(totalValue, 'USD')}
+                                </p>` : (v.coingeckoId ? '<p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">Loading price...</p>' : '')}
                             </div>
                             <div class="vesting-actions">
                                 ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none;">Visit Claim Page</a>` : ''}
@@ -5329,10 +5420,14 @@
                             <div class="vesting-progress-bar">
                                 <div class="vesting-progress-fill" style="width: ${progressPercent}%"></div>
                             </div>
+                            ${price ? `<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem;">
+                                <span style="color: var(--accent-green);">Unlocked: ${formatCurrencyValue(unlockedValue, 'USD')}</span>
+                                <span style="color: var(--accent-orange);">Locked: ${formatCurrencyValue(lockedValue, 'USD')}</span>
+                            </div>` : ''}
                         </div>
                         ${nextUnlock ? `
                             <div class="countdown">
-                                Next unlock: ${formatDate(nextUnlock.date)} (${formatNumber(nextUnlock.amount)} ${v.token})
+                                Next unlock: ${formatDate(nextUnlock.date)} (${formatNumber(nextUnlock.amount)} ${v.token}${price ? ` ≈ ${formatCurrencyValue(nextUnlock.amount * price, 'USD')}` : ''})
                             </div>
                         ` : '<div class="countdown" style="color: var(--accent-green);">Fully vested!</div>'}
                         <div class="vesting-schedule">
@@ -5361,19 +5456,38 @@
             const today = new Date();
             let totalTokens = 0;
             let unlockedTokens = 0;
+            let totalPortfolioValue = 0;
+            let unlockedPortfolioValue = 0;
 
             vestings.forEach(v => {
                 const unlocks = calculateUnlockSchedule(v);
-                totalTokens += parseFloat(v.totalTokens);
-                unlockedTokens += unlocks
+                const vTotalTokens = parseFloat(v.totalTokens);
+                const vUnlockedTokens = unlocks
                     .filter(u => new Date(u.date) <= today)
                     .reduce((sum, u) => sum + u.amount, 0);
+
+                totalTokens += vTotalTokens;
+                unlockedTokens += vUnlockedTokens;
+
+                // Calculate value if price is available
+                const price = getTokenPrice(v.coingeckoId, 'usd');
+                if (price) {
+                    totalPortfolioValue += vTotalTokens * price;
+                    unlockedPortfolioValue += vUnlockedTokens * price;
+                }
             });
 
             document.getElementById('total-vesting-tokens').textContent = formatNumber(totalTokens);
             document.getElementById('unlocked-tokens').textContent = formatNumber(unlockedTokens);
             document.getElementById('locked-tokens').textContent = formatNumber(totalTokens - unlockedTokens);
             document.getElementById('active-vestings').textContent = vestings.length;
+            document.getElementById('portfolio-value').textContent = formatCurrencyValue(totalPortfolioValue, 'USD');
+            document.getElementById('unlocked-value').textContent = formatCurrencyValue(unlockedPortfolioValue, 'USD');
+
+            // Update last updated time
+            if (pricesLastUpdated) {
+                document.getElementById('prices-updated').textContent = 'Updated: ' + pricesLastUpdated.toLocaleTimeString();
+            }
         }
 
         // Check upcoming unlocks and show banner
