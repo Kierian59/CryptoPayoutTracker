@@ -1626,81 +1626,106 @@
         }
 
         .vesting-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
         }
 
         .vesting-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 16px;
             transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
         }
 
         .vesting-card:hover {
             border-color: var(--accent);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.15);
         }
 
         .vesting-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .vesting-info h3 {
             color: var(--accent);
-            font-size: 1.1rem;
-            margin-bottom: 5px;
+            font-size: 1rem;
+            margin-bottom: 3px;
         }
 
         .vesting-info p {
             color: var(--text-secondary);
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .vesting-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .vesting-actions .btn {
+            padding: 4px 8px;
+            font-size: 0.75rem;
         }
 
         .vesting-progress-section {
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .vesting-progress-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
         }
 
         .vesting-progress-bar {
-            height: 10px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .vesting-progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--accent), var(--accent-green));
-            border-radius: 5px;
+            border-radius: 4px;
             transition: width 0.5s ease;
         }
 
         .vesting-schedule {
             border-top: 1px solid var(--border-color);
-            padding-top: 15px;
+            padding-top: 12px;
+            margin-top: auto;
         }
 
         .vesting-schedule h4 {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--text-secondary);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+        }
+
+        .vesting-card-compact {
+            cursor: pointer;
+        }
+
+        .vesting-card-details {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .vesting-card-details.expanded {
+            display: block;
         }
 
         .unlock-list {
@@ -5405,6 +5430,14 @@
             previewSection.style.display = 'block';
         };
 
+        // Toggle vesting card details
+        window.toggleVestingDetails = function(id) {
+            const details = document.getElementById('vesting-details-' + id);
+            if (details) {
+                details.classList.toggle('expanded');
+            }
+        };
+
         // Toggle vesting form visibility
         var vestingFormVisible = true;
         window.toggleVestingForm = function() {
@@ -5574,68 +5607,93 @@
                 }
 
                 return `
-                    <div class="vesting-card">
-                        <div class="vesting-header">
-                            <div class="vesting-info" style="display: flex; gap: 12px; align-items: flex-start;">
-                                ${tokenImage ? `<img src="${tokenImage}" alt="${v.token}" style="width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;">` : `<div style="width: 40px; height: 40px; border-radius: 50%; background: var(--border-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; color: var(--accent);">${v.token.substring(0, 2)}</div>`}
-                                <div>
-                                    <h3 style="margin: 0;">${escapeHtml(v.project)} (${v.token}) ${isLinear ? '<span style="background: var(--accent); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">LINEAR</span>' : ''}</h3>
-                                    <p style="margin: 4px 0 0 0;">Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
-                                    ${price ? `<p style="color: var(--accent-green); font-size: 0.85rem; margin-top: 5px;">
-                                        Price: $${price.toFixed(price < 1 ? 4 : 2)} | Value: ${formatCurrencyValue(totalValue, 'USD')}
-                                    </p>` : (v.coingeckoId ? '<p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 5px;">Loading price...</p>' : '')}
+                    <div class="vesting-card" id="vesting-card-${v.id}">
+                        <!-- Compact Header -->
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                            ${tokenImage ? `<img src="${tokenImage}" alt="${v.token}" style="width: 36px; height: 36px; border-radius: 50%;">` : `<div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-green)); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.8rem;">${v.token.substring(0, 2)}</div>`}
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                    <h3 style="margin: 0; font-size: 0.95rem; white-space: nowrap;">${escapeHtml(v.project)}</h3>
+                                    <span style="color: var(--text-secondary); font-size: 0.8rem;">${v.token}</span>
+                                    ${isLinear ? '<span style="background: var(--accent); color: #000; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">LINEAR</span>' : ''}
                                 </div>
-                            </div>
-                            <div class="vesting-actions">
-                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none;">Visit Claim Page</a>` : ''}
-                                <button class="btn btn-edit" onclick="editVesting('${v.id}')">Edit</button>
-                                <button class="btn btn-danger" onclick="deleteVesting('${v.id}')">Delete</button>
+                                ${price ? `<div style="color: var(--accent-green); font-size: 0.8rem; font-weight: 600;">${formatCurrencyValue(totalValue, 'USD')}</div>` : ''}
                             </div>
                         </div>
-                        ${linearDisplay}
-                        <div class="vesting-progress-section">
-                            <div class="vesting-progress-header">
-                                <span>Progress: ${progressPercent}%</span>
-                                <span>${formatNumber(unlockedTokens)} / ${formatNumber(totalTokens)} ${v.token}</span>
+
+                        <!-- Progress Bar -->
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 4px;">
+                                <span style="color: var(--accent);">${progressPercent}%</span>
+                                <span style="color: var(--text-secondary);">${formatNumber(unlockedTokens)} / ${formatNumber(totalTokens)}</span>
                             </div>
                             <div class="vesting-progress-bar">
                                 <div class="vesting-progress-fill" style="width: ${progressPercent}%"></div>
                             </div>
-                            ${price ? `<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.8rem;">
-                                <span style="color: var(--accent-green);">Unlocked: ${formatCurrencyValue(unlockedValue, 'USD')}</span>
-                                <span style="color: var(--accent-orange);">Locked: ${formatCurrencyValue(lockedValue, 'USD')}</span>
-                            </div>` : ''}
                         </div>
-                        ${!isLinear && nextUnlock ? `
-                            <div class="countdown">
-                                Next unlock: ${formatDate(nextUnlock.date)} (${formatNumber(nextUnlock.amount)} ${v.token}${price ? ` ≈ ${formatCurrencyValue(nextUnlock.amount * price, 'USD')}` : ''})
+
+                        <!-- Key Stats -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
+                            <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
+                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(unlockedValue, 'USD') : formatNumber(unlockedTokens)}</div>
+                                <div style="color: var(--text-secondary);">Unlocked</div>
                             </div>
-                        ` : (!isLinear ? '<div class="countdown" style="color: var(--accent-green);">Fully vested!</div>' : '')}
-                        <div class="vesting-schedule">
-                            <h4>${isLinear ? 'Vesting Period' : 'Unlock Schedule'}</h4>
-                            <div class="unlock-list">
+                            <div style="background: rgba(255, 159, 67, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
+                                <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD') : formatNumber(totalTokens - unlockedTokens)}</div>
+                                <div style="color: var(--text-secondary);">Locked</div>
+                            </div>
+                        </div>
+
+                        ${isLinear && linearInfo && linearInfo.vestingStatus === 'in_progress' ? `
+                            <div style="background: rgba(0, 217, 255, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center; font-size: 0.75rem;">
+                                <span style="color: var(--accent);">&#9201; ${formatNumber(linearInfo.tokensPerDay)} ${v.token}/day</span>
+                                ${price ? `<span style="color: var(--text-secondary);"> (${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD')}/day)</span>` : ''}
+                            </div>
+                        ` : ''}
+
+                        ${!isLinear && nextUnlock ? `
+                            <div style="background: rgba(0, 217, 255, 0.05); padding: 8px; border-radius: 6px; margin-bottom: 10px; font-size: 0.75rem; text-align: center;">
+                                <span style="color: var(--text-secondary);">Next:</span>
+                                <span style="color: var(--accent);">${formatDate(nextUnlock.date)}</span>
+                                <span style="color: var(--accent-green);">(${formatNumber(nextUnlock.amount)} ${v.token})</span>
+                            </div>
+                        ` : (!isLinear ? '<div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center; font-size: 0.75rem; color: var(--accent-green);">Fully vested!</div>' : '')}
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="flex: 1; text-align: center; padding: 6px 8px; font-size: 0.75rem; text-decoration: none;">Claim</a>` : ''}
+                            <button class="btn" style="background: var(--secondary); padding: 6px 8px; font-size: 0.75rem;" onclick="toggleVestingDetails('${v.id}')">Details</button>
+                            <button class="btn btn-edit" style="padding: 6px 8px; font-size: 0.75rem;" onclick="editVesting('${v.id}')">Edit</button>
+                            <button class="btn btn-danger" style="padding: 6px 8px; font-size: 0.75rem;" onclick="deleteVesting('${v.id}')">&#128465;</button>
+                        </div>
+
+                        <!-- Expandable Details -->
+                        <div class="vesting-card-details" id="vesting-details-${v.id}">
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
+                                TGE: ${formatDate(v.tgeDate)} ${price ? `| Price: $${price.toFixed(price < 1 ? 4 : 2)}` : ''}
+                            </div>
+                            <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">${isLinear ? 'Vesting Period' : 'Unlock Schedule'}</div>
+                            <div class="unlock-list" style="max-height: 150px; overflow-y: auto;">
                                 ${isLinear ? `
-                                    <div class="unlock-item">
+                                    <div class="unlock-item" style="font-size: 0.75rem;">
                                         <span class="unlock-date">Start: ${formatDate(linearInfo.startDate.toISOString().split('T')[0])}</span>
-                                        <span class="unlock-amount">Linear vesting begins</span>
                                         <span class="unlock-status ${linearInfo.vestingStatus !== 'not_started' ? 'claimed' : 'pending'}">${linearInfo.vestingStatus !== 'not_started' ? 'Started' : 'Pending'}</span>
                                     </div>
-                                    <div class="unlock-item">
+                                    <div class="unlock-item" style="font-size: 0.75rem;">
                                         <span class="unlock-date">End: ${formatDate(linearInfo.endDate.toISOString().split('T')[0])}</span>
-                                        <span class="unlock-amount">${formatNumber(linearInfo.linearTokens)} ${v.token}</span>
                                         <span class="unlock-status ${linearInfo.vestingStatus === 'completed' ? 'claimed' : 'pending'}">${linearInfo.vestingStatus === 'completed' ? 'Complete' : 'Pending'}</span>
                                     </div>
-                                ` : unlocks.map(u => {
+                                ` : unlocks.slice(0, 10).map(u => {
                                     const isUnlocked = new Date(u.date) <= today;
                                     const isNext = nextUnlock && u.date === nextUnlock.date;
                                     return `
-                                        <div class="unlock-item ${isUnlocked ? 'unlocked' : ''} ${isNext ? 'next' : ''}">
+                                        <div class="unlock-item ${isUnlocked ? 'unlocked' : ''} ${isNext ? 'next' : ''}" style="font-size: 0.75rem;">
                                             <span class="unlock-date">${formatDate(u.date)}</span>
-                                            <span class="unlock-amount">${formatNumber(u.amount)} ${v.token}</span>
-                                            <span class="unlock-status ${isUnlocked ? 'claimed' : 'pending'}">${isUnlocked ? 'Unlocked' : 'Pending'}</span>
+                                            <span class="unlock-amount">${formatNumber(u.amount)}</span>
+                                            <span class="unlock-status ${isUnlocked ? 'claimed' : 'pending'}">${isUnlocked ? '&#10003;' : '&#9679;'}</span>
                                         </div>
                                     `;
-                                }).join('')}
+                                }).join('') + (unlocks.length > 10 ? `<div style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); padding: 5px;">+${unlocks.length - 10} more unlocks</div>` : '')}
                             </div>
                         </div>
                     </div>
