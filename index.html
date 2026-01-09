@@ -2197,6 +2197,233 @@
             border-color: #ff4757;
         }
 
+        /* Campaign Styles */
+        .campaign-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .campaign-stat {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .campaign-stat .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .campaign-stat .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .campaigns-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .campaign-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+        }
+
+        .campaign-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .campaign-info h3 {
+            margin: 0 0 5px 0;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+        }
+
+        .campaign-rewards {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .campaign-reward-badge {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .campaign-reward-badge.tokens {
+            background: rgba(0, 217, 255, 0.15);
+            color: var(--accent);
+        }
+
+        .campaign-reward-badge.usd {
+            background: rgba(46, 213, 115, 0.15);
+            color: var(--accent-green);
+        }
+
+        .campaign-progress {
+            margin: 15px 0;
+        }
+
+        .campaign-progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .campaign-progress-bar {
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .campaign-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-green));
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        .campaign-posts-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .campaign-posts-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .campaign-posts-header h4 {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        .campaign-posts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .campaign-post-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .campaign-post-item a {
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.85rem;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .campaign-post-item a:hover {
+            text-decoration: underline;
+        }
+
+        .campaign-post-item .post-date {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .campaign-post-item .delete-post {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 2px 6px;
+            font-size: 0.9rem;
+        }
+
+        .campaign-post-item .delete-post:hover {
+            color: #ff4757;
+        }
+
+        .add-post-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .add-post-form input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+        }
+
+        .add-post-form button {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            background: var(--accent);
+            color: #000;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .add-post-form button:hover {
+            opacity: 0.9;
+        }
+
+        .campaign-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .campaign-actions button {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-secondary);
+        }
+
+        .campaign-actions button:hover {
+            background: var(--border-color);
+        }
+
+        .campaign-actions button.delete:hover {
+            background: rgba(255, 71, 87, 0.2);
+            color: #ff4757;
+            border-color: #ff4757;
+        }
+
         /* Settings Styles */
         .settings-grid {
             display: grid;
@@ -2444,6 +2671,10 @@
                 <span class="nav-icon">&#128197;</span>
                 <span class="nav-label">Events & Vesting</span>
             </div>
+            <div class="nav-item" data-tab="campaigns" onclick="switchMainTab('campaigns')">
+                <span class="nav-icon">&#128230;</span>
+                <span class="nav-label">Campaigns</span>
+            </div>
             <div class="nav-item" data-tab="settings" onclick="switchMainTab('settings')">
                 <span class="nav-icon">&#9881;</span>
                 <span class="nav-label">Settings</span>
@@ -2556,6 +2787,7 @@
             <button class="main-tab" data-tab="analytics" onclick="switchMainTab('analytics')">Analytics</button>
             <button class="main-tab" data-tab="history" onclick="switchMainTab('history')">History</button>
             <button class="main-tab" data-tab="vesting" onclick="switchMainTab('vesting')">Events & Vesting</button>
+            <button class="main-tab" data-tab="campaigns" onclick="switchMainTab('campaigns')">Campaigns</button>
             <button class="main-tab" data-tab="settings" onclick="switchMainTab('settings')">Settings</button>
         </div>
 
@@ -3155,6 +3387,79 @@
             </div>
         </div>
         <!-- End Vesting Tab -->
+
+        <!-- Campaigns Tab -->
+        <div class="tab-content" id="tab-campaigns">
+            <!-- Campaign Stats -->
+            <div class="campaign-stats">
+                <div class="campaign-stat">
+                    <div class="stat-value" id="total-campaigns">0</div>
+                    <div class="stat-label">Active Campaigns</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="stat-value" id="total-posts-needed">0</div>
+                    <div class="stat-label">Total Posts Needed</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="stat-value" id="total-posts-made">0</div>
+                    <div class="stat-label">Posts Made</div>
+                </div>
+                <div class="campaign-stat">
+                    <div class="stat-value" id="total-posts-left">0</div>
+                    <div class="stat-label">Posts Left</div>
+                </div>
+                <div class="campaign-stat" style="background: rgba(46, 213, 115, 0.1);">
+                    <div class="stat-value" id="total-campaign-rewards" style="color: var(--accent-green);">$0</div>
+                    <div class="stat-label">Total Rewards (USD)</div>
+                </div>
+            </div>
+
+            <!-- Add Campaign Form -->
+            <div class="card" style="margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleCampaignForm()">
+                    <h2 id="campaign-form-title" style="margin: 0;">Add Campaign</h2>
+                    <button type="button" id="campaign-form-toggle" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <span id="campaign-form-toggle-icon">&#9660;</span> Show
+                    </button>
+                </div>
+                <div id="campaign-form-container" style="margin-top: 20px; display: none;">
+                    <form id="campaign-form">
+                        <input type="hidden" id="campaign-edit-id">
+                        <div class="vesting-form">
+                            <div class="form-group">
+                                <label for="campaign-project">Project Name</label>
+                                <input type="text" id="campaign-project" required placeholder="e.g., LayerZero">
+                            </div>
+                            <div class="form-group">
+                                <label for="campaign-posts-needed">Posts Needed</label>
+                                <input type="number" id="campaign-posts-needed" required min="1" placeholder="e.g., 10">
+                            </div>
+                            <div class="form-group">
+                                <label for="campaign-reward-tokens">Reward (Tokens)</label>
+                                <input type="text" id="campaign-reward-tokens" placeholder="e.g., 500 ZRO">
+                            </div>
+                            <div class="form-group">
+                                <label for="campaign-reward-usd">Reward (USD)</label>
+                                <input type="number" id="campaign-reward-usd" step="any" placeholder="e.g., 250">
+                            </div>
+                        </div>
+                        <div class="form-actions" style="margin-top: 15px;">
+                            <button type="submit" class="btn btn-primary">Save Campaign</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetCampaignForm()">Clear</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Campaigns List -->
+            <div class="card" style="margin-top: 20px;">
+                <h3 style="margin-bottom: 15px;">Your Campaigns</h3>
+                <div id="campaigns-list" class="campaigns-list">
+                    <div class="no-data" id="no-campaigns">No campaigns yet. Add your first one above!</div>
+                </div>
+            </div>
+        </div>
+        <!-- End Campaigns Tab -->
 
         <!-- Settings Tab -->
         <div class="tab-content" id="tab-settings">
@@ -4278,6 +4583,7 @@
             await loadPayouts();
             loadVestings();
             loadCryptoEvents();
+            loadCampaigns();
 
             // Start tour for first-time users
             setTimeout(() => startTour(), 1000);
@@ -5454,6 +5760,314 @@
                 toggleBtn.innerHTML = '<span id="event-form-toggle-icon">&#9660;</span> Show';
             }
         };
+
+        // ============================================
+        // CAMPAIGNS FUNCTIONALITY
+        // ============================================
+
+        var campaigns = [];
+
+        // Load campaigns from Supabase
+        async function loadCampaigns() {
+            try {
+                const result = await window.supabaseClient
+                    .from('campaigns')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (result.error) {
+                    console.error('Error loading campaigns:', result.error);
+                    campaigns = [];
+                } else {
+                    campaigns = (result.data || []).map(c => ({
+                        id: c.id,
+                        project: c.project,
+                        postsNeeded: c.posts_needed,
+                        rewardTokens: c.reward_tokens || '',
+                        rewardUsd: c.reward_usd || 0,
+                        posts: c.posts || [],
+                        createdAt: c.created_at
+                    }));
+                }
+            } catch (e) {
+                console.error('Error in loadCampaigns:', e);
+                campaigns = [];
+            }
+            renderCampaigns();
+            updateCampaignStats();
+        }
+
+        // Save campaign to Supabase
+        async function saveCampaignToSupabase(campaign) {
+            try {
+                const campaignData = {
+                    user_id: currentUser.id,
+                    project: campaign.project,
+                    posts_needed: campaign.postsNeeded,
+                    reward_tokens: campaign.rewardTokens,
+                    reward_usd: campaign.rewardUsd,
+                    posts: campaign.posts || []
+                };
+
+                if (campaign.id) {
+                    const result = await window.supabaseClient
+                        .from('campaigns')
+                        .update(campaignData)
+                        .eq('id', campaign.id);
+                    if (result.error) throw result.error;
+                } else {
+                    const result = await window.supabaseClient
+                        .from('campaigns')
+                        .insert([campaignData])
+                        .select();
+                    if (result.error) throw result.error;
+                    if (result.data && result.data[0]) {
+                        campaign.id = result.data[0].id;
+                    }
+                }
+                return true;
+            } catch (e) {
+                console.error('Error saving campaign:', e);
+                return false;
+            }
+        }
+
+        // Delete campaign from Supabase
+        async function deleteCampaignFromSupabase(id) {
+            try {
+                const result = await window.supabaseClient
+                    .from('campaigns')
+                    .delete()
+                    .eq('id', id);
+                if (result.error) throw result.error;
+                return true;
+            } catch (e) {
+                console.error('Error deleting campaign:', e);
+                return false;
+            }
+        }
+
+        // Handle campaign form submission
+        document.getElementById('campaign-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const campaignId = document.getElementById('campaign-edit-id').value;
+            const existingCampaign = campaignId ? campaigns.find(c => c.id === campaignId) : null;
+
+            const campaign = {
+                id: campaignId || null,
+                project: document.getElementById('campaign-project').value,
+                postsNeeded: parseInt(document.getElementById('campaign-posts-needed').value),
+                rewardTokens: document.getElementById('campaign-reward-tokens').value,
+                rewardUsd: parseFloat(document.getElementById('campaign-reward-usd').value) || 0,
+                posts: existingCampaign ? existingCampaign.posts : []
+            };
+
+            const success = await saveCampaignToSupabase(campaign);
+            if (success) {
+                if (campaignId) {
+                    const index = campaigns.findIndex(c => c.id === campaignId);
+                    if (index !== -1) {
+                        campaigns[index] = campaign;
+                    }
+                } else {
+                    campaigns.unshift(campaign);
+                }
+
+                resetCampaignForm();
+                renderCampaigns();
+                updateCampaignStats();
+                addNotification('Campaign ' + (campaignId ? 'updated' : 'added') + ': ' + campaign.project);
+            }
+        });
+
+        // Reset campaign form
+        window.resetCampaignForm = function() {
+            document.getElementById('campaign-form').reset();
+            document.getElementById('campaign-edit-id').value = '';
+            document.getElementById('campaign-form-title').textContent = 'Add Campaign';
+        };
+
+        // Edit campaign
+        window.editCampaign = function(id) {
+            const campaign = campaigns.find(c => c.id === id);
+            if (!campaign) return;
+
+            document.getElementById('campaign-edit-id').value = campaign.id;
+            document.getElementById('campaign-project').value = campaign.project;
+            document.getElementById('campaign-posts-needed').value = campaign.postsNeeded;
+            document.getElementById('campaign-reward-tokens').value = campaign.rewardTokens;
+            document.getElementById('campaign-reward-usd').value = campaign.rewardUsd || '';
+            document.getElementById('campaign-form-title').textContent = 'Edit Campaign';
+
+            const container = document.getElementById('campaign-form-container');
+            if (container) container.style.display = 'block';
+            document.getElementById('campaign-form-toggle').innerHTML = '<span>&#9650;</span> Hide';
+
+            document.getElementById('campaign-form')?.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        // Delete campaign
+        window.deleteCampaign = async function(id) {
+            if (!confirm('Are you sure you want to delete this campaign?')) return;
+
+            const success = await deleteCampaignFromSupabase(id);
+            if (success) {
+                campaigns = campaigns.filter(c => c.id !== id);
+                renderCampaigns();
+                updateCampaignStats();
+                addNotification('Campaign deleted');
+            }
+        };
+
+        // Add post to campaign
+        window.addPostToCampaign = async function(campaignId) {
+            const input = document.getElementById(`post-url-${campaignId}`);
+            const url = input.value.trim();
+
+            if (!url) return;
+
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) return;
+
+            const newPost = {
+                url: url,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            campaign.posts = campaign.posts || [];
+            campaign.posts.push(newPost);
+
+            const success = await saveCampaignToSupabase(campaign);
+            if (success) {
+                input.value = '';
+                renderCampaigns();
+                updateCampaignStats();
+            }
+        };
+
+        // Delete post from campaign
+        window.deletePostFromCampaign = async function(campaignId, postIndex) {
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign || !campaign.posts) return;
+
+            campaign.posts.splice(postIndex, 1);
+
+            const success = await saveCampaignToSupabase(campaign);
+            if (success) {
+                renderCampaigns();
+                updateCampaignStats();
+            }
+        };
+
+        // Toggle campaign form visibility
+        window.toggleCampaignForm = function() {
+            const container = document.getElementById('campaign-form-container');
+            const toggleBtn = document.getElementById('campaign-form-toggle');
+
+            if (container.style.display === 'none') {
+                container.style.display = 'block';
+                toggleBtn.innerHTML = '<span id="campaign-form-toggle-icon">&#9650;</span> Hide';
+            } else {
+                container.style.display = 'none';
+                toggleBtn.innerHTML = '<span id="campaign-form-toggle-icon">&#9660;</span> Show';
+            }
+        };
+
+        // Render campaigns list
+        function renderCampaigns() {
+            const container = document.getElementById('campaigns-list');
+            const noData = document.getElementById('no-campaigns');
+            if (!container) return;
+
+            if (campaigns.length === 0) {
+                container.innerHTML = '';
+                if (noData) noData.style.display = 'block';
+                return;
+            }
+
+            if (noData) noData.style.display = 'none';
+
+            container.innerHTML = campaigns.map(campaign => {
+                const postsMade = campaign.posts ? campaign.posts.length : 0;
+                const postsLeft = Math.max(0, campaign.postsNeeded - postsMade);
+                const progress = Math.min(100, (postsMade / campaign.postsNeeded) * 100);
+                const isComplete = postsMade >= campaign.postsNeeded;
+
+                const postsHtml = (campaign.posts || []).map((post, index) => `
+                    <div class="campaign-post-item">
+                        <a href="${escapeHtml(post.url)}" target="_blank" rel="noopener">${escapeHtml(post.url)}</a>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="post-date">${post.date}</span>
+                            <button class="delete-post" onclick="deletePostFromCampaign('${campaign.id}', ${index})" title="Delete post">&times;</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="campaign-card" style="${isComplete ? 'border-left-color: var(--accent-green);' : ''}">
+                        <div class="campaign-header">
+                            <div class="campaign-info">
+                                <h3>${escapeHtml(campaign.project)} ${isComplete ? '<span style="color: var(--accent-green);">✓ Complete</span>' : ''}</h3>
+                                <div class="campaign-rewards">
+                                    ${campaign.rewardTokens ? `<span class="campaign-reward-badge tokens">${escapeHtml(campaign.rewardTokens)}</span>` : ''}
+                                    ${campaign.rewardUsd ? `<span class="campaign-reward-badge usd">$${formatNumber(campaign.rewardUsd)}</span>` : ''}
+                                </div>
+                            </div>
+                            <div class="campaign-actions">
+                                <button onclick="editCampaign('${campaign.id}')">Edit</button>
+                                <button class="delete" onclick="deleteCampaign('${campaign.id}')">Delete</button>
+                            </div>
+                        </div>
+
+                        <div class="campaign-progress">
+                            <div class="campaign-progress-header">
+                                <span>${postsMade} of ${campaign.postsNeeded} posts</span>
+                                <span>${postsLeft} left</span>
+                            </div>
+                            <div class="campaign-progress-bar">
+                                <div class="campaign-progress-fill" style="width: ${progress}%;"></div>
+                            </div>
+                        </div>
+
+                        <div class="campaign-posts-section">
+                            <div class="campaign-posts-header">
+                                <h4>Posts Made</h4>
+                            </div>
+                            ${postsMade > 0 ? `<div class="campaign-posts-list">${postsHtml}</div>` : '<p style="color: var(--text-secondary); font-size: 0.85rem;">No posts yet</p>'}
+
+                            <div class="add-post-form">
+                                <input type="url" id="post-url-${campaign.id}" placeholder="Paste post URL (e.g., https://twitter.com/...)" onkeypress="if(event.key === 'Enter') { event.preventDefault(); addPostToCampaign('${campaign.id}'); }">
+                                <button type="button" onclick="addPostToCampaign('${campaign.id}')">Add Post</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update campaign stats
+        function updateCampaignStats() {
+            let totalCampaigns = campaigns.length;
+            let totalPostsNeeded = 0;
+            let totalPostsMade = 0;
+            let totalRewardsUsd = 0;
+
+            campaigns.forEach(c => {
+                totalPostsNeeded += c.postsNeeded || 0;
+                totalPostsMade += (c.posts ? c.posts.length : 0);
+                totalRewardsUsd += c.rewardUsd || 0;
+            });
+
+            const totalPostsLeft = Math.max(0, totalPostsNeeded - totalPostsMade);
+
+            document.getElementById('total-campaigns').textContent = totalCampaigns;
+            document.getElementById('total-posts-needed').textContent = totalPostsNeeded;
+            document.getElementById('total-posts-made').textContent = totalPostsMade;
+            document.getElementById('total-posts-left').textContent = totalPostsLeft;
+            document.getElementById('total-campaign-rewards').textContent = '$' + formatNumber(totalRewardsUsd);
+        }
 
         // Toggle custom unlocks section based on frequency selection
         document.getElementById('vesting-frequency').addEventListener('change', function() {
