@@ -2823,9 +2823,15 @@
 
             <!-- Add Vesting Form -->
             <div class="card">
-                <h2 id="vesting-form-title">Add Vesting Schedule</h2>
-                <form id="vesting-form">
-                    <input type="hidden" id="vesting-edit-id">
+                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleVestingForm()">
+                    <h2 id="vesting-form-title" style="margin: 0;">Add Vesting Schedule</h2>
+                    <button type="button" id="vesting-form-toggle" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
+                        <span id="vesting-form-toggle-icon">&#9650;</span> Hide
+                    </button>
+                </div>
+                <div id="vesting-form-container" style="margin-top: 20px;">
+                    <form id="vesting-form">
+                        <input type="hidden" id="vesting-edit-id">
 
                     <!-- Section 1: Basic Info -->
                     <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
@@ -2939,12 +2945,13 @@
                         </div>
                     </div>
 
-                    <div class="form-actions" style="gap: 10px;">
-                        <button type="button" class="btn" id="vesting-preview-btn" style="background: var(--secondary);" onclick="previewVestingSchedule()">Preview Schedule</button>
-                        <button type="submit" class="btn btn-primary" id="vesting-submit-btn">Add Vesting</button>
-                        <button type="button" class="btn" id="vesting-cancel-btn" style="display:none; background: #666;" onclick="cancelVestingEdit()">Cancel</button>
-                    </div>
-                </form>
+                        <div class="form-actions" style="gap: 10px;">
+                            <button type="button" class="btn" id="vesting-preview-btn" style="background: var(--secondary);" onclick="previewVestingSchedule()">Preview Schedule</button>
+                            <button type="submit" class="btn btn-primary" id="vesting-submit-btn">Add Vesting</button>
+                            <button type="button" class="btn" id="vesting-cancel-btn" style="display:none; background: #666;" onclick="cancelVestingEdit()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <!-- Vesting List -->
@@ -5398,6 +5405,24 @@
             previewSection.style.display = 'block';
         };
 
+        // Toggle vesting form visibility
+        var vestingFormVisible = true;
+        window.toggleVestingForm = function() {
+            const container = document.getElementById('vesting-form-container');
+            const toggleBtn = document.getElementById('vesting-form-toggle');
+            const toggleIcon = document.getElementById('vesting-form-toggle-icon');
+
+            vestingFormVisible = !vestingFormVisible;
+
+            if (vestingFormVisible) {
+                container.style.display = 'block';
+                toggleBtn.innerHTML = '<span id="vesting-form-toggle-icon">&#9650;</span> Hide';
+            } else {
+                container.style.display = 'none';
+                toggleBtn.innerHTML = '<span id="vesting-form-toggle-icon">&#9660;</span> Show';
+            }
+        };
+
         // Cancel vesting edit
         window.cancelVestingEdit = function() {
             document.getElementById('vesting-edit-id').value = '';
@@ -5447,6 +5472,11 @@
             document.getElementById('vesting-form-title').textContent = 'Edit Vesting Schedule';
             document.getElementById('vesting-submit-btn').textContent = 'Update Vesting';
             document.getElementById('vesting-cancel-btn').style.display = 'inline-block';
+
+            // Expand the form if collapsed
+            if (!vestingFormVisible) {
+                toggleVestingForm();
+            }
             switchMainTab('vesting');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
