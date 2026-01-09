@@ -4372,10 +4372,13 @@
             });
         }
 
-        // Get filtered payouts based on selected month
+        // Get filtered payouts based on selected month and category
         function getFilteredPayouts() {
-            if (selectedMonth === 'all') return payouts;
-            return payouts.filter(p => p.date.substring(0, 7) === selectedMonth);
+            return payouts.filter(p => {
+                const matchesMonth = selectedMonth === 'all' || p.date.substring(0, 7) === selectedMonth;
+                const matchesCategory = selectedCategoryFilter === 'all' || p.category === selectedCategoryFilter;
+                return matchesMonth && matchesCategory;
+            });
         }
 
         // Update month tabs
@@ -4590,7 +4593,7 @@
             cryptoChart.update();
 
             // Cumulative earnings chart - running total over time
-            const allPayoutsSorted = [...payouts].sort((a, b) => a.date.localeCompare(b.date));
+            const allPayoutsSorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
             const cumulativeData = [];
             let runningTotal = 0;
             const dateLabels = [];
@@ -5843,6 +5846,7 @@
             selectedCategoryFilter = category;
             updateCategoryFilterChips();
             renderTable();
+            updateCharts();
         };
 
         // ============================================
