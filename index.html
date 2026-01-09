@@ -2895,6 +2895,7 @@
                                     <option value="quarterly">Quarterly (every 3 months)</option>
                                     <option value="weekly">Weekly</option>
                                     <option value="daily">Daily</option>
+                                    <option value="linear">Linear (Continuous - claim anytime)</option>
                                     <option value="custom">Custom Dates</option>
                                 </select>
                             </div>
@@ -5116,43 +5117,134 @@
                     let numPeriods;
                     let periodMonths;
 
-                    switch (frequency) {
-                        case 'quarterly':
-                            periodMonths = 3;
-                            numPeriods = Math.ceil(duration / 3);
-                            break;
-                        case 'weekly':
-                            periodMonths = 0.25; // ~1 week
-                            numPeriods = duration * 4; // 4 weeks per month
-                            break;
-                        case 'daily':
-                            periodMonths = 1 / 30;
-                            numPeriods = duration * 30;
-                            break;
-                        case 'monthly':
-                        default:
-                            periodMonths = 1;
-                            numPeriods = duration;
-                            break;
-                    }
+                    // Handle linear (continuous) vesting separately
+                    if (frequency === 'linear') {
+                        const startDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths);
+                        const endDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths + duration);
 
-                    const tokensPerPeriod = remainingTokens / numPeriods;
-                    const startAfterCliff = cliffMonths;
-
-                    for (let i = 1; i <= numPeriods; i++) {
-                        const monthsFromTGE = startAfterCliff + (i * periodMonths);
-                        const unlockDate = addMonths(tgeYear, tgeMonth, tgeDay, Math.round(monthsFromTGE));
-
+                        // For linear vesting, we create start and end markers
                         unlocks.push({
-                            date: formatDateISO(unlockDate),
-                            amount: tokensPerPeriod,
-                            type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            date: formatDateISO(startDate),
+                            amount: 0,
+                            type: 'Linear Start',
+                            isLinear: true,
+                            linearTotal: remainingTokens,
+                            linearEndDate: formatDateISO(endDate)
                         });
+                        unlocks.push({
+                            date: formatDateISO(endDate),
+                            amount: remainingTokens,
+                            type: 'Linear End',
+                            isLinear: true
+                        });
+                    } else {
+                        switch (frequency) {
+                            case 'quarterly':
+                                periodMonths = 3;
+                                numPeriods = Math.ceil(duration / 3);
+                                break;
+                            case 'weekly':
+                                periodMonths = 0.25; // ~1 week
+                                numPeriods = duration * 4; // 4 weeks per month
+                                break;
+                            case 'daily':
+                                periodMonths = 1 / 30;
+                                numPeriods = duration * 30;
+                                break;
+                            case 'monthly':
+                            default:
+                                periodMonths = 1;
+                                numPeriods = duration;
+                                break;
+                        }
+
+                        const tokensPerPeriod = remainingTokens / numPeriods;
+                        const startAfterCliff = cliffMonths;
+
+                        for (let i = 1; i <= numPeriods; i++) {
+                            const monthsFromTGE = startAfterCliff + (i * periodMonths);
+                            const unlockDate = addMonths(tgeYear, tgeMonth, tgeDay, Math.round(monthsFromTGE));
+
+                            unlocks.push({
+                                date: formatDateISO(unlockDate),
+                                amount: tokensPerPeriod,
+                                type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            });
+                        }
                     }
                 }
             }
 
             return unlocks.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        // Calculate linear vesting details for a vesting schedule
+        function calculateLinearVesting(vesting) {
+            if (vesting.frequency !== 'linear') return null;
+
+            const totalTokens = parseFloat(vesting.totalTokens);
+            const tgePercent = parseFloat(vesting.tgePercent) || 0;
+            const cliffMonths = parseInt(vesting.cliff) || 0;
+            const cliffPercent = parseFloat(vesting.cliffPercent) || 0;
+            const duration = parseInt(vesting.duration) || 0;
+
+            const tgeParts = vesting.tgeDate.split('-');
+            const tgeDate = new Date(parseInt(tgeParts[0]), parseInt(tgeParts[1]) - 1, parseInt(tgeParts[2]));
+
+            // Calculate start and end dates
+            const startDate = new Date(tgeDate);
+            startDate.setMonth(startDate.getMonth() + cliffMonths);
+            const endDate = new Date(startDate);
+            endDate.setMonth(endDate.getMonth() + duration);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Tokens from TGE and cliff
+            const tgeTokens = totalTokens * (tgePercent / 100);
+            const cliffTokens = totalTokens * (cliffPercent / 100);
+            const linearTokens = totalTokens * ((100 - tgePercent - cliffPercent) / 100);
+
+            // Calculate vested amount
+            let vestedFromLinear = 0;
+            let vestingStatus = 'not_started';
+            let percentComplete = 0;
+            let tokensPerDay = 0;
+
+            if (today < startDate) {
+                vestingStatus = 'not_started';
+                vestedFromLinear = 0;
+            } else if (today >= endDate) {
+                vestingStatus = 'completed';
+                vestedFromLinear = linearTokens;
+                percentComplete = 100;
+            } else {
+                vestingStatus = 'in_progress';
+                const totalDays = (endDate - startDate) / (1000 * 60 * 60 * 24);
+                const elapsedDays = (today - startDate) / (1000 * 60 * 60 * 24);
+                percentComplete = (elapsedDays / totalDays) * 100;
+                vestedFromLinear = linearTokens * (elapsedDays / totalDays);
+                tokensPerDay = linearTokens / totalDays;
+            }
+
+            // Total vested includes TGE and cliff (if past those dates)
+            let totalVested = 0;
+            if (today >= tgeDate) totalVested += tgeTokens;
+            if (today >= startDate) totalVested += cliffTokens;
+            totalVested += vestedFromLinear;
+
+            return {
+                startDate,
+                endDate,
+                linearTokens,
+                vestedFromLinear,
+                totalVested,
+                vestingStatus,
+                percentComplete,
+                tokensPerDay,
+                tokensPerHour: tokensPerDay / 24,
+                claimableNow: totalVested
+            };
         }
 
         // Vesting form submission
@@ -5380,11 +5472,21 @@
             list.innerHTML = vestings.map(v => {
                 const unlocks = calculateUnlockSchedule(v);
                 const totalTokens = parseFloat(v.totalTokens);
-                const unlockedTokens = unlocks
-                    .filter(u => new Date(u.date) <= today)
-                    .reduce((sum, u) => sum + u.amount, 0);
+                const isLinear = v.frequency === 'linear';
+                const linearInfo = isLinear ? calculateLinearVesting(v) : null;
+
+                // Calculate unlocked tokens (use linear calculation if linear vesting)
+                let unlockedTokens;
+                if (isLinear && linearInfo) {
+                    unlockedTokens = linearInfo.totalVested;
+                } else {
+                    unlockedTokens = unlocks
+                        .filter(u => new Date(u.date) <= today)
+                        .reduce((sum, u) => sum + u.amount, 0);
+                }
+
                 const progressPercent = (unlockedTokens / totalTokens * 100).toFixed(1);
-                const nextUnlock = unlocks.find(u => new Date(u.date) > today);
+                const nextUnlock = unlocks.find(u => new Date(u.date) > today && !u.isLinear);
 
                 // Get token price
                 const price = getTokenPrice(v.coingeckoId, 'usd');
@@ -5392,11 +5494,52 @@
                 const unlockedValue = price ? unlockedTokens * price : null;
                 const lockedValue = price ? (totalTokens - unlockedTokens) * price : null;
 
+                // Linear vesting specific display
+                let linearDisplay = '';
+                if (isLinear && linearInfo) {
+                    const statusColors = {
+                        'not_started': 'var(--text-secondary)',
+                        'in_progress': 'var(--accent)',
+                        'completed': 'var(--accent-green)'
+                    };
+                    const statusText = {
+                        'not_started': 'Not Started',
+                        'in_progress': 'Vesting Active',
+                        'completed': 'Fully Vested'
+                    };
+                    linearDisplay = `
+                        <div style="background: rgba(0, 217, 255, 0.1); border-radius: 8px; padding: 12px; margin-bottom: 15px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: 600; color: ${statusColors[linearInfo.vestingStatus]};">
+                                    &#9201; ${statusText[linearInfo.vestingStatus]}
+                                </span>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">
+                                    ${formatDate(linearInfo.startDate.toISOString().split('T')[0])} → ${formatDate(linearInfo.endDate.toISOString().split('T')[0])}
+                                </span>
+                            </div>
+                            ${linearInfo.vestingStatus === 'in_progress' ? `
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem;">
+                                    <div style="background: rgba(46, 213, 115, 0.15); padding: 8px; border-radius: 6px; text-align: center;">
+                                        <div style="color: var(--accent-green); font-weight: 600;">${formatNumber(linearInfo.claimableNow)} ${v.token}</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.75rem;">Claimable Now</div>
+                                        ${price ? `<div style="color: var(--accent-green); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.claimableNow * price, 'USD')}</div>` : ''}
+                                    </div>
+                                    <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; text-align: center;">
+                                        <div style="color: var(--accent); font-weight: 600;">${formatNumber(linearInfo.tokensPerDay)} ${v.token}</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.75rem;">Vesting per Day</div>
+                                        ${price ? `<div style="color: var(--accent); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD')}/day</div>` : ''}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                }
+
                 return `
                     <div class="vesting-card">
                         <div class="vesting-header">
                             <div class="vesting-info">
-                                <h3>${escapeHtml(v.project)} (${v.token})</h3>
+                                <h3>${escapeHtml(v.project)} (${v.token}) ${isLinear ? '<span style="background: var(--accent); color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-left: 5px;">LINEAR</span>' : ''}</h3>
                                 <p>Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
                                 ${price ? `<p style="color: var(--accent-green); font-size: 0.85rem; margin-top: 5px;">
                                     Price: $${price.toFixed(price < 1 ? 4 : 2)} | Value: ${formatCurrencyValue(totalValue, 'USD')}
@@ -5408,6 +5551,7 @@
                                 <button class="btn btn-danger" onclick="deleteVesting('${v.id}')">Delete</button>
                             </div>
                         </div>
+                        ${linearDisplay}
                         <div class="vesting-progress-section">
                             <div class="vesting-progress-header">
                                 <span>Progress: ${progressPercent}%</span>
@@ -5421,15 +5565,26 @@
                                 <span style="color: var(--accent-orange);">Locked: ${formatCurrencyValue(lockedValue, 'USD')}</span>
                             </div>` : ''}
                         </div>
-                        ${nextUnlock ? `
+                        ${!isLinear && nextUnlock ? `
                             <div class="countdown">
                                 Next unlock: ${formatDate(nextUnlock.date)} (${formatNumber(nextUnlock.amount)} ${v.token}${price ? ` ≈ ${formatCurrencyValue(nextUnlock.amount * price, 'USD')}` : ''})
                             </div>
-                        ` : '<div class="countdown" style="color: var(--accent-green);">Fully vested!</div>'}
+                        ` : (!isLinear ? '<div class="countdown" style="color: var(--accent-green);">Fully vested!</div>' : '')}
                         <div class="vesting-schedule">
-                            <h4>Unlock Schedule</h4>
+                            <h4>${isLinear ? 'Vesting Period' : 'Unlock Schedule'}</h4>
                             <div class="unlock-list">
-                                ${unlocks.map(u => {
+                                ${isLinear ? `
+                                    <div class="unlock-item">
+                                        <span class="unlock-date">Start: ${formatDate(linearInfo.startDate.toISOString().split('T')[0])}</span>
+                                        <span class="unlock-amount">Linear vesting begins</span>
+                                        <span class="unlock-status ${linearInfo.vestingStatus !== 'not_started' ? 'claimed' : 'pending'}">${linearInfo.vestingStatus !== 'not_started' ? 'Started' : 'Pending'}</span>
+                                    </div>
+                                    <div class="unlock-item">
+                                        <span class="unlock-date">End: ${formatDate(linearInfo.endDate.toISOString().split('T')[0])}</span>
+                                        <span class="unlock-amount">${formatNumber(linearInfo.linearTokens)} ${v.token}</span>
+                                        <span class="unlock-status ${linearInfo.vestingStatus === 'completed' ? 'claimed' : 'pending'}">${linearInfo.vestingStatus === 'completed' ? 'Complete' : 'Pending'}</span>
+                                    </div>
+                                ` : unlocks.map(u => {
                                     const isUnlocked = new Date(u.date) <= today;
                                     const isNext = nextUnlock && u.date === nextUnlock.date;
                                     return `
@@ -5456,11 +5611,19 @@
             let unlockedPortfolioValue = 0;
 
             vestings.forEach(v => {
-                const unlocks = calculateUnlockSchedule(v);
                 const vTotalTokens = parseFloat(v.totalTokens);
-                const vUnlockedTokens = unlocks
-                    .filter(u => new Date(u.date) <= today)
-                    .reduce((sum, u) => sum + u.amount, 0);
+                let vUnlockedTokens;
+
+                // Use linear calculation for linear vesting
+                if (v.frequency === 'linear') {
+                    const linearInfo = calculateLinearVesting(v);
+                    vUnlockedTokens = linearInfo ? linearInfo.totalVested : 0;
+                } else {
+                    const unlocks = calculateUnlockSchedule(v);
+                    vUnlockedTokens = unlocks
+                        .filter(u => new Date(u.date) <= today)
+                        .reduce((sum, u) => sum + u.amount, 0);
+                }
 
                 totalTokens += vTotalTokens;
                 unlockedTokens += vUnlockedTokens;
