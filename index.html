@@ -4511,9 +4511,11 @@
                     <td>${formatDate(p.date)}</td>
                     <td>${escapeHtml(p.company)}</td>
                     <td>${p.amount}</td>
-                    <td style="display: flex; align-items: center; gap: 6px;">
-                        ${tokenImage ? `<img src="${tokenImage}" alt="${p.crypto}" style="width: 20px; height: 20px; border-radius: 50%;">` : ''}
-                        ${p.crypto}
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            ${tokenImage ? `<img src="${tokenImage}" alt="${p.crypto}" style="width: 20px; height: 20px; border-radius: 50%;">` : ''}
+                            <span>${p.crypto}</span>
+                        </div>
                     </td>
                     <td>${p.category ? `<span class="category-badge ${categoryClass}">${p.category}</span>` : '-'}</td>
                     <td>${escapeHtml(p.chain) || '-'}</td>
