@@ -5240,10 +5240,9 @@
                             <div class="vesting-info">
                                 <h3>${escapeHtml(v.project)} (${v.token})</h3>
                                 <p>Total: ${formatNumber(totalTokens)} ${v.token} | TGE: ${formatDate(v.tgeDate)}</p>
-                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" style="color: var(--accent); font-size: 0.85rem; display: inline-flex; align-items: center; gap: 5px; margin-top: 5px;">&#128279; Visit Claim Page</a>` : ''}
                             </div>
                             <div class="vesting-actions">
-                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none;">Claim</a>` : ''}
+                                ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none;">Visit Claim Page</a>` : ''}
                                 <button class="btn btn-edit" onclick="editVesting('${v.id}')">Edit</button>
                                 <button class="btn btn-danger" onclick="deleteVesting('${v.id}')">Delete</button>
                             </div>
