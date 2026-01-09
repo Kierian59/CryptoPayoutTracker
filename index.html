@@ -5751,8 +5751,8 @@
             document.getElementById('unlocked-tokens').textContent = formatNumber(unlockedTokens);
             document.getElementById('locked-tokens').textContent = formatNumber(totalTokens - unlockedTokens);
             document.getElementById('active-vestings').textContent = vestings.length;
-            document.getElementById('portfolio-value').textContent = formatCurrencyValue(totalPortfolioValue, 'USD');
-            document.getElementById('unlocked-value').textContent = formatCurrencyValue(unlockedPortfolioValue, 'USD');
+            document.getElementById('portfolio-value').textContent = formatCurrencyValue(totalPortfolioValue, 'USD', false);
+            document.getElementById('unlocked-value').textContent = formatCurrencyValue(unlockedPortfolioValue, 'USD', false);
 
             // Update last updated time
             if (pricesLastUpdated) {
