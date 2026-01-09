@@ -3047,34 +3047,6 @@
                     </div>
                 </div>
 
-                <!-- Data Management -->
-                <div class="settings-section">
-                    <h3>&#128190; Data Management</h3>
-                    <div class="setting-item">
-                        <div class="setting-label">
-                            <span>Export All Data</span>
-                            <small>Download your payouts and vesting data as JSON</small>
-                        </div>
-                        <div class="setting-control">
-                            <button class="btn btn-secondary" onclick="exportAllData()">Export</button>
-                        </div>
-                    </div>
-                    <div class="setting-item">
-                        <div class="setting-label">
-                            <span>Import Data</span>
-                            <small>Restore data from a JSON backup file</small>
-                        </div>
-                        <div class="setting-control">
-                            <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
-                            <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()">Import</button>
-                        </div>
-                    </div>
-                    <div class="settings-actions">
-                        <button class="btn btn-secondary" onclick="resetTour()">Restart Tour</button>
-                        <button class="btn btn-danger" onclick="showClearDataConfirm()">Clear All Data</button>
-                    </div>
-                </div>
-
                 <!-- About -->
                 <div class="settings-section">
                     <h3>&#9432; About</h3>
