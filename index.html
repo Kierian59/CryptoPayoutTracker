@@ -2583,6 +2583,10 @@
                         <input type="text" id="crypto" required placeholder="e.g., BTC, ETH, SOL...">
                     </div>
                     <div class="form-group">
+                        <label for="coingecko-id">CoinGecko ID (optional)</label>
+                        <input type="text" id="coingecko-id" placeholder="e.g., bitcoin, ethereum">
+                    </div>
+                    <div class="form-group">
                         <label for="usd-sold">Amount Sold (USD)</label>
                         <input type="number" id="usd-sold" step="any" placeholder="0.00" oninput="updateEurPreview()">
                         <div class="eur-preview" id="eur-preview"></div>
@@ -4137,6 +4141,7 @@
             payouts = (result.data || []).map(p => ({ ...p, amount: parseFloat(p.amount) || 0, usd_sold: parseFloat(p.usd_sold) || 0, eur_value: parseFloat(p.eur_value) || 0 }));
             updateMonthTabs();
             renderAll();
+            fetchPayoutTokenImages(); // Fetch token images for payouts with CoinGecko IDs
         }
 
         async function savePayout(payout) {
@@ -4148,6 +4153,7 @@
                     date: payout.date,
                     amount: payout.amount,
                     crypto: payout.crypto,
+                    coingecko_id: payout.coingecko_id || null,
                     usd_sold: payout.usd_sold,
                     eur_value: payout.eur_value,
                     chain: payout.chain,
@@ -4173,6 +4179,7 @@
                     date: payout.date,
                     amount: payout.amount,
                     crypto: payout.crypto,
+                    coingecko_id: payout.coingecko_id || null,
                     usd_sold: payout.usd_sold,
                     eur_value: payout.eur_value,
                     chain: payout.chain,
@@ -4428,6 +4435,7 @@
                 date: document.getElementById('date').value,
                 amount: parseFloat(document.getElementById('amount').value),
                 crypto: document.getElementById('crypto').value.toUpperCase(),
+                coingecko_id: document.getElementById('coingecko-id').value.trim().toLowerCase(),
                 usd_sold: usdValue,
                 eur_value: eurValue,
                 chain: document.getElementById('chain').value.trim(),
@@ -4453,6 +4461,7 @@
 
             updateMonthTabs();
             renderAll();
+            fetchPayoutTokenImages(); // Fetch new token image if added
             e.target.reset();
             document.getElementById('date').valueAsDate = new Date();
         });
@@ -4496,12 +4505,16 @@
             noData.style.display = 'none';
             tbody.innerHTML = filtered.map(p => {
                 const categoryClass = (p.category || '').toLowerCase().replace(' ', '-');
+                const tokenImage = p.coingecko_id ? getTokenImage(p.coingecko_id) : null;
                 return `
                 <tr>
                     <td>${formatDate(p.date)}</td>
                     <td>${escapeHtml(p.company)}</td>
                     <td>${p.amount}</td>
-                    <td>${p.crypto}</td>
+                    <td style="display: flex; align-items: center; gap: 6px;">
+                        ${tokenImage ? `<img src="${tokenImage}" alt="${p.crypto}" style="width: 20px; height: 20px; border-radius: 50%;">` : ''}
+                        ${p.crypto}
+                    </td>
                     <td>${p.category ? `<span class="category-badge ${categoryClass}">${p.category}</span>` : '-'}</td>
                     <td>${escapeHtml(p.chain) || '-'}</td>
                     <td class="usd-value">${p.usd_sold ? '$' + formatUSD(p.usd_sold) : '-'}</td>
@@ -4678,6 +4691,7 @@
             document.getElementById('date').value = payout.date;
             document.getElementById('amount').value = payout.amount;
             document.getElementById('crypto').value = payout.crypto;
+            document.getElementById('coingecko-id').value = payout.coingecko_id || '';
             document.getElementById('usd-sold').value = payout.usd_sold || '';
             document.getElementById('chain').value = payout.chain || '';
             document.getElementById('wallet').value = payout.wallet || '';
@@ -4974,6 +4988,47 @@
         function getTokenImage(coingeckoId) {
             if (!coingeckoId || !tokenImages[coingeckoId]) return null;
             return tokenImages[coingeckoId];
+        }
+
+        // Fetch token images for payouts from CoinGecko
+        async function fetchPayoutTokenImages() {
+            const coingeckoIds = payouts
+                .map(p => p.coingecko_id)
+                .filter(id => id && id.trim() !== '');
+
+            if (coingeckoIds.length === 0) {
+                return;
+            }
+
+            // Filter out IDs we already have
+            const uniqueIds = [...new Set(coingeckoIds)].filter(id => !tokenImages[id]);
+
+            if (uniqueIds.length === 0) {
+                renderTable(); // Re-render with existing images
+                return;
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${uniqueIds.join(',')}&sparkline=false`
+                );
+
+                if (!response.ok) {
+                    console.error('CoinGecko API error:', response.status);
+                    return;
+                }
+
+                const data = await response.json();
+
+                data.forEach(coin => {
+                    tokenImages[coin.id] = coin.image;
+                });
+
+                console.log('Payout token images updated:', tokenImages);
+                renderTable();
+            } catch (e) {
+                console.error('Error fetching payout token images:', e);
+            }
         }
 
         // Format currency value (abbreviated by default, set abbreviate=false for full numbers)
