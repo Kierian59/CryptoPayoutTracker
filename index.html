@@ -2688,6 +2688,12 @@
                     <div class="monthly-totals-list" id="monthly-totals-list">
                     </div>
                 </div>
+                <div class="chart-container" style="grid-column: 1 / -1;">
+                    <h3>Cumulative Earnings (USD)</h3>
+                    <div class="chart-wrapper" style="height: 300px;">
+                        <canvas id="cumulativeChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
         </div>
@@ -3891,7 +3897,7 @@
         var selectedMonth = 'all';
 
         // Chart instances
-        var timelineChart, companyChart, cryptoChart;
+        var timelineChart, companyChart, cryptoChart, cumulativeChart;
 
         // Currency settings
         var selectedCurrency = 'USD';
@@ -4282,6 +4288,42 @@
                     }
                 }
             });
+
+            // Cumulative earnings chart
+            cumulativeChart = new Chart(document.getElementById('cumulativeChart'), {
+                type: 'line',
+                data: { labels: [], datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Total: ' + getCurrencySymbol() + formatUSD(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#aaa' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#aaa',
+                                callback: function(value) {
+                                    return getCurrencySymbol() + formatUSD(value);
+                                }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        }
+                    }
+                }
+            });
         }
 
         // Get filtered payouts based on selected month
@@ -4501,6 +4543,37 @@
             }];
             cryptoChart.update();
 
+            // Cumulative earnings chart - running total over time
+            const allPayoutsSorted = [...payouts].sort((a, b) => a.date.localeCompare(b.date));
+            const cumulativeData = [];
+            let runningTotal = 0;
+            const dateLabels = [];
+
+            allPayoutsSorted.forEach(p => {
+                runningTotal += (p.usd_sold || 0);
+                // Group by date to avoid duplicate points
+                const existingIndex = dateLabels.indexOf(p.date);
+                if (existingIndex >= 0) {
+                    cumulativeData[existingIndex] = runningTotal;
+                } else {
+                    dateLabels.push(p.date);
+                    cumulativeData.push(runningTotal);
+                }
+            });
+
+            cumulativeChart.data.labels = dateLabels.map(d => formatDate(d));
+            cumulativeChart.data.datasets = [{
+                data: cumulativeData.map(v => convertCurrency(v)),
+                borderColor: '#00d9ff',
+                backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#00d9ff',
+                pointBorderColor: '#00d9ff',
+                pointRadius: 3
+            }];
+            cumulativeChart.update();
+
             // Monthly totals list - values by month (shows all months)
             const monthlyData = {};
             payouts.forEach(p => {
@@ -4532,6 +4605,7 @@
             document.querySelector('#companyChart').closest('.chart-container').querySelector('h3').textContent = 'Payouts by Project (' + selectedCurrency + ')';
             document.querySelector('#cryptoChart').closest('.chart-container').querySelector('h3').textContent = 'Payouts by Cryptocurrency (' + selectedCurrency + ')';
             document.querySelector('#monthly-totals-list').closest('.chart-container').querySelector('h3').textContent = 'Monthly Totals (' + selectedCurrency + ')';
+            document.querySelector('#cumulativeChart').closest('.chart-container').querySelector('h3').textContent = 'Cumulative Earnings (' + selectedCurrency + ')';
         }
 
         // Sort table
