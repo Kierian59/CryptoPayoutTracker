@@ -590,6 +590,10 @@
             transition: width 0.5s ease;
         }
 
+        .goal-progress-bar.yearly {
+            background: linear-gradient(90deg, #f39c12, #f1c40f);
+        }
+
         /* Heat Map Calendar */
         .heatmap-container {
             overflow-x: auto;
@@ -2885,6 +2889,24 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Yearly Goal Tracking -->
+            <div class="card">
+                <h2>Yearly Goal <span id="yearly-goal-year" style="font-size: 0.9rem; color: var(--text-secondary);"></span></h2>
+                <div class="goal-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                    <div class="goal-header">
+                        <span class="goal-title">Earnings Goal</span>
+                        <span class="goal-value" id="yearly-goal-text">$0 / $100,000</span>
+                    </div>
+                    <div class="goal-progress">
+                        <div class="goal-progress-bar yearly" id="yearly-goal-bar" style="width: 0%"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                        <span id="yearly-goal-percent">0% complete</span>
+                        <span id="yearly-goal-remaining">$100,000 remaining</span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Add Payout Tab -->
@@ -3527,6 +3549,15 @@
                             <input type="number" id="setting-payouts-goal" min="0" step="1" value="50" onchange="saveSetting('payoutsGoal', this.value)">
                         </div>
                     </div>
+                    <div class="setting-item">
+                        <div class="setting-label">
+                            <span>Yearly Earnings Goal</span>
+                            <small>Target earnings for the year (USD)</small>
+                        </div>
+                        <div class="setting-control">
+                            <input type="number" id="setting-yearly-goal" min="0" step="1000" value="100000" onchange="saveSetting('yearlyGoal', this.value)">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Notifications Settings -->
@@ -3652,6 +3683,7 @@
             numberFormat: '1,234.56',
             revenueGoal: 10000,
             payoutsGoal: 50,
+            yearlyGoal: 100000,
             unlockAlerts: 1
         };
 
@@ -3675,6 +3707,7 @@
             const numberFormatEl = document.getElementById('setting-numberformat');
             const revenueGoalEl = document.getElementById('setting-revenue-goal');
             const payoutsGoalEl = document.getElementById('setting-payouts-goal');
+            const yearlyGoalEl = document.getElementById('setting-yearly-goal');
             const unlockAlertsEl = document.getElementById('setting-unlock-alerts');
 
             if (currencyEl) currencyEl.value = appSettings.currency;
@@ -3682,12 +3715,13 @@
             if (numberFormatEl) numberFormatEl.value = appSettings.numberFormat;
             if (revenueGoalEl) revenueGoalEl.value = appSettings.revenueGoal;
             if (payoutsGoalEl) payoutsGoalEl.value = appSettings.payoutsGoal;
+            if (yearlyGoalEl) yearlyGoalEl.value = appSettings.yearlyGoal;
             if (unlockAlertsEl) unlockAlertsEl.value = appSettings.unlockAlerts;
         }
 
         // Save individual setting
         window.saveSetting = function(key, value) {
-            if (key === 'revenueGoal' || key === 'payoutsGoal' || key === 'unlockAlerts') {
+            if (key === 'revenueGoal' || key === 'payoutsGoal' || key === 'yearlyGoal' || key === 'unlockAlerts') {
                 value = parseInt(value) || 0;
             }
             appSettings[key] = value;
@@ -4170,6 +4204,9 @@
         function updateGoals() {
             const now = new Date();
             const thisMonth = now.toISOString().substring(0, 7);
+            const thisYear = now.getFullYear().toString();
+
+            // Monthly goals
             const monthPayouts = payouts.filter(p => p.date.startsWith(thisMonth));
             const monthRevenue = monthPayouts.reduce((s, p) => s + (p.usd_sold || 0), 0);
 
@@ -4183,6 +4220,23 @@
 
             document.getElementById('payouts-goal-text').textContent = monthPayouts.length + ' / ' + payoutsGoal;
             document.getElementById('payouts-goal-bar').style.width = Math.min(100, (monthPayouts.length / payoutsGoal) * 100) + '%';
+
+            // Yearly goal
+            const yearlyGoal = appSettings.yearlyGoal || 100000;
+            const yearPayouts = payouts.filter(p => p.date.startsWith(thisYear));
+            const yearRevenue = yearPayouts.reduce((s, p) => s + (p.usd_sold || 0), 0);
+
+            const displayYearRevenue = convertCurrency(yearRevenue);
+            const displayYearlyGoal = convertCurrency(yearlyGoal);
+            const yearlyPercent = Math.min(100, (yearRevenue / yearlyGoal) * 100);
+            const yearlyRemaining = Math.max(0, yearlyGoal - yearRevenue);
+            const displayYearlyRemaining = convertCurrency(yearlyRemaining);
+
+            document.getElementById('yearly-goal-year').textContent = '(' + thisYear + ')';
+            document.getElementById('yearly-goal-text').textContent = getCurrencySymbol() + formatUSD(displayYearRevenue) + ' / ' + getCurrencySymbol() + formatUSD(displayYearlyGoal);
+            document.getElementById('yearly-goal-bar').style.width = yearlyPercent + '%';
+            document.getElementById('yearly-goal-percent').textContent = yearlyPercent.toFixed(1) + '% complete';
+            document.getElementById('yearly-goal-remaining').textContent = getCurrencySymbol() + formatUSD(displayYearlyRemaining) + ' remaining';
         }
 
         // Quick Filter Chips
