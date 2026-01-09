@@ -5369,16 +5369,12 @@
         // Render vestings
         function renderVestings() {
             const list = document.getElementById('vesting-list');
-            const noData = document.getElementById('no-vesting');
 
             if (vestings.length === 0) {
-                noData.style.display = 'block';
-                list.innerHTML = '';
-                list.appendChild(noData);
+                list.innerHTML = '<div class="no-data">No vesting schedules yet. Add your first one above!</div>';
                 return;
             }
 
-            noData.style.display = 'none';
             const today = new Date();
 
             list.innerHTML = vestings.map(v => {
