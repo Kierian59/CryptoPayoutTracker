@@ -4976,16 +4976,18 @@
             return tokenImages[coingeckoId];
         }
 
-        // Format currency value
-        function formatCurrencyValue(value, currency = 'USD') {
+        // Format currency value (abbreviated by default, set abbreviate=false for full numbers)
+        function formatCurrencyValue(value, currency = 'USD', abbreviate = true) {
             if (value === null || value === undefined) return 'N/A';
             const symbol = currency === 'EUR' ? '€' : '$';
-            if (value >= 1000000) {
-                return symbol + (value / 1000000).toFixed(2) + 'M';
-            } else if (value >= 1000) {
-                return symbol + (value / 1000).toFixed(2) + 'K';
+            if (abbreviate) {
+                if (value >= 1000000) {
+                    return symbol + (value / 1000000).toFixed(2) + 'M';
+                } else if (value >= 1000) {
+                    return symbol + (value / 1000).toFixed(2) + 'K';
+                }
             }
-            return symbol + value.toFixed(2);
+            return symbol + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         // Migrate vestings from localStorage to Supabase
@@ -5603,12 +5605,12 @@
                                     <div style="background: rgba(46, 213, 115, 0.15); padding: 8px; border-radius: 6px; text-align: center;">
                                         <div style="color: var(--accent-green); font-weight: 600;">${formatNumber(linearInfo.claimableNow)} ${v.token}</div>
                                         <div style="color: var(--text-secondary); font-size: 0.75rem;">Claimable Now</div>
-                                        ${price ? `<div style="color: var(--accent-green); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.claimableNow * price, 'USD')}</div>` : ''}
+                                        ${price ? `<div style="color: var(--accent-green); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.claimableNow * price, 'USD', false)}</div>` : ''}
                                     </div>
                                     <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; text-align: center;">
                                         <div style="color: var(--accent); font-weight: 600;">${formatNumber(linearInfo.tokensPerDay)} ${v.token}</div>
                                         <div style="color: var(--text-secondary); font-size: 0.75rem;">Vesting per Day</div>
-                                        ${price ? `<div style="color: var(--accent); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD')}/day</div>` : ''}
+                                        ${price ? `<div style="color: var(--accent); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD', false)}/day</div>` : ''}
                                     </div>
                                 </div>
                             ` : ''}
@@ -5627,7 +5629,7 @@
                                     <span style="color: var(--text-secondary); font-size: 0.8rem;">${v.token}</span>
                                     ${isLinear ? '<span style="background: var(--accent); color: #000; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">LINEAR</span>' : ''}
                                 </div>
-                                ${price ? `<div style="color: var(--accent-green); font-size: 0.8rem; font-weight: 600;">${formatCurrencyValue(totalValue, 'USD')}</div>` : ''}
+                                ${price ? `<div style="color: var(--accent-green); font-size: 0.8rem; font-weight: 600;">${formatCurrencyValue(totalValue, 'USD', false)}</div>` : ''}
                             </div>
                         </div>
 
@@ -5645,11 +5647,11 @@
                         <!-- Key Stats -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
                             <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(unlockedValue, 'USD') : formatNumber(unlockedTokens)}</div>
+                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(unlockedValue, 'USD', false) : formatNumber(unlockedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Unlocked</div>
                             </div>
                             <div style="background: rgba(255, 159, 67, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD') : formatNumber(totalTokens - unlockedTokens)}</div>
+                                <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD', false) : formatNumber(totalTokens - unlockedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Locked</div>
                             </div>
                         </div>
@@ -5657,7 +5659,7 @@
                         ${isLinear && linearInfo && linearInfo.vestingStatus === 'in_progress' ? `
                             <div style="background: rgba(0, 217, 255, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center; font-size: 0.75rem;">
                                 <span style="color: var(--accent);">&#9201; ${formatNumber(linearInfo.tokensPerDay)} ${v.token}/day</span>
-                                ${price ? `<span style="color: var(--text-secondary);"> (${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD')}/day)</span>` : ''}
+                                ${price ? `<span style="color: var(--text-secondary);"> (${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD', false)}/day)</span>` : ''}
                             </div>
                         ` : ''}
 
