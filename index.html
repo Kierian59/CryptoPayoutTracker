@@ -1796,6 +1796,18 @@
             color: var(--accent-orange);
         }
 
+        .unlock-item.is-claimed {
+            background: rgba(46, 213, 115, 0.05);
+            border-left: 2px solid var(--accent-green);
+            padding-left: 8px;
+        }
+
+        .unlock-item.unlocked:not(.is-claimed) {
+            background: rgba(0, 217, 255, 0.05);
+            border-left: 2px solid var(--accent);
+            padding-left: 8px;
+        }
+
         .vesting-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -5526,6 +5538,7 @@
                             customUnlocks: customUnlocks,
                             website: v.website || '',
                             coingeckoId: v.coingecko_id || '',
+                            claimedUnlocks: v.claimed_unlocks || [],
                             createdAt: v.created_at
                         };
                     });
@@ -5723,6 +5736,7 @@
                     custom_unlocks: vesting.customUnlocks || [],
                     website: vesting.website || '',
                     coingecko_id: vesting.coingeckoId || '',
+                    claimed_unlocks: vesting.claimedUnlocks || [],
                     created_at: vesting.createdAt || new Date().toISOString()
                 });
 
@@ -5733,6 +5747,85 @@
             }
             return true;
         }
+
+        // Claim an unlock for a vesting
+        window.claimUnlock = async function(vestingId, unlockDate) {
+            const vesting = vestings.find(v => v.id === vestingId);
+            if (!vesting) return;
+
+            // Initialize claimedUnlocks if not exists
+            if (!vesting.claimedUnlocks) {
+                vesting.claimedUnlocks = [];
+            }
+
+            // Add the date if not already claimed
+            if (!vesting.claimedUnlocks.includes(unlockDate)) {
+                vesting.claimedUnlocks.push(unlockDate);
+
+                // Save to database
+                const saved = await saveVestingToSupabase(vesting);
+                if (saved) {
+                    showToast('Unlock marked as claimed!');
+                    renderVestings();
+                    updateVestingStats();
+                }
+            }
+        };
+
+        // Unclaim an unlock (in case of mistake)
+        window.unclaimUnlock = async function(vestingId, unlockDate) {
+            const vesting = vestings.find(v => v.id === vestingId);
+            if (!vesting || !vesting.claimedUnlocks) return;
+
+            const index = vesting.claimedUnlocks.indexOf(unlockDate);
+            if (index > -1) {
+                vesting.claimedUnlocks.splice(index, 1);
+
+                // Save to database
+                const saved = await saveVestingToSupabase(vesting);
+                if (saved) {
+                    showToast('Unlock unmarked');
+                    renderVestings();
+                    updateVestingStats();
+                }
+            }
+        };
+
+        // Claim all unlocked tokens for a vesting
+        window.claimAllUnlocks = async function(vestingId) {
+            const vesting = vestings.find(v => v.id === vestingId);
+            if (!vesting) return;
+
+            const today = new Date();
+            const unlocks = calculateUnlockSchedule(vesting);
+            const unlockedDates = unlocks
+                .filter(u => new Date(u.date) <= today)
+                .map(u => u.date);
+
+            if (!vesting.claimedUnlocks) {
+                vesting.claimedUnlocks = [];
+            }
+
+            // Add all unlocked dates that aren't already claimed
+            let newClaims = 0;
+            unlockedDates.forEach(date => {
+                if (!vesting.claimedUnlocks.includes(date)) {
+                    vesting.claimedUnlocks.push(date);
+                    newClaims++;
+                }
+            });
+
+            if (newClaims > 0) {
+                const saved = await saveVestingToSupabase(vesting);
+                if (saved) {
+                    showToast(`${newClaims} unlock(s) marked as claimed!`);
+                    renderVestings();
+                    updateVestingStats();
+                }
+            } else {
+                showToast('All unlocks already claimed');
+            }
+        };
 
         // Delete vesting from Supabase
         async function deleteVestingFromSupabase(id) {
@@ -6720,6 +6813,14 @@
                         .reduce((sum, u) => sum + u.amount, 0);
                 }
 
+                // Calculate claimed tokens
+                const claimedUnlocks = v.claimedUnlocks || [];
+                const claimedTokens = isLinear ? 0 : unlocks
+                    .filter(u => claimedUnlocks.includes(u.date))
+                    .reduce((sum, u) => sum + u.amount, 0);
+                const unclaimedTokens = unlockedTokens - claimedTokens;
+                const hasUnclaimedUnlocks = !isLinear && unclaimedTokens > 0;
+
                 const progressPercent = (unlockedTokens / totalTokens * 100).toFixed(1);
                 const nextUnlock = unlocks.find(u => new Date(u.date) > today && !u.isLinear);
 
@@ -6729,6 +6830,8 @@
                 const totalValue = price ? totalTokens * price : null;
                 const unlockedValue = price ? unlockedTokens * price : null;
                 const lockedValue = price ? (totalTokens - unlockedTokens) * price : null;
+                const claimedValue = price ? claimedTokens * price : null;
+                const unclaimedValue = price ? unclaimedTokens * price : null;
 
                 // Linear vesting specific display
                 let linearDisplay = '';
@@ -6798,11 +6901,22 @@
                         </div>
 
                         <!-- Key Stats -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
+                        <div style="display: grid; grid-template-columns: ${isLinear ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
+                            ${!isLinear ? `
+                            <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
+                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(claimedValue, 'USD', false) : formatNumber(claimedTokens)}</div>
+                                <div style="color: var(--text-secondary);">Claimed</div>
+                            </div>
+                            <div style="background: rgba(0, 217, 255, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
+                                <div style="color: var(--accent); font-weight: 600;">${price ? formatCurrencyValue(unclaimedValue, 'USD', false) : formatNumber(unclaimedTokens)}</div>
+                                <div style="color: var(--text-secondary);">Unclaimed</div>
+                            </div>
+                            ` : `
                             <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
                                 <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(unlockedValue, 'USD', false) : formatNumber(unlockedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Unlocked</div>
                             </div>
+                            `}
                             <div style="background: rgba(255, 159, 67, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
                                 <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD', false) : formatNumber(totalTokens - unlockedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Locked</div>
@@ -6826,7 +6940,8 @@
 
                         <!-- Action Buttons -->
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-                            ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="flex: 1; text-align: center; padding: 6px 8px; font-size: 0.75rem; text-decoration: none;">Claim</a>` : ''}
+                            ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="flex: 1; text-align: center; padding: 6px 8px; font-size: 0.75rem; text-decoration: none;">Go to Claim Page</a>` : ''}
+                            ${hasUnclaimedUnlocks ? `<button class="btn" style="background: var(--accent-green); color: #000; padding: 6px 8px; font-size: 0.75rem;" onclick="claimAllUnlocks('${v.id}')">Mark All Claimed</button>` : ''}
                             <button class="btn" style="background: var(--secondary); color: var(--text-primary); padding: 6px 8px; font-size: 0.75rem;" onclick="toggleVestingDetails('${v.id}')">Details</button>
                             <button class="btn btn-edit" style="padding: 6px 8px; font-size: 0.75rem;" onclick="editVesting('${v.id}')">Edit</button>
                             <button class="btn btn-danger" style="padding: 6px 8px; font-size: 0.75rem;" onclick="deleteVesting('${v.id}')">&#128465;</button>
@@ -6850,12 +6965,16 @@
                                     </div>
                                 ` : unlocks.slice(0, 10).map(u => {
                                     const isUnlocked = new Date(u.date) <= today;
+                                    const isClaimed = v.claimedUnlocks && v.claimedUnlocks.includes(u.date);
                                     const isNext = nextUnlock && u.date === nextUnlock.date;
                                     return `
-                                        <div class="unlock-item ${isUnlocked ? 'unlocked' : ''} ${isNext ? 'next' : ''}" style="font-size: 0.75rem;">
-                                            <span class="unlock-date">${formatDate(u.date)}</span>
+                                        <div class="unlock-item ${isUnlocked ? 'unlocked' : ''} ${isNext ? 'next' : ''} ${isClaimed ? 'is-claimed' : ''}" style="font-size: 0.75rem; display: flex; align-items: center; gap: 6px;">
+                                            <span class="unlock-date" style="flex: 1;">${formatDate(u.date)}</span>
                                             <span class="unlock-amount">${formatNumber(u.amount)}</span>
-                                            <span class="unlock-status ${isUnlocked ? 'claimed' : 'pending'}">${isUnlocked ? '&#10003;' : '&#9679;'}</span>
+                                            ${isUnlocked ? (isClaimed
+                                                ? `<span class="unlock-status claimed" style="cursor: pointer;" onclick="unclaimUnlock('${v.id}', '${u.date}')" title="Click to unclaim">&#10003; Claimed</span>`
+                                                : `<button class="btn" style="padding: 2px 6px; font-size: 0.65rem; background: var(--accent-green); color: #000;" onclick="claimUnlock('${v.id}', '${u.date}')">Claim</button>`
+                                            ) : `<span class="unlock-status pending">&#9679;</span>`}
                                         </div>
                                     `;
                                 }).join('') + (unlocks.length > 10 ? `<div style="text-align: center; font-size: 0.7rem; color: var(--text-secondary); padding: 5px;">+${unlocks.length - 10} more unlocks</div>` : '')}
