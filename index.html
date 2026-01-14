@@ -6432,7 +6432,7 @@
                 unlocks.push({
                     date: formatDateISO(startDate),
                     amount: 0,
-                    type: hasCliffStartDate ? 'Vesting Start' : 'Linear Start',
+                    type: hasCliffStartDate ? 'Cliff End / Linear Start' : 'Linear Start',
                     isLinear: true,
                     linearTotal: totalTokens,
                     linearEndDate: vesting.endDate,
@@ -6470,7 +6470,7 @@
                         unlocks.push({
                             date: formatDateISO(currentDate),
                             amount: tokensPerPeriod,
-                            type: isFirstUnlock && hasCliffStartDate ? 'First Unlock' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            type: isFirstUnlock && hasCliffStartDate ? 'Cliff End' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
                         });
                         periodIndex++;
                         currentDate = addMonthsToDate(effectiveStartDate, periodIndex * monthIncrement);
@@ -6513,7 +6513,7 @@
                     unlocks.push({
                         date: formatDateISO(unlockDate),
                         amount: tokensPerPeriod,
-                        type: isFirstUnlock && hasCliffStartDate ? 'First Unlock' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                        type: isFirstUnlock && hasCliffStartDate ? 'Cliff End' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
                     });
                 }
             }
