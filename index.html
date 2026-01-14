@@ -3340,49 +3340,27 @@
                                 <input type="number" id="vesting-total" step="any" required placeholder="e.g., 10000">
                             </div>
                             <div class="form-group">
-                                <label for="vesting-tge">TGE Date (Start Date)</label>
-                                <input type="date" id="vesting-tge" required>
+                                <label for="vesting-claimed">Tokens Already Claimed</label>
+                                <input type="number" id="vesting-claimed" step="any" placeholder="0" min="0" value="0">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">For projects already in progress</small>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section 2: TGE Unlock -->
-                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">TGE Unlock (Initial Release)</h4>
-                        <div class="vesting-form">
-                            <div class="form-group">
-                                <label for="vesting-tge-percent">TGE Unlock %</label>
-                                <input type="number" id="vesting-tge-percent" step="any" placeholder="0" min="0" max="100" value="0">
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">% of tokens released at TGE (day 1)</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Section 3: Cliff -->
-                    <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Cliff Period</h4>
-                        <div class="vesting-form">
-                            <div class="form-group">
-                                <label for="vesting-cliff">Cliff Duration (months)</label>
-                                <input type="number" id="vesting-cliff" placeholder="e.g., 12" min="0" value="0">
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">Waiting period before any vesting starts</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="vesting-cliff-percent">Cliff Unlock %</label>
-                                <input type="number" id="vesting-cliff-percent" step="any" placeholder="e.g., 33.33" min="0" max="100" value="0">
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">% released at end of cliff</small>
-                            </div>
-                        </div>
-                    </div>
 
                     <!-- Section 4: Linear Vesting -->
                     <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Linear Vesting (After Cliff)</h4>
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Linear Vesting Schedule</h4>
                         <div class="vesting-form">
                             <div class="form-group">
-                                <label for="vesting-duration">Vesting Duration (months)</label>
-                                <input type="number" id="vesting-duration" placeholder="e.g., 24" min="0">
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">How long remaining tokens vest after cliff</small>
+                                <label for="vesting-start-date">Start Date (First Unlock)</label>
+                                <input type="date" id="vesting-start-date" required>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When vesting begins (after any cliff)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-end-date">End Date (Final Unlock)</label>
+                                <input type="date" id="vesting-end-date" required>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When vesting completes</small>
                             </div>
                             <div class="form-group">
                                 <label for="vesting-frequency">Unlock Frequency</label>
@@ -5499,28 +5477,22 @@
                     }
                 } else {
                     vestings = (result.data || []).map(v => {
-                        // Ensure tge_date is in YYYY-MM-DD string format (handle timezone correctly)
-                        let tgeDate = v.tge_date;
-                        if (tgeDate) {
-                            // If it's already YYYY-MM-DD format, use it directly
-                            if (/^\d{4}-\d{2}-\d{2}$/.test(tgeDate)) {
-                                // Already correct format
-                            } else {
-                                // Parse and format in local timezone to avoid date shift
-                                const d = new Date(tgeDate + 'T12:00:00'); // Add noon time to avoid timezone issues
-                                tgeDate = d.getFullYear() + '-' +
-                                    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-                                    String(d.getDate()).padStart(2, '0');
-                            }
+                        // Helper to ensure date is in YYYY-MM-DD format
+                        function formatDateField(dateVal) {
+                            if (!dateVal) return '';
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(dateVal)) return dateVal;
+                            const d = new Date(dateVal + 'T12:00:00');
+                            return d.getFullYear() + '-' +
+                                String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                                String(d.getDate()).padStart(2, '0');
                         }
 
-                        // Process custom unlocks dates too
+                        // Process custom unlocks dates
                         let customUnlocks = v.custom_unlocks || [];
                         if (customUnlocks && Array.isArray(customUnlocks)) {
                             customUnlocks = customUnlocks.map(u => ({
                                 ...u,
-                                date: u.date && /^\d{4}-\d{2}-\d{2}$/.test(u.date) ? u.date :
-                                    (u.date ? new Date(u.date + 'T12:00:00').toISOString().split('T')[0] : u.date)
+                                date: formatDateField(u.date)
                             }));
                         }
 
@@ -5529,11 +5501,9 @@
                             project: v.project,
                             token: v.token,
                             totalTokens: String(v.total_tokens),
-                            tgeDate: tgeDate,
-                            tgePercent: String(v.tge_percent || 0),
-                            cliff: String(v.cliff || 0),
-                            cliffPercent: String(v.cliff_percent || 0),
-                            duration: String(v.duration || 0),
+                            tokensClaimed: String(v.tokens_claimed || 0),
+                            startDate: formatDateField(v.start_date),
+                            endDate: formatDateField(v.end_date),
                             frequency: v.frequency,
                             customUnlocks: customUnlocks,
                             website: v.website || '',
@@ -5698,14 +5668,14 @@
                             project: v.project,
                             token: v.token,
                             total_tokens: v.totalTokens,
-                            tge_date: v.tgeDate,
-                            tge_percent: v.tgePercent || 0,
-                            cliff: v.cliff || 0,
-                            cliff_percent: v.cliffPercent || 0,
-                            duration: v.duration || 0,
+                            tokens_claimed: v.tokensClaimed || 0,
+                            start_date: v.startDate,
+                            end_date: v.endDate,
                             frequency: v.frequency,
                             custom_unlocks: v.customUnlocks || [],
                             website: v.website || '',
+                            coingecko_id: v.coingeckoId || '',
+                            claimed_unlocks: v.claimedUnlocks || [],
                             created_at: v.createdAt || new Date().toISOString()
                         });
                 } catch (e) {
@@ -5727,11 +5697,9 @@
                     project: vesting.project,
                     token: vesting.token,
                     total_tokens: vesting.totalTokens,
-                    tge_date: vesting.tgeDate,
-                    tge_percent: vesting.tgePercent || 0,
-                    cliff: vesting.cliff || 0,
-                    cliff_percent: vesting.cliffPercent || 0,
-                    duration: vesting.duration || 0,
+                    tokens_claimed: vesting.tokensClaimed || 0,
+                    start_date: vesting.startDate,
+                    end_date: vesting.endDate,
                     frequency: vesting.frequency,
                     custom_unlocks: vesting.customUnlocks || [],
                     website: vesting.website || '',
@@ -5824,6 +5792,37 @@
                 }
             } else {
                 showToast('All unlocks already claimed');
+            }
+        };
+
+        // Claim tokens for linear vesting (prompts for amount)
+        window.claimLinearTokens = async function(vestingId) {
+            const vesting = vestings.find(v => v.id === vestingId);
+            if (!vesting) return;
+
+            const linearInfo = calculateLinearVesting(vesting);
+            if (!linearInfo) return;
+
+            const currentClaimed = parseFloat(vesting.tokensClaimed) || 0;
+            const claimableNow = linearInfo.claimableNow;
+            const unclaimed = Math.max(0, claimableNow - currentClaimed);
+
+            const amount = prompt(`How many tokens did you claim?\n\nCurrently claimable: ${formatNumber(claimableNow)} ${vesting.token}\nAlready claimed: ${formatNumber(currentClaimed)} ${vesting.token}\nUnclaimed: ${formatNumber(unclaimed)} ${vesting.token}`, unclaimed.toFixed(2));
+
+            if (amount === null) return; // User cancelled
+
+            const claimedAmount = parseFloat(amount);
+            if (isNaN(claimedAmount) || claimedAmount < 0) {
+                showToast('Invalid amount', true);
+                return;
+            }
+
+            vesting.tokensClaimed = String(currentClaimed + claimedAmount);
+            const saved = await saveVestingToSupabase(vesting);
+            if (saved) {
+                showToast(`Marked ${formatNumber(claimedAmount)} ${vesting.token} as claimed!`);
+                renderVestings();
+                updateVestingStats();
             }
         };
 
@@ -6345,27 +6344,16 @@
         function calculateUnlockSchedule(vesting) {
             const unlocks = [];
             const totalTokens = parseFloat(vesting.totalTokens);
-            const tgePercent = parseFloat(vesting.tgePercent) || 0;
-            const cliffMonths = parseInt(vesting.cliff) || 0;
-            const cliffPercent = parseFloat(vesting.cliffPercent) || 0;
-            const duration = parseInt(vesting.duration) || 0;
             const frequency = vesting.frequency;
 
-            // Parse TGE date properly (avoid timezone issues)
-            const tgeParts = vesting.tgeDate.split('-');
-            const tgeYear = parseInt(tgeParts[0]);
-            const tgeMonth = parseInt(tgeParts[1]) - 1; // JS months are 0-indexed
-            const tgeDay = parseInt(tgeParts[2]);
+            // Parse start and end dates
+            if (!vesting.startDate || !vesting.endDate) return unlocks;
 
-            // Helper function to add months to a date
-            function addMonths(year, month, day, monthsToAdd) {
-                const newMonth = month + monthsToAdd;
-                const newYear = year + Math.floor(newMonth / 12);
-                const adjustedMonth = ((newMonth % 12) + 12) % 12;
-                const daysInMonth = new Date(newYear, adjustedMonth + 1, 0).getDate();
-                const adjustedDay = Math.min(day, daysInMonth);
-                return new Date(newYear, adjustedMonth, adjustedDay);
-            }
+            const startParts = vesting.startDate.split('-');
+            const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+
+            const endParts = vesting.endDate.split('-');
+            const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
 
             // Format date as YYYY-MM-DD
             function formatDateISO(date) {
@@ -6375,26 +6363,7 @@
                 return `${y}-${m}-${d}`;
             }
 
-            // 1. TGE unlock (day 1)
-            if (tgePercent > 0) {
-                unlocks.push({
-                    date: vesting.tgeDate,
-                    amount: totalTokens * (tgePercent / 100),
-                    type: 'TGE'
-                });
-            }
-
-            // 2. Cliff unlock (at end of cliff period)
-            if (cliffMonths > 0 && cliffPercent > 0) {
-                const cliffDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths);
-                unlocks.push({
-                    date: formatDateISO(cliffDate),
-                    amount: totalTokens * (cliffPercent / 100),
-                    type: 'Cliff'
-                });
-            }
-
-            // 3. Custom unlocks OR Linear vesting
+            // Custom unlocks
             if (frequency === 'custom' && vesting.customUnlocks && vesting.customUnlocks.length > 0) {
                 vesting.customUnlocks.forEach(u => {
                     unlocks.push({
@@ -6403,72 +6372,62 @@
                         type: 'Custom'
                     });
                 });
-            } else if (duration > 0) {
-                // Calculate remaining tokens for linear vesting
-                const usedPercent = tgePercent + cliffPercent;
-                const remainingPercent = 100 - usedPercent;
-                const remainingTokens = totalTokens * (remainingPercent / 100);
+            } else if (frequency === 'linear') {
+                // Linear (continuous) vesting - create start and end markers
+                unlocks.push({
+                    date: vesting.startDate,
+                    amount: 0,
+                    type: 'Linear Start',
+                    isLinear: true,
+                    linearTotal: totalTokens,
+                    linearEndDate: vesting.endDate
+                });
+                unlocks.push({
+                    date: vesting.endDate,
+                    amount: totalTokens,
+                    type: 'Linear End',
+                    isLinear: true
+                });
+            } else {
+                // Calculate number of periods based on frequency and date range
+                const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+                let numPeriods;
+                let periodDays;
 
-                if (remainingTokens > 0) {
-                    // Calculate number of periods based on frequency
-                    let numPeriods;
-                    let periodMonths;
+                switch (frequency) {
+                    case 'quarterly':
+                        periodDays = 91; // ~3 months
+                        numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
+                        break;
+                    case 'weekly':
+                        periodDays = 7;
+                        numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
+                        break;
+                    case 'daily':
+                        periodDays = 1;
+                        numPeriods = Math.max(1, totalDays);
+                        break;
+                    case 'monthly':
+                    default:
+                        periodDays = 30;
+                        numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
+                        break;
+                }
 
-                    // Handle linear (continuous) vesting separately
-                    if (frequency === 'linear') {
-                        const startDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths);
-                        const endDate = addMonths(tgeYear, tgeMonth, tgeDay, cliffMonths + duration);
+                const tokensPerPeriod = totalTokens / numPeriods;
 
-                        // For linear vesting, we create start and end markers
-                        unlocks.push({
-                            date: formatDateISO(startDate),
-                            amount: 0,
-                            type: 'Linear Start',
-                            isLinear: true,
-                            linearTotal: remainingTokens,
-                            linearEndDate: formatDateISO(endDate)
-                        });
-                        unlocks.push({
-                            date: formatDateISO(endDate),
-                            amount: remainingTokens,
-                            type: 'Linear End',
-                            isLinear: true
-                        });
-                    } else {
-                        switch (frequency) {
-                            case 'quarterly':
-                                periodMonths = 3;
-                                numPeriods = Math.ceil(duration / 3);
-                                break;
-                            case 'weekly':
-                                periodMonths = 0.25; // ~1 week
-                                numPeriods = duration * 4; // 4 weeks per month
-                                break;
-                            case 'daily':
-                                periodMonths = 1 / 30;
-                                numPeriods = duration * 30;
-                                break;
-                            case 'monthly':
-                            default:
-                                periodMonths = 1;
-                                numPeriods = duration;
-                                break;
-                        }
+                for (let i = 0; i < numPeriods; i++) {
+                    const unlockDate = new Date(startDate);
+                    unlockDate.setDate(unlockDate.getDate() + (i * periodDays));
 
-                        const tokensPerPeriod = remainingTokens / numPeriods;
-                        const startAfterCliff = cliffMonths;
+                    // Don't exceed end date
+                    if (unlockDate > endDate) break;
 
-                        for (let i = 1; i <= numPeriods; i++) {
-                            const monthsFromTGE = startAfterCliff + (i * periodMonths);
-                            const unlockDate = addMonths(tgeYear, tgeMonth, tgeDay, Math.round(monthsFromTGE));
-
-                            unlocks.push({
-                                date: formatDateISO(unlockDate),
-                                amount: tokensPerPeriod,
-                                type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
-                            });
-                        }
-                    }
+                    unlocks.push({
+                        date: formatDateISO(unlockDate),
+                        amount: tokensPerPeriod,
+                        type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                    });
                 }
             }
 
@@ -6480,27 +6439,21 @@
             if (vesting.frequency !== 'linear') return null;
 
             const totalTokens = parseFloat(vesting.totalTokens);
-            const tgePercent = parseFloat(vesting.tgePercent) || 0;
-            const cliffMonths = parseInt(vesting.cliff) || 0;
-            const cliffPercent = parseFloat(vesting.cliffPercent) || 0;
-            const duration = parseInt(vesting.duration) || 0;
 
-            const tgeParts = vesting.tgeDate.split('-');
-            const tgeDate = new Date(parseInt(tgeParts[0]), parseInt(tgeParts[1]) - 1, parseInt(tgeParts[2]));
+            // Parse start and end dates
+            if (!vesting.startDate || !vesting.endDate) return null;
 
-            // Calculate start and end dates
-            const startDate = new Date(tgeDate);
-            startDate.setMonth(startDate.getMonth() + cliffMonths);
-            const endDate = new Date(startDate);
-            endDate.setMonth(endDate.getMonth() + duration);
+            const startParts = vesting.startDate.split('-');
+            const startDate = new Date(parseInt(startParts[0]), parseInt(startParts[1]) - 1, parseInt(startParts[2]));
+
+            const endParts = vesting.endDate.split('-');
+            const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Tokens from TGE and cliff
-            const tgeTokens = totalTokens * (tgePercent / 100);
-            const cliffTokens = totalTokens * (cliffPercent / 100);
-            const linearTokens = totalTokens * ((100 - tgePercent - cliffPercent) / 100);
+            // All tokens vest linearly
+            const linearTokens = totalTokens;
 
             // Calculate vested amount
             let vestedFromLinear = 0;
@@ -6524,11 +6477,7 @@
                 tokensPerDay = linearTokens / totalDays;
             }
 
-            // Total vested includes TGE and cliff (if past those dates)
-            let totalVested = 0;
-            if (today >= tgeDate) totalVested += tgeTokens;
-            if (today >= startDate) totalVested += cliffTokens;
-            totalVested += vestedFromLinear;
+            const totalVested = vestedFromLinear;
 
             return {
                 startDate,
@@ -6571,11 +6520,9 @@
                 project: document.getElementById('vesting-project').value.trim(),
                 token: document.getElementById('vesting-token').value.toUpperCase(),
                 totalTokens: document.getElementById('vesting-total').value,
-                tgeDate: document.getElementById('vesting-tge').value,
-                tgePercent: document.getElementById('vesting-tge-percent').value || 0,
-                cliff: document.getElementById('vesting-cliff').value || 0,
-                cliffPercent: document.getElementById('vesting-cliff-percent').value || 0,
-                duration: document.getElementById('vesting-duration').value || 0,
+                tokensClaimed: document.getElementById('vesting-claimed').value || 0,
+                startDate: document.getElementById('vesting-start-date').value,
+                endDate: document.getElementById('vesting-end-date').value,
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData,
                 website: document.getElementById('vesting-website').value.trim() || '',
@@ -6606,11 +6553,12 @@
 
         // Preview vesting schedule
         window.previewVestingSchedule = function() {
-            const tgeDate = document.getElementById('vesting-tge').value;
+            const startDate = document.getElementById('vesting-start-date').value;
+            const endDate = document.getElementById('vesting-end-date').value;
             const totalTokens = document.getElementById('vesting-total').value;
 
-            if (!tgeDate || !totalTokens) {
-                alert('Please enter TGE Date and Total Tokens to preview the schedule.');
+            if (!startDate || !endDate || !totalTokens) {
+                alert('Please enter Start Date, End Date and Total Tokens to preview the schedule.');
                 return;
             }
 
@@ -6632,11 +6580,9 @@
 
             const previewVesting = {
                 totalTokens: totalTokens,
-                tgeDate: tgeDate,
-                tgePercent: document.getElementById('vesting-tge-percent').value || 0,
-                cliff: document.getElementById('vesting-cliff').value || 0,
-                cliffPercent: document.getElementById('vesting-cliff-percent').value || 0,
-                duration: document.getElementById('vesting-duration').value || 0,
+                tokensClaimed: document.getElementById('vesting-claimed').value || 0,
+                startDate: startDate,
+                endDate: endDate,
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData
             };
@@ -6735,11 +6681,9 @@
             document.getElementById('vesting-project').value = vesting.project;
             document.getElementById('vesting-token').value = vesting.token;
             document.getElementById('vesting-total').value = vesting.totalTokens;
-            document.getElementById('vesting-tge').value = vesting.tgeDate;
-            document.getElementById('vesting-tge-percent').value = vesting.tgePercent;
-            document.getElementById('vesting-cliff').value = vesting.cliff;
-            document.getElementById('vesting-cliff-percent').value = vesting.cliffPercent || 0;
-            document.getElementById('vesting-duration').value = vesting.duration;
+            document.getElementById('vesting-claimed').value = vesting.tokensClaimed || 0;
+            document.getElementById('vesting-start-date').value = vesting.startDate;
+            document.getElementById('vesting-end-date').value = vesting.endDate;
             document.getElementById('vesting-frequency').value = vesting.frequency;
             document.getElementById('vesting-website').value = vesting.website || '';
             document.getElementById('vesting-coingecko-id').value = vesting.coingeckoId || '';
@@ -6813,12 +6757,14 @@
                         .reduce((sum, u) => sum + u.amount, 0);
                 }
 
-                // Calculate claimed tokens
+                // Calculate claimed tokens (includes both tracked unlocks and initial tokensClaimed)
                 const claimedUnlocks = v.claimedUnlocks || [];
-                const claimedTokens = isLinear ? 0 : unlocks
+                const tokensClaimedInitial = parseFloat(v.tokensClaimed) || 0;
+                const claimedFromUnlocks = isLinear ? 0 : unlocks
                     .filter(u => claimedUnlocks.includes(u.date))
                     .reduce((sum, u) => sum + u.amount, 0);
-                const unclaimedTokens = unlockedTokens - claimedTokens;
+                const claimedTokens = isLinear ? tokensClaimedInitial : (tokensClaimedInitial + claimedFromUnlocks);
+                const unclaimedTokens = Math.max(0, unlockedTokens - claimedTokens);
                 const hasUnclaimedUnlocks = !isLinear && unclaimedTokens > 0;
 
                 const progressPercent = (unlockedTokens / totalTokens * 100).toFixed(1);
@@ -6901,8 +6847,7 @@
                         </div>
 
                         <!-- Key Stats -->
-                        <div style="display: grid; grid-template-columns: ${isLinear ? '1fr 1fr' : '1fr 1fr 1fr'}; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
-                            ${!isLinear ? `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
                             <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
                                 <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(claimedValue, 'USD', false) : formatNumber(claimedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Claimed</div>
@@ -6911,12 +6856,6 @@
                                 <div style="color: var(--accent); font-weight: 600;">${price ? formatCurrencyValue(unclaimedValue, 'USD', false) : formatNumber(unclaimedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Unclaimed</div>
                             </div>
-                            ` : `
-                            <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(unlockedValue, 'USD', false) : formatNumber(unlockedTokens)}</div>
-                                <div style="color: var(--text-secondary);">Unlocked</div>
-                            </div>
-                            `}
                             <div style="background: rgba(255, 159, 67, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
                                 <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD', false) : formatNumber(totalTokens - unlockedTokens)}</div>
                                 <div style="color: var(--text-secondary);">Locked</div>
@@ -6941,7 +6880,8 @@
                         <!-- Action Buttons -->
                         <div style="display: flex; gap: 6px; flex-wrap: wrap;">
                             ${v.website ? `<a href="${escapeHtml(v.website)}" target="_blank" rel="noopener" class="btn btn-primary" style="flex: 1; text-align: center; padding: 6px 8px; font-size: 0.75rem; text-decoration: none;">Go to Claim Page</a>` : ''}
-                            ${hasUnclaimedUnlocks ? `<button class="btn" style="background: var(--accent-green); color: #000; padding: 6px 8px; font-size: 0.75rem;" onclick="claimAllUnlocks('${v.id}')">Mark All Claimed</button>` : ''}
+                            ${isLinear && unclaimedTokens > 0 ? `<button class="btn" style="background: var(--accent-green); color: #000; padding: 6px 8px; font-size: 0.75rem;" onclick="claimLinearTokens('${v.id}')">Claimed</button>` : ''}
+                            ${!isLinear && hasUnclaimedUnlocks ? `<button class="btn" style="background: var(--accent-green); color: #000; padding: 6px 8px; font-size: 0.75rem;" onclick="claimAllUnlocks('${v.id}')">Claimed</button>` : ''}
                             <button class="btn" style="background: var(--secondary); color: var(--text-primary); padding: 6px 8px; font-size: 0.75rem;" onclick="toggleVestingDetails('${v.id}')">Details</button>
                             <button class="btn btn-edit" style="padding: 6px 8px; font-size: 0.75rem;" onclick="editVesting('${v.id}')">Edit</button>
                             <button class="btn btn-danger" style="padding: 6px 8px; font-size: 0.75rem;" onclick="deleteVesting('${v.id}')">&#128465;</button>
@@ -6950,7 +6890,7 @@
                         <!-- Expandable Details -->
                         <div class="vesting-card-details" id="vesting-details-${v.id}">
                             <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px;">
-                                TGE: ${formatDate(v.tgeDate)} ${price ? `| Price: $${price.toFixed(price < 1 ? 4 : 2)}` : ''}
+                                ${v.startDate ? `${formatDate(v.startDate)} → ${formatDate(v.endDate)}` : ''} ${price ? `| Price: $${price.toFixed(price < 1 ? 4 : 2)}` : ''}
                             </div>
                             <div style="font-size: 0.8rem; font-weight: 600; margin-bottom: 6px;">${isLinear ? 'Vesting Period' : 'Unlock Schedule'}</div>
                             <div class="unlock-list" style="max-height: 150px; overflow-y: auto;">
