@@ -6389,16 +6389,53 @@
                     isLinear: true
                 });
             } else {
-                // Calculate number of periods based on frequency and date range
+                // Helper to add months properly (preserves day of month)
+                function addMonthsToDate(date, months) {
+                    const result = new Date(date);
+                    const targetMonth = result.getMonth() + months;
+                    result.setMonth(targetMonth);
+                    // Handle month overflow (e.g., Jan 31 + 1 month = Feb 28/29)
+                    if (result.getMonth() !== ((targetMonth % 12) + 12) % 12) {
+                        result.setDate(0); // Go to last day of previous month
+                    }
+                    return result;
+                }
+
+                // For monthly/quarterly, use month-based calculation
+                if (frequency === 'monthly' || frequency === 'quarterly') {
+                    const monthIncrement = frequency === 'quarterly' ? 3 : 1;
+                    let currentDate = new Date(startDate);
+                    let periodIndex = 0;
+
+                    // Calculate total periods
+                    let tempDate = new Date(startDate);
+                    let totalPeriods = 0;
+                    while (tempDate <= endDate) {
+                        totalPeriods++;
+                        tempDate = addMonthsToDate(startDate, totalPeriods * monthIncrement);
+                    }
+
+                    const tokensPerPeriod = totalTokens / Math.max(1, totalPeriods);
+
+                    while (currentDate <= endDate) {
+                        unlocks.push({
+                            date: formatDateISO(currentDate),
+                            amount: tokensPerPeriod,
+                            type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                        });
+                        periodIndex++;
+                        currentDate = addMonthsToDate(startDate, periodIndex * monthIncrement);
+                    }
+
+                    return unlocks.sort((a, b) => new Date(a.date) - new Date(b.date));
+                }
+
+                // For weekly/daily, use day-based calculation
                 const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
                 let numPeriods;
                 let periodDays;
 
                 switch (frequency) {
-                    case 'quarterly':
-                        periodDays = 91; // ~3 months
-                        numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
-                        break;
                     case 'weekly':
                         periodDays = 7;
                         numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
@@ -6407,7 +6444,6 @@
                         periodDays = 1;
                         numPeriods = Math.max(1, totalDays);
                         break;
-                    case 'monthly':
                     default:
                         periodDays = 30;
                         numPeriods = Math.max(1, Math.ceil(totalDays / periodDays));
