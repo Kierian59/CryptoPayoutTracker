@@ -6383,6 +6383,7 @@
             const totalTokens = parseFloat(vesting.totalTokens);
             const frequency = vesting.frequency;
             const cliffMonths = parseInt(vesting.cliffMonths) || 0;
+            const hasCliffStartDate = vesting.cliffStartDate && vesting.cliffStartDate.length > 0;
 
             // Parse start and end dates
             if (!vesting.startDate || !vesting.endDate) return unlocks;
@@ -6413,8 +6414,9 @@
                 return result;
             }
 
-            // Calculate cliff end date
-            const cliffEndDate = cliffMonths > 0 ? addMonthsToDate(startDate, cliffMonths) : startDate;
+            // If cliffStartDate is set, vesting start date is already after cliff - don't add cliff months
+            // If only cliffMonths is set (no cliffStartDate), add cliff to startDate for backward compatibility
+            const shouldApplyCliffOffset = cliffMonths > 0 && !hasCliffStartDate;
 
             // Custom unlocks - user controls dates manually
             if (frequency === 'custom' && vesting.customUnlocks && vesting.customUnlocks.length > 0) {
@@ -6426,12 +6428,11 @@
                     });
                 });
             } else if (frequency === 'linear') {
-                // Linear (continuous) vesting - starts after cliff
-                const linearStartDate = cliffMonths > 0 ? cliffEndDate : startDate;
+                // Linear (continuous) vesting - use startDate directly (it's already after cliff if cliffStartDate was set)
                 unlocks.push({
-                    date: formatDateISO(linearStartDate),
+                    date: formatDateISO(startDate),
                     amount: 0,
-                    type: cliffMonths > 0 ? 'Cliff End / Linear Start' : 'Linear Start',
+                    type: hasCliffStartDate ? 'Vesting Start' : 'Linear Start',
                     isLinear: true,
                     linearTotal: totalTokens,
                     linearEndDate: vesting.endDate,
@@ -6448,8 +6449,8 @@
                 if (frequency === 'monthly' || frequency === 'quarterly') {
                     const monthIncrement = frequency === 'quarterly' ? 3 : 1;
 
-                    // Calculate effective start date (after cliff)
-                    const effectiveStartDate = cliffMonths > 0 ? cliffEndDate : startDate;
+                    // Use startDate directly - it's already the vesting start (after cliff if cliffStartDate was set)
+                    const effectiveStartDate = startDate;
 
                     // Calculate total periods from effective start to end
                     let tempDate = new Date(effectiveStartDate);
@@ -6465,11 +6466,11 @@
                     let periodIndex = 0;
 
                     while (currentDate <= endDate) {
-                        const isCliffUnlock = cliffMonths > 0 && periodIndex === 0;
+                        const isFirstUnlock = periodIndex === 0;
                         unlocks.push({
                             date: formatDateISO(currentDate),
                             amount: tokensPerPeriod,
-                            type: isCliffUnlock ? 'Cliff End' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            type: isFirstUnlock && hasCliffStartDate ? 'First Unlock' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
                         });
                         periodIndex++;
                         currentDate = addMonthsToDate(effectiveStartDate, periodIndex * monthIncrement);
@@ -6478,8 +6479,8 @@
                     return unlocks.sort((a, b) => new Date(a.date) - new Date(b.date));
                 }
 
-                // For weekly/daily, use day-based calculation starting after cliff
-                const effectiveStartDate = cliffMonths > 0 ? cliffEndDate : startDate;
+                // For weekly/daily, use day-based calculation - startDate is already the vesting start
+                const effectiveStartDate = startDate;
                 const totalDays = Math.ceil((endDate - effectiveStartDate) / (1000 * 60 * 60 * 24));
                 let numPeriods;
                 let periodDays;
@@ -6508,11 +6509,11 @@
                     // Don't exceed end date
                     if (unlockDate > endDate) break;
 
-                    const isCliffUnlock = cliffMonths > 0 && i === 0;
+                    const isFirstUnlock = i === 0;
                     unlocks.push({
                         date: formatDateISO(unlockDate),
                         amount: tokensPerPeriod,
-                        type: isCliffUnlock ? 'Cliff End' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                        type: isFirstUnlock && hasCliffStartDate ? 'First Unlock' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
                     });
                 }
             }
@@ -6526,6 +6527,7 @@
 
             const totalTokens = parseFloat(vesting.totalTokens);
             const cliffMonths = parseInt(vesting.cliffMonths) || 0;
+            const hasCliffStartDate = vesting.cliffStartDate && vesting.cliffStartDate.length > 0;
 
             // Parse start and end dates
             if (!vesting.startDate || !vesting.endDate) return null;
@@ -6536,22 +6538,23 @@
             const endParts = vesting.endDate.split('-');
             const endDate = new Date(parseInt(endParts[0]), parseInt(endParts[1]) - 1, parseInt(endParts[2]));
 
-            // Calculate cliff end date
-            function addMonthsToDate(date, months) {
-                const result = new Date(date);
-                const targetMonth = result.getMonth() + months;
-                result.setMonth(targetMonth);
-                if (result.getMonth() !== ((targetMonth % 12) + 12) % 12) {
-                    result.setDate(0);
-                }
-                return result;
+            // Parse cliff start date if provided
+            let cliffStartDate = null;
+            if (hasCliffStartDate) {
+                const cliffParts = vesting.cliffStartDate.split('-');
+                cliffStartDate = new Date(parseInt(cliffParts[0]), parseInt(cliffParts[1]) - 1, parseInt(cliffParts[2]));
             }
-            let cliffEndDate = cliffMonths > 0 ? addMonthsToDate(startDate, cliffMonths) : new Date(startDate);
-            // Ensure cliff doesn't exceed end date
-            if (cliffEndDate > endDate) {
-                cliffEndDate = new Date(endDate);
+
+            // vestingStartDate is simply the startDate (user sets this as when vesting begins)
+            const vestingStartDate = new Date(startDate);
+
+            // cliffEndDate is for display only - calculated from cliffStartDate if provided
+            let cliffEndDate = cliffStartDate ? new Date(cliffStartDate) : new Date(startDate);
+            if (cliffMonths > 0 && cliffStartDate) {
+                // Add cliff months to cliff start date
+                const targetMonth = cliffEndDate.getMonth() + cliffMonths;
+                cliffEndDate.setMonth(targetMonth);
             }
-            const vestingStartDate = new Date(cliffEndDate); // Linear vesting starts after cliff
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -6565,16 +6568,14 @@
             let percentComplete = 0;
             let tokensPerDay = 0;
 
+            // Check if we're in cliff period (only if cliffStartDate is set and we're before vesting start)
+            const inCliffPeriod = hasCliffStartDate && cliffStartDate && today >= cliffStartDate && today < vestingStartDate;
+
             if (today < vestingStartDate) {
-                // Still in cliff period or before start
-                vestingStatus = cliffMonths > 0 && today >= startDate ? 'cliff' : 'not_started';
+                // Before vesting starts
+                vestingStatus = inCliffPeriod ? 'cliff' : 'not_started';
                 vestedFromLinear = 0;
-                // Calculate days remaining in cliff
-                if (vestingStatus === 'cliff') {
-                    const daysInCliff = Math.max(1, (cliffEndDate - startDate) / (1000 * 60 * 60 * 24));
-                    const daysElapsedInCliff = (today - startDate) / (1000 * 60 * 60 * 24);
-                    percentComplete = 0; // No progress during cliff
-                }
+                percentComplete = 0;
             } else if (today >= endDate) {
                 vestingStatus = 'completed';
                 vestedFromLinear = linearTokens;
