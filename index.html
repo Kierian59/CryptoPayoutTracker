@@ -3350,13 +3350,8 @@
 
                     <!-- Section 4: Linear Vesting -->
                     <div style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color);">
-                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Linear Vesting Schedule</h4>
+                        <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Vesting Schedule</h4>
                         <div class="vesting-form">
-                            <div class="form-group">
-                                <label for="vesting-start-date">Start Date (First Unlock)</label>
-                                <input type="date" id="vesting-start-date" required>
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When vesting begins (after any cliff)</small>
-                            </div>
                             <div class="form-group">
                                 <label for="vesting-end-date">End Date (Final Unlock)</label>
                                 <input type="date" id="vesting-end-date" required>
@@ -6515,13 +6510,17 @@
                 });
             }
 
+            // Default start date to today if not editing
+            const todayISO = new Date().toISOString().split('T')[0];
+            const existingVesting = editId ? vestings.find(v => v.id === editId) : null;
+
             const vesting = {
                 id: editId || Date.now().toString(),
                 project: document.getElementById('vesting-project').value.trim(),
                 token: document.getElementById('vesting-token').value.toUpperCase(),
                 totalTokens: document.getElementById('vesting-total').value,
                 tokensClaimed: document.getElementById('vesting-claimed').value || 0,
-                startDate: document.getElementById('vesting-start-date').value,
+                startDate: existingVesting?.startDate || todayISO,
                 endDate: document.getElementById('vesting-end-date').value,
                 frequency: document.getElementById('vesting-frequency').value,
                 customUnlocks: customUnlocksData,
@@ -6553,12 +6552,12 @@
 
         // Preview vesting schedule
         window.previewVestingSchedule = function() {
-            const startDate = document.getElementById('vesting-start-date').value;
+            const startDate = new Date().toISOString().split('T')[0]; // Default to today
             const endDate = document.getElementById('vesting-end-date').value;
             const totalTokens = document.getElementById('vesting-total').value;
 
-            if (!startDate || !endDate || !totalTokens) {
-                alert('Please enter Start Date, End Date and Total Tokens to preview the schedule.');
+            if (!endDate || !totalTokens) {
+                alert('Please enter End Date and Total Tokens to preview the schedule.');
                 return;
             }
 
@@ -6682,7 +6681,6 @@
             document.getElementById('vesting-token').value = vesting.token;
             document.getElementById('vesting-total').value = vesting.totalTokens;
             document.getElementById('vesting-claimed').value = vesting.tokensClaimed || 0;
-            document.getElementById('vesting-start-date').value = vesting.startDate;
             document.getElementById('vesting-end-date').value = vesting.endDate;
             document.getElementById('vesting-frequency').value = vesting.frequency;
             document.getElementById('vesting-website').value = vesting.website || '';
