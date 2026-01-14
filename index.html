@@ -5492,13 +5492,22 @@
                                 String(d.getDate()).padStart(2, '0');
                         }
 
-                        // Process custom unlocks dates
+                        // Process custom unlocks dates and extract metadata
                         let customUnlocks = v.custom_unlocks || [];
+                        let cliffMonths = 0;
                         if (customUnlocks && Array.isArray(customUnlocks)) {
-                            customUnlocks = customUnlocks.map(u => ({
-                                ...u,
-                                date: formatDateField(u.date)
-                            }));
+                            // Extract cliff metadata if present
+                            const metadataEntry = customUnlocks.find(u => u._isMetadata);
+                            if (metadataEntry && metadataEntry.cliffMonths) {
+                                cliffMonths = parseInt(metadataEntry.cliffMonths) || 0;
+                            }
+                            // Filter out metadata and format dates
+                            customUnlocks = customUnlocks
+                                .filter(u => !u._isMetadata)
+                                .map(u => ({
+                                    ...u,
+                                    date: formatDateField(u.date)
+                                }));
                         }
 
                         return {
@@ -5510,7 +5519,7 @@
                             startDate: formatDateField(v.start_date),
                             endDate: formatDateField(v.end_date),
                             frequency: v.frequency,
-                            cliffMonths: v.cliff_months || 0,
+                            cliffMonths: cliffMonths,
                             customUnlocks: customUnlocks,
                             website: v.website || '',
                             coingeckoId: v.coingecko_id || '',
@@ -5695,6 +5704,15 @@
 
         // Save vesting to Supabase
         async function saveVestingToSupabase(vesting) {
+            // Store cliff_months in custom_unlocks as metadata (avoids DB schema change)
+            let customUnlocksWithMeta = vesting.customUnlocks || [];
+            // Remove any existing metadata entry
+            customUnlocksWithMeta = customUnlocksWithMeta.filter(u => !u._isMetadata);
+            // Add cliff metadata if cliff is set
+            if (vesting.cliffMonths > 0) {
+                customUnlocksWithMeta = [...customUnlocksWithMeta, { _isMetadata: true, cliffMonths: vesting.cliffMonths }];
+            }
+
             const result = await window.supabaseClient
                 .from('vestings')
                 .upsert({
@@ -5707,8 +5725,7 @@
                     start_date: vesting.startDate,
                     end_date: vesting.endDate,
                     frequency: vesting.frequency,
-                    cliff_months: vesting.cliffMonths || 0,
-                    custom_unlocks: vesting.customUnlocks || [],
+                    custom_unlocks: customUnlocksWithMeta,
                     website: vesting.website || '',
                     coingecko_id: vesting.coingeckoId || '',
                     claimed_unlocks: vesting.claimedUnlocks || [],
@@ -6516,8 +6533,12 @@
                 }
                 return result;
             }
-            const cliffEndDate = cliffMonths > 0 ? addMonthsToDate(startDate, cliffMonths) : startDate;
-            const vestingStartDate = cliffEndDate; // Linear vesting starts after cliff
+            let cliffEndDate = cliffMonths > 0 ? addMonthsToDate(startDate, cliffMonths) : new Date(startDate);
+            // Ensure cliff doesn't exceed end date
+            if (cliffEndDate > endDate) {
+                cliffEndDate = new Date(endDate);
+            }
+            const vestingStartDate = new Date(cliffEndDate); // Linear vesting starts after cliff
 
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -6537,9 +6558,9 @@
                 vestedFromLinear = 0;
                 // Calculate days remaining in cliff
                 if (vestingStatus === 'cliff') {
-                    const daysInCliff = (cliffEndDate - startDate) / (1000 * 60 * 60 * 24);
+                    const daysInCliff = Math.max(1, (cliffEndDate - startDate) / (1000 * 60 * 60 * 24));
                     const daysElapsedInCliff = (today - startDate) / (1000 * 60 * 60 * 24);
-                    percentComplete = (daysElapsedInCliff / daysInCliff) * (cliffMonths > 0 ? 0 : 100); // Show cliff progress separately
+                    percentComplete = 0; // No progress during cliff
                 }
             } else if (today >= endDate) {
                 vestingStatus = 'completed';
@@ -6547,10 +6568,10 @@
                 percentComplete = 100;
             } else {
                 vestingStatus = 'in_progress';
-                const totalDays = (endDate - vestingStartDate) / (1000 * 60 * 60 * 24);
-                const elapsedDays = (today - vestingStartDate) / (1000 * 60 * 60 * 24);
-                percentComplete = (elapsedDays / totalDays) * 100;
-                vestedFromLinear = linearTokens * (elapsedDays / totalDays);
+                const totalDays = Math.max(1, (endDate - vestingStartDate) / (1000 * 60 * 60 * 24));
+                const elapsedDays = Math.max(0, (today - vestingStartDate) / (1000 * 60 * 60 * 24));
+                percentComplete = Math.min(100, (elapsedDays / totalDays) * 100);
+                vestedFromLinear = linearTokens * Math.min(1, elapsedDays / totalDays);
                 tokensPerDay = linearTokens / totalDays;
             }
 
@@ -6878,10 +6899,11 @@
                         'in_progress': 'Vesting Active',
                         'completed': 'Fully Vested'
                     };
-                    const cliffInfo = linearInfo.cliffMonths > 0 ? `
+                    const cliffEndDateStr = linearInfo.cliffEndDate ? formatDate(linearInfo.cliffEndDate.toISOString().split('T')[0]) : '';
+                    const cliffInfo = linearInfo.cliffMonths > 0 && cliffEndDateStr ? `
                         <div style="font-size: 0.75rem; color: #9b59b6; margin-top: 5px;">
                             Cliff: ${linearInfo.cliffMonths} month${linearInfo.cliffMonths > 1 ? 's' : ''}
-                            (ends ${formatDate(linearInfo.cliffEndDate.toISOString().split('T')[0])})
+                            (ends ${cliffEndDateStr})
                         </div>
                     ` : '';
                     linearDisplay = `
