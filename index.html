@@ -3353,17 +3353,22 @@
                         <h4 style="color: var(--accent); font-size: 0.95rem; margin-bottom: 15px;">Vesting Schedule</h4>
                         <div class="vesting-form">
                             <div class="form-group">
-                                <label for="vesting-start-date">Start Date</label>
-                                <input type="date" id="vesting-start-date" required>
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When the vesting schedule begins (cliff starts here)</small>
+                                <label for="vesting-cliff-start">Cliff Start Date</label>
+                                <input type="date" id="vesting-cliff-start">
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When the cliff period begins (leave empty if no cliff)</small>
                             </div>
                             <div class="form-group">
-                                <label for="vesting-cliff">Cliff Period (months)</label>
+                                <label for="vesting-cliff">Cliff Duration (months)</label>
                                 <input type="number" id="vesting-cliff" min="0" step="1" value="0" placeholder="0">
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">No tokens unlock until cliff ends, then vesting begins</small>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">How long until tokens start unlocking</small>
                             </div>
                             <div class="form-group">
-                                <label for="vesting-end-date">End Date</label>
+                                <label for="vesting-start-date">Vesting Start Date</label>
+                                <input type="date" id="vesting-start-date" required>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">When tokens start unlocking (first unlock)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="vesting-end-date">Vesting End Date</label>
                                 <input type="date" id="vesting-end-date" required>
                                 <small style="color: var(--text-secondary); font-size: 0.75rem;">When all tokens are fully vested</small>
                             </div>
@@ -3377,7 +3382,7 @@
                                     <option value="linear">Linear (Continuous - claim anytime)</option>
                                     <option value="custom">Custom Dates</option>
                                 </select>
-                                <small style="color: var(--text-secondary); font-size: 0.75rem;">How tokens unlock after cliff ends</small>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem;">How tokens unlock from start to end</small>
                             </div>
                         </div>
                         <div id="vesting-preview" style="background: rgba(0,217,255,0.1); border-radius: 8px; padding: 15px; margin-top: 15px;">
@@ -5496,11 +5501,13 @@
                         // Process custom unlocks dates and extract metadata
                         let customUnlocks = v.custom_unlocks || [];
                         let cliffMonths = 0;
+                        let cliffStartDate = '';
                         if (customUnlocks && Array.isArray(customUnlocks)) {
                             // Extract cliff metadata if present
                             const metadataEntry = customUnlocks.find(u => u._isMetadata);
-                            if (metadataEntry && metadataEntry.cliffMonths) {
+                            if (metadataEntry) {
                                 cliffMonths = parseInt(metadataEntry.cliffMonths) || 0;
+                                cliffStartDate = metadataEntry.cliffStartDate || '';
                             }
                             // Filter out metadata and format dates
                             customUnlocks = customUnlocks
@@ -5517,10 +5524,11 @@
                             token: v.token,
                             totalTokens: String(v.total_tokens),
                             tokensClaimed: String(v.tokens_claimed || 0),
+                            cliffStartDate: cliffStartDate,
+                            cliffMonths: cliffMonths,
                             startDate: formatDateField(v.start_date),
                             endDate: formatDateField(v.end_date),
                             frequency: v.frequency,
-                            cliffMonths: cliffMonths,
                             customUnlocks: customUnlocks,
                             website: v.website || '',
                             coingeckoId: v.coingecko_id || '',
@@ -5705,13 +5713,17 @@
 
         // Save vesting to Supabase
         async function saveVestingToSupabase(vesting) {
-            // Store cliff_months in custom_unlocks as metadata (avoids DB schema change)
+            // Store cliff data in custom_unlocks as metadata (avoids DB schema change)
             let customUnlocksWithMeta = vesting.customUnlocks || [];
             // Remove any existing metadata entry
             customUnlocksWithMeta = customUnlocksWithMeta.filter(u => !u._isMetadata);
             // Add cliff metadata if cliff is set
-            if (vesting.cliffMonths > 0) {
-                customUnlocksWithMeta = [...customUnlocksWithMeta, { _isMetadata: true, cliffMonths: vesting.cliffMonths }];
+            if (vesting.cliffMonths > 0 || vesting.cliffStartDate) {
+                customUnlocksWithMeta = [...customUnlocksWithMeta, {
+                    _isMetadata: true,
+                    cliffMonths: vesting.cliffMonths || 0,
+                    cliffStartDate: vesting.cliffStartDate || ''
+                }];
             }
 
             const result = await window.supabaseClient
@@ -6623,10 +6635,11 @@
                 token: document.getElementById('vesting-token').value.toUpperCase(),
                 totalTokens: document.getElementById('vesting-total').value,
                 tokensClaimed: document.getElementById('vesting-claimed').value || 0,
+                cliffStartDate: document.getElementById('vesting-cliff-start').value || '',
+                cliffMonths: parseInt(document.getElementById('vesting-cliff').value) || 0,
                 startDate: document.getElementById('vesting-start-date').value,
                 endDate: document.getElementById('vesting-end-date').value,
                 frequency: document.getElementById('vesting-frequency').value,
-                cliffMonths: parseInt(document.getElementById('vesting-cliff').value) || 0,
                 customUnlocks: customUnlocksData,
                 website: document.getElementById('vesting-website').value.trim() || '',
                 coingeckoId: document.getElementById('vesting-coingecko-id').value.trim().toLowerCase() || '',
@@ -6684,10 +6697,11 @@
             const previewVesting = {
                 totalTokens: totalTokens,
                 tokensClaimed: document.getElementById('vesting-claimed').value || 0,
+                cliffStartDate: document.getElementById('vesting-cliff-start').value || '',
+                cliffMonths: parseInt(document.getElementById('vesting-cliff').value) || 0,
                 startDate: startDate,
                 endDate: endDate,
                 frequency: document.getElementById('vesting-frequency').value,
-                cliffMonths: parseInt(document.getElementById('vesting-cliff').value) || 0,
                 customUnlocks: customUnlocksData
             };
 
@@ -6768,6 +6782,7 @@
         window.cancelVestingEdit = function() {
             document.getElementById('vesting-edit-id').value = '';
             document.getElementById('vesting-form').reset();
+            document.getElementById('vesting-cliff-start').value = '';
             document.getElementById('vesting-cliff').value = 0;
             document.getElementById('vesting-form-title').textContent = 'Add Vesting Schedule';
             document.getElementById('vesting-submit-btn').textContent = 'Add Vesting';
@@ -6787,10 +6802,11 @@
             document.getElementById('vesting-token').value = vesting.token;
             document.getElementById('vesting-total').value = vesting.totalTokens;
             document.getElementById('vesting-claimed').value = vesting.tokensClaimed || 0;
+            document.getElementById('vesting-cliff-start').value = vesting.cliffStartDate || '';
+            document.getElementById('vesting-cliff').value = vesting.cliffMonths || 0;
             document.getElementById('vesting-start-date').value = vesting.startDate;
             document.getElementById('vesting-end-date').value = vesting.endDate;
             document.getElementById('vesting-frequency').value = vesting.frequency;
-            document.getElementById('vesting-cliff').value = vesting.cliffMonths || 0;
             document.getElementById('vesting-website').value = vesting.website || '';
             document.getElementById('vesting-coingecko-id').value = vesting.coingeckoId || '';
 
@@ -6954,7 +6970,7 @@
                                     <h3 style="margin: 0; font-size: 0.95rem; white-space: nowrap;">${escapeHtml(v.project)}</h3>
                                     <span style="color: var(--text-secondary); font-size: 0.8rem;">${v.token}</span>
                                     ${isLinear ? '<span style="background: var(--accent); color: #000; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">LINEAR</span>' : ''}
-                                    ${v.cliffMonths > 0 ? `<span style="background: #9b59b6; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">CLIFF ${v.cliffMonths}M</span>` : ''}
+                                    ${v.cliffMonths > 0 || v.cliffStartDate ? `<span style="background: #9b59b6; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 0.65rem;">CLIFF${v.cliffMonths > 0 ? ` ${v.cliffMonths}M` : ''}${v.cliffStartDate ? ` (${formatDate(v.cliffStartDate)})` : ''}</span>` : ''}
                                 </div>
                                 ${price ? `<div style="color: var(--accent-green); font-size: 0.8rem; font-weight: 600;">${formatCurrencyValue(totalValue, 'USD', false)}</div>` : ''}
                             </div>
