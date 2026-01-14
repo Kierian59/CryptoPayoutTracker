@@ -6452,28 +6452,57 @@
                     // Use startDate directly - it's already the vesting start (after cliff if cliffStartDate was set)
                     const effectiveStartDate = startDate;
 
-                    // Calculate total periods from effective start to end
+                    // Calculate total periods from effective start to end (unlocks after cliff)
                     let tempDate = new Date(effectiveStartDate);
-                    let totalPeriods = 0;
+                    let periodsAfterCliff = 0;
                     while (tempDate <= endDate) {
-                        totalPeriods++;
-                        tempDate = addMonthsToDate(effectiveStartDate, totalPeriods * monthIncrement);
+                        periodsAfterCliff++;
+                        tempDate = addMonthsToDate(effectiveStartDate, periodsAfterCliff * monthIncrement);
                     }
 
-                    const tokensPerPeriod = totalTokens / Math.max(1, totalPeriods);
+                    // If cliff is set, calculate cliff unlock + regular unlocks
+                    if (hasCliffStartDate && cliffMonths > 0) {
+                        // Total periods = cliff periods + periods after cliff
+                        const cliffPeriods = Math.floor(cliffMonths / monthIncrement);
+                        const totalPeriods = cliffPeriods + periodsAfterCliff;
+                        const tokensPerPeriod = totalTokens / Math.max(1, totalPeriods);
 
-                    let currentDate = new Date(effectiveStartDate);
-                    let periodIndex = 0;
+                        // Cliff unlock = all tokens accumulated during cliff
+                        const cliffUnlockAmount = tokensPerPeriod * cliffPeriods;
 
-                    while (currentDate <= endDate) {
-                        const isFirstUnlock = periodIndex === 0;
+                        // Add cliff end unlock
                         unlocks.push({
-                            date: formatDateISO(currentDate),
-                            amount: tokensPerPeriod,
-                            type: isFirstUnlock && hasCliffStartDate ? 'Cliff End' : frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            date: formatDateISO(effectiveStartDate),
+                            amount: cliffUnlockAmount,
+                            type: 'Cliff End'
                         });
-                        periodIndex++;
-                        currentDate = addMonthsToDate(effectiveStartDate, periodIndex * monthIncrement);
+
+                        // Add remaining periodic unlocks
+                        let currentDate = addMonthsToDate(effectiveStartDate, monthIncrement);
+                        while (currentDate <= endDate) {
+                            unlocks.push({
+                                date: formatDateISO(currentDate),
+                                amount: tokensPerPeriod,
+                                type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            });
+                            currentDate = addMonthsToDate(currentDate, monthIncrement);
+                        }
+                    } else {
+                        // No cliff - equal distribution
+                        const tokensPerPeriod = totalTokens / Math.max(1, periodsAfterCliff);
+
+                        let currentDate = new Date(effectiveStartDate);
+                        let periodIndex = 0;
+
+                        while (currentDate <= endDate) {
+                            unlocks.push({
+                                date: formatDateISO(currentDate),
+                                amount: tokensPerPeriod,
+                                type: frequency.charAt(0).toUpperCase() + frequency.slice(1)
+                            });
+                            periodIndex++;
+                            currentDate = addMonthsToDate(effectiveStartDate, periodIndex * monthIncrement);
+                        }
                     }
 
                     return unlocks.sort((a, b) => new Date(a.date) - new Date(b.date));
