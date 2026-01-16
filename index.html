@@ -6575,6 +6575,7 @@
 
             const totalTokens = parseFloat(vesting.totalTokens);
             const cliffMonths = parseInt(vesting.cliffMonths) || 0;
+            const cliffAmount = parseFloat(vesting.cliffAmount) || 0;
             const hasCliffStartDate = vesting.cliffStartDate && vesting.cliffStartDate.length > 0;
 
             // Parse start and end dates
@@ -6607,11 +6608,12 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // All tokens vest linearly
-            const linearTokens = totalTokens;
+            // Tokens that vest linearly (after cliff amount is deducted)
+            const linearTokens = totalTokens - cliffAmount;
 
             // Calculate vested amount
             let vestedFromLinear = 0;
+            let vestedFromCliff = 0;
             let vestingStatus = 'not_started';
             let percentComplete = 0;
             let tokensPerDay = 0;
@@ -6623,13 +6625,17 @@
                 // Before vesting starts
                 vestingStatus = inCliffPeriod ? 'cliff' : 'not_started';
                 vestedFromLinear = 0;
+                vestedFromCliff = 0;
                 percentComplete = 0;
             } else if (today >= endDate) {
                 vestingStatus = 'completed';
+                vestedFromCliff = cliffAmount;
                 vestedFromLinear = linearTokens;
                 percentComplete = 100;
             } else {
                 vestingStatus = 'in_progress';
+                // Cliff amount is immediately vested when vesting starts
+                vestedFromCliff = cliffAmount;
                 const totalDays = Math.max(1, (endDate - vestingStartDate) / (1000 * 60 * 60 * 24));
                 const elapsedDays = Math.max(0, (today - vestingStartDate) / (1000 * 60 * 60 * 24));
                 percentComplete = Math.min(100, (elapsedDays / totalDays) * 100);
@@ -6637,7 +6643,7 @@
                 tokensPerDay = linearTokens / totalDays;
             }
 
-            const totalVested = vestedFromLinear;
+            const totalVested = vestedFromCliff + vestedFromLinear;
 
             return {
                 startDate,
@@ -6645,7 +6651,9 @@
                 cliffEndDate,
                 vestingStartDate,
                 cliffMonths,
+                cliffAmount,
                 linearTokens,
+                vestedFromCliff,
                 vestedFromLinear,
                 totalVested,
                 vestingStatus,
