@@ -4724,6 +4724,19 @@
                 loadCampaigns()
             ]);
 
+            // Auto-refresh vestings every hour to keep unclaimed tokens up to date
+            setInterval(function() {
+                console.log('Auto-refreshing vesting data...');
+                if (typeof renderVestings === 'function') {
+                    renderVestings();
+                    updateVestingStats();
+                }
+                // Also refresh token prices
+                if (typeof fetchAllTokenData === 'function') {
+                    fetchAllTokenData();
+                }
+            }, 3600000); // 1 hour = 3600000ms
+
             // Start tour for first-time users
             setTimeout(() => startTour(), 1000);
         }
