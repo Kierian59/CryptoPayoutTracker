@@ -7051,16 +7051,19 @@
                         <!-- Key Stats -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; font-size: 0.75rem;">
                             <div style="background: rgba(46, 213, 115, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent-green); font-weight: 600;">${price ? formatCurrencyValue(claimedValue, 'USD', false) : formatNumber(claimedTokens)}</div>
-                                <div style="color: var(--text-secondary);">Claimed</div>
+                                <div style="color: var(--accent-green); font-weight: 600;">${formatNumber(claimedTokens)} ${v.token}</div>
+                                ${price ? `<div style="color: var(--accent-green); font-size: 0.7rem; opacity: 0.8;">${formatCurrencyValue(claimedValue, 'USD', false)}</div>` : ''}
+                                <div style="color: var(--text-secondary); margin-top: 2px;">Claimed</div>
                             </div>
                             <div style="background: rgba(0, 217, 255, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent); font-weight: 600;">${price ? formatCurrencyValue(unclaimedValue, 'USD', false) : formatNumber(unclaimedTokens)}</div>
-                                <div style="color: var(--text-secondary);">Unclaimed</div>
+                                <div style="color: var(--accent); font-weight: 600;">${formatNumber(unclaimedTokens)} ${v.token}</div>
+                                ${price ? `<div style="color: var(--accent); font-size: 0.7rem; opacity: 0.8;">${formatCurrencyValue(unclaimedValue, 'USD', false)}</div>` : ''}
+                                <div style="color: var(--text-secondary); margin-top: 2px;">Unclaimed</div>
                             </div>
                             <div style="background: rgba(255, 159, 67, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                                <div style="color: var(--accent-orange); font-weight: 600;">${price ? formatCurrencyValue(lockedValue, 'USD', false) : formatNumber(totalTokens - unlockedTokens)}</div>
-                                <div style="color: var(--text-secondary);">Locked</div>
+                                <div style="color: var(--accent-orange); font-weight: 600;">${formatNumber(totalTokens - unlockedTokens)} ${v.token}</div>
+                                ${price ? `<div style="color: var(--accent-orange); font-size: 0.7rem; opacity: 0.8;">${formatCurrencyValue(lockedValue, 'USD', false)}</div>` : ''}
+                                <div style="color: var(--text-secondary); margin-top: 2px;">Locked</div>
                             </div>
                         </div>
 
