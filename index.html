@@ -2180,6 +2180,55 @@
             display: none;
         }
 
+        /* Payout styles on calendar */
+        .calendar-day.has-payout {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .calendar-day.has-payout:not(.has-unlock):not(.has-event) {
+            background: rgba(155, 89, 182, 0.2);
+        }
+
+        .calendar-day.has-payout:hover {
+            transform: scale(1.02);
+        }
+
+        .calendar-day.has-payout.has-unlock {
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.2), rgba(155, 89, 182, 0.2));
+        }
+
+        .calendar-day.has-payout.has-event:not(.has-unlock) {
+            background: linear-gradient(135deg, rgba(255, 159, 67, 0.2), rgba(155, 89, 182, 0.2));
+        }
+
+        .calendar-day.has-payout.has-unlock.has-event {
+            background: linear-gradient(135deg, rgba(46, 213, 115, 0.15), rgba(255, 159, 67, 0.15), rgba(155, 89, 182, 0.15));
+        }
+
+        .calendar-day .payout-badge {
+            font-size: 0.6rem;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3);
+        }
+
+        .calendar-day.has-payout .payout-badge {
+            animation: badgePop 0.3s ease;
+        }
+
+        .calendar-legend-dot.payout {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
         /* Event card styles */
         .event-item {
             display: flex;
@@ -3212,6 +3261,10 @@
                         <div class="calendar-legend-item">
                             <div class="calendar-legend-dot event"></div>
                             <span>Event</span>
+                        </div>
+                        <div class="calendar-legend-item">
+                            <div class="calendar-legend-dot payout"></div>
+                            <span>Payout</span>
                         </div>
                     </div>
                 </div>
@@ -6634,6 +6687,11 @@
             // Check if we're in cliff period (only if cliffStartDate is set and we're before vesting start)
             const inCliffPeriod = hasCliffStartDate && cliffStartDate && today >= cliffStartDate && today < vestingStartDate;
 
+            // Calculate total days for the vesting period (always needed for tokensPerDay)
+            const totalDays = Math.max(1, (endDate - vestingStartDate) / (1000 * 60 * 60 * 24));
+            // Always calculate tokensPerDay so it shows for all linear vestings
+            tokensPerDay = linearTokens / totalDays;
+
             if (today < vestingStartDate) {
                 // Before vesting starts
                 vestingStatus = inCliffPeriod ? 'cliff' : 'not_started';
@@ -6649,11 +6707,9 @@
                 vestingStatus = 'in_progress';
                 // Cliff amount is immediately vested when vesting starts
                 vestedFromCliff = cliffAmount;
-                const totalDays = Math.max(1, (endDate - vestingStartDate) / (1000 * 60 * 60 * 24));
                 const elapsedDays = Math.max(0, (today - vestingStartDate) / (1000 * 60 * 60 * 24));
                 percentComplete = Math.min(100, (elapsedDays / totalDays) * 100);
                 vestedFromLinear = linearTokens * Math.min(1, elapsedDays / totalDays);
-                tokensPerDay = linearTokens / totalDays;
             }
 
             const totalVested = vestedFromCliff + vestedFromLinear;
@@ -7022,11 +7078,16 @@
                                     </div>
                                 </div>
                             ` : ''}
-                            ${linearInfo.vestingStatus === 'cliff' ? `
-                                <div style="display: grid; grid-template-columns: 1fr; gap: 10px; font-size: 0.85rem; margin-top: 10px;">
+                            ${linearInfo.vestingStatus === 'cliff' || linearInfo.vestingStatus === 'not_started' ? `
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.85rem; margin-top: 10px;">
                                     <div style="background: rgba(155, 89, 182, 0.15); padding: 8px; border-radius: 6px; text-align: center;">
                                         <div style="color: #9b59b6; font-weight: 600;">0 ${v.token}</div>
-                                        <div style="color: var(--text-secondary); font-size: 0.75rem;">Tokens during cliff</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.75rem;">${linearInfo.vestingStatus === 'cliff' ? 'Tokens during cliff' : 'Claimable Now'}</div>
+                                    </div>
+                                    <div style="background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 6px; text-align: center;">
+                                        <div style="color: var(--accent); font-weight: 600;">${formatNumber(linearInfo.tokensPerDay)} ${v.token}</div>
+                                        <div style="color: var(--text-secondary); font-size: 0.75rem;">Vesting per Day</div>
+                                        ${price ? `<div style="color: var(--accent); font-size: 0.75rem;">${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD', false)}/day</div>` : ''}
                                     </div>
                                 </div>
                             ` : ''}
@@ -7080,7 +7141,7 @@
                             </div>
                         </div>
 
-                        ${isLinear && linearInfo && linearInfo.vestingStatus === 'in_progress' ? `
+                        ${isLinear && linearInfo && linearInfo.tokensPerDay > 0 && linearInfo.vestingStatus !== 'completed' ? `
                             <div style="background: rgba(0, 217, 255, 0.1); padding: 8px; border-radius: 6px; margin-bottom: 10px; text-align: center; font-size: 0.75rem;">
                                 <span style="color: var(--accent);">&#9201; ${formatNumber(linearInfo.tokensPerDay)} ${v.token}/day</span>
                                 ${price ? `<span style="color: var(--text-secondary);"> (${formatCurrencyValue(linearInfo.tokensPerDay * price, 'USD', false)}/day)</span>` : ''}
@@ -7344,6 +7405,15 @@
                 eventMap[e.date].push(e);
             });
 
+            // Create payout map by date
+            const payoutMap = {};
+            payouts.forEach(p => {
+                if (!payoutMap[p.date]) {
+                    payoutMap[p.date] = [];
+                }
+                payoutMap[p.date].push(p);
+            });
+
             const year = calendarDate.getFullYear();
             const month = calendarDate.getMonth();
 
@@ -7369,14 +7439,14 @@
             for (let i = firstDay - 1; i >= 0; i--) {
                 const day = daysInPrevMonth - i;
                 const dateStr = formatDateStr(year, month - 1, day);
-                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], true, todayStr);
+                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], payoutMap[dateStr], true, todayStr);
                 grid.appendChild(dayEl);
             }
 
             // Add current month days
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = formatDateStr(year, month, day);
-                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], false, todayStr);
+                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], payoutMap[dateStr], false, todayStr);
                 grid.appendChild(dayEl);
             }
 
@@ -7385,7 +7455,7 @@
             const remainingCells = 42 - totalCells; // 6 rows x 7 days
             for (let day = 1; day <= remainingCells; day++) {
                 const dateStr = formatDateStr(year, month + 1, day);
-                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], true, todayStr);
+                const dayEl = createCalendarDay(day, dateStr, unlockMap[dateStr], eventMap[dateStr], payoutMap[dateStr], true, todayStr);
                 grid.appendChild(dayEl);
             }
 
@@ -7403,7 +7473,7 @@
         }
 
         // Create calendar day element
-        function createCalendarDay(day, dateStr, unlocks, events, isOtherMonth, todayStr) {
+        function createCalendarDay(day, dateStr, unlocks, events, payoutsForDay, isOtherMonth, todayStr) {
             const dayEl = document.createElement('div');
             dayEl.className = 'calendar-day';
 
@@ -7423,6 +7493,7 @@
 
             const hasUnlocks = unlocks && unlocks.length > 0;
             const hasEvents = events && events.length > 0;
+            const hasPayouts = payoutsForDay && payoutsForDay.length > 0;
 
             if (hasUnlocks) {
                 dayEl.classList.add('has-unlock');
@@ -7467,9 +7538,24 @@
                 dayEl.appendChild(eventBadge);
             }
 
-            // Add click event to show tooltip if there are unlocks or events
-            if (hasUnlocks || hasEvents) {
-                dayEl.addEventListener('click', (e) => showCalendarTooltip(e, dateStr, unlocks || [], events || []));
+            if (hasPayouts) {
+                dayEl.classList.add('has-payout');
+                // Add payout badge with company name or count
+                const payoutBadge = document.createElement('span');
+                payoutBadge.className = 'payout-badge';
+                if (payoutsForDay.length === 1) {
+                    payoutBadge.textContent = payoutsForDay[0].company;
+                    payoutBadge.title = `${payoutsForDay[0].company}: ${formatNumber(payoutsForDay[0].amount)} ${payoutsForDay[0].crypto}`;
+                } else {
+                    payoutBadge.textContent = `${payoutsForDay.length} payouts`;
+                    payoutBadge.title = payoutsForDay.map(p => `${p.company}: ${formatNumber(p.amount)} ${p.crypto}`).join('\n');
+                }
+                dayEl.appendChild(payoutBadge);
+            }
+
+            // Add click event to show tooltip if there are unlocks, events, or payouts
+            if (hasUnlocks || hasEvents || hasPayouts) {
+                dayEl.addEventListener('click', (e) => showCalendarTooltip(e, dateStr, unlocks || [], events || [], payoutsForDay || []));
                 dayEl.addEventListener('mouseleave', hideCalendarTooltip);
             }
 
@@ -7477,7 +7563,7 @@
         }
 
         // Show calendar tooltip
-        function showCalendarTooltip(e, dateStr, unlocks, events) {
+        function showCalendarTooltip(e, dateStr, unlocks, events, payoutsForDay) {
             const tooltip = document.getElementById('calendar-tooltip');
             const date = new Date(dateStr + 'T00:00:00');
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
@@ -7518,6 +7604,26 @@
                         </div>
                     </div>
                 `).join('');
+            }
+
+            // Add payouts
+            if (payoutsForDay && payoutsForDay.length > 0) {
+                if ((unlocks && unlocks.length > 0) || (events && events.length > 0)) {
+                    tooltipHtml += '<div style="border-top: 1px solid var(--border-color); margin: 10px 0;"></div>';
+                }
+                tooltipHtml += '<div style="margin-bottom: 10px;"><strong style="color: #9b59b6; font-size: 0.8rem;">PAYOUTS RECEIVED</strong></div>';
+                tooltipHtml += payoutsForDay.map(p => {
+                    const usdValue = p.usd_sold ? `$${formatNumber(p.usd_sold)}` : '';
+                    return `
+                    <div class="calendar-tooltip-item" style="flex-wrap: wrap; border-left: 3px solid #9b59b6; padding-left: 8px;">
+                        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                            <span class="calendar-tooltip-project">${escapeHtml(p.company)}</span>
+                            <span style="color: #9b59b6; font-weight: 600;">${formatNumber(p.amount)} ${p.crypto}</span>
+                        </div>
+                        ${usdValue ? `<div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 3px;">${usdValue} USD</div>` : ''}
+                        ${p.category ? `<div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(p.category)}</div>` : ''}
+                    </div>
+                `}).join('');
             }
 
             document.getElementById('tooltip-unlocks').innerHTML = tooltipHtml;
