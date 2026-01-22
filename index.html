@@ -3396,10 +3396,10 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleVestingForm()">
                     <h2 id="vesting-form-title" style="margin: 0;">Add Vesting Schedule</h2>
                     <button type="button" id="vesting-form-toggle" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                        <span id="vesting-form-toggle-icon">&#9650;</span> Hide
+                        <span id="vesting-form-toggle-icon">&#9660;</span> Show
                     </button>
                 </div>
-                <div id="vesting-form-container" style="margin-top: 20px;">
+                <div id="vesting-form-container" style="margin-top: 20px; display: none;">
                     <form id="vesting-form">
                         <input type="hidden" id="vesting-edit-id">
 
@@ -7041,7 +7041,7 @@
         };
 
         // Toggle vesting form visibility
-        var vestingFormVisible = true;
+        var vestingFormVisible = false;
         window.toggleVestingForm = function() {
             const container = document.getElementById('vesting-form-container');
             const toggleBtn = document.getElementById('vesting-form-toggle');
