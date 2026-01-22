@@ -2345,17 +2345,27 @@
         }
 
         .campaigns-list {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
         }
 
         .campaign-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+            background: linear-gradient(145deg, rgba(30, 35, 50, 0.9), rgba(20, 25, 35, 0.95));
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            border-radius: 16px;
             padding: 20px;
-            border-left: 4px solid var(--accent);
+            border-top: 4px solid var(--accent);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campaign-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(0, 217, 255, 0.2);
         }
 
         .campaign-header {
@@ -2420,7 +2430,7 @@
         }
 
         .campaign-posts-section {
-            margin-top: 15px;
+            margin-top: auto;
             padding-top: 15px;
             border-top: 1px solid var(--border-color);
         }
@@ -2442,8 +2452,9 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 200px;
+            max-height: 150px;
             overflow-y: auto;
+            margin-bottom: 10px;
         }
 
         .campaign-post-item {
