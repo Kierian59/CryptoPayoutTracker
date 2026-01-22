@@ -2940,23 +2940,18 @@
                 </div>
             </div>
 
-            <!-- Heat Map Calendar -->
+            <!-- Cumulative Earnings -->
             <div class="card">
-                <h2>Activity Calendar</h2>
-                <div class="heatmap-container">
-                    <div class="heatmap" id="heatmap">
-                        <!-- Heatmap populated dynamically -->
+                <h2>Cumulative Earnings</h2>
+                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px; padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">Total in USD</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--success-color);" id="cumulative-usd">$0</div>
                     </div>
-                </div>
-                <div class="heatmap-legend">
-                    <span>Less</span>
-                    <div class="heatmap-day"></div>
-                    <div class="heatmap-day level-1"></div>
-                    <div class="heatmap-day level-2"></div>
-                    <div class="heatmap-day level-3"></div>
-                    <div class="heatmap-day level-4"></div>
-                    <div class="heatmap-day level-5"></div>
-                    <span>More</span>
+                    <div style="flex: 1; min-width: 200px; padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
+                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">Total in EUR</div>
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color);" id="cumulative-eur">€0</div>
+                    </div>
                 </div>
             </div>
 
@@ -4289,11 +4284,24 @@
             // Update mini charts
             updateMiniCharts();
 
-            // Generate heatmap
-            generateHeatmap();
+            // Update cumulative earnings
+            updateCumulativeEarnings(totalRevenue);
 
             // Check milestones
             checkMilestones();
+        }
+
+        function updateCumulativeEarnings(totalRevenue) {
+            const cumulativeUsd = getEl('cumulative-usd');
+            const cumulativeEur = getEl('cumulative-eur');
+
+            if (cumulativeUsd) {
+                cumulativeUsd.textContent = '$' + formatUSD(totalRevenue);
+            }
+            if (cumulativeEur) {
+                const eurValue = eurExchangeRate ? totalRevenue * eurExchangeRate : totalRevenue * 0.92;
+                cumulativeEur.textContent = '€' + formatUSD(eurValue);
+            }
         }
 
         function updateGoals() {
