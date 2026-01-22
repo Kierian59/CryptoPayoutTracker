@@ -1174,26 +1174,48 @@
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
+            gap: 24px;
         }
 
         .chart-container {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            padding: 20px;
+            background: linear-gradient(145deg, rgba(30, 35, 50, 0.9), rgba(20, 25, 35, 0.95));
+            border-radius: 16px;
+            padding: 24px;
             position: relative;
-            height: 320px;
+            height: 350px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            border-color: rgba(0, 217, 255, 0.2);
         }
 
         .chart-container h3 {
             color: #00d9ff;
             font-size: 1rem;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-container h3::before {
+            content: '';
+            width: 4px;
+            height: 16px;
+            background: linear-gradient(180deg, #00d9ff, #00ff88);
+            border-radius: 2px;
         }
 
         .chart-wrapper {
             position: relative;
-            height: calc(100% - 30px);
+            height: calc(100% - 40px);
         }
 
         .usd-value {
@@ -4600,10 +4622,10 @@
             tokenPrices: 5 * 60 * 1000    // 5 minutes
         };
 
-        // Chart colors
+        // Chart colors - vibrant gradient palette
         var chartColors = [
-            '#00d9ff', '#ff6b6b', '#4ecdc4', '#ffe66d', '#95e1d3',
-            '#f38181', '#aa96da', '#fcbad3', '#a8d8ea', '#ffd93d'
+            '#00d9ff', '#2ed573', '#ff6b6b', '#ffa502', '#a55eea',
+            '#ff7eb3', '#26de81', '#fd9644', '#45aaf2', '#fed330'
         ];
 
         // Fetch EUR exchange rate with caching
@@ -4924,10 +4946,26 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(20, 25, 35, 0.95)',
+                            titleColor: '#00d9ff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(0, 217, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
                             callbacks: {
                                 label: function(context) {
                                     return getCurrencySymbol() + formatUSD(context.raw);
@@ -4937,17 +4975,18 @@
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#aaa' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: '#888', font: { size: 11 } },
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         },
                         y: {
                             ticks: {
-                                color: '#aaa',
+                                color: '#888',
+                                font: { size: 11 },
                                 callback: function(value) {
                                     return getCurrencySymbol() + formatUSD(value);
                                 }
                             },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         }
                     }
                 }
@@ -4960,18 +4999,30 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: {
                             anchor: 'end',
                             align: 'top',
                             color: '#2ed573',
-                            font: { weight: 'bold', size: 11 },
+                            font: { weight: 'bold', size: 10 },
                             formatter: function(value) {
                                 return getCurrencySymbol() + formatUSD(value);
                             }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(20, 25, 35, 0.95)',
+                            titleColor: '#00d9ff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(0, 217, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true,
                             callbacks: {
                                 label: function(context) {
                                     return getCurrencySymbol() + formatUSD(context.raw);
@@ -4981,17 +5032,18 @@
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#aaa' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: '#888', font: { size: 11 } },
+                            grid: { display: false }
                         },
                         y: {
                             ticks: {
-                                color: '#aaa',
+                                color: '#888',
+                                font: { size: 11 },
                                 callback: function(value) {
                                     return getCurrencySymbol() + formatUSD(value);
                                 }
                             },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         }
                     }
                 }
@@ -5004,22 +5056,44 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '65%',
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
                     plugins: {
                         legend: {
                             position: 'right',
-                            labels: { color: '#aaa' }
+                            labels: {
+                                color: '#aaa',
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                font: { size: 11 }
+                            }
                         },
                         datalabels: {
                             color: '#fff',
-                            font: { weight: 'bold', size: 11 },
+                            font: { weight: 'bold', size: 10 },
+                            textShadowColor: 'rgba(0,0,0,0.5)',
+                            textShadowBlur: 4,
                             formatter: function(value, context) {
                                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
                                 const percentage = ((value / total) * 100).toFixed(1);
-                                if (percentage < 5) return '';
-                                return getCurrencySymbol() + formatUSD(value);
+                                if (percentage < 8) return '';
+                                return percentage + '%';
                             }
                         },
                         tooltip: {
+                            backgroundColor: 'rgba(20, 25, 35, 0.95)',
+                            titleColor: '#00d9ff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(0, 217, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
                             callbacks: {
                                 label: function(context) {
                                     const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
@@ -5039,10 +5113,26 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeOutQuart'
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
                     plugins: {
                         legend: { display: false },
                         datalabels: { display: false },
                         tooltip: {
+                            backgroundColor: 'rgba(20, 25, 35, 0.95)',
+                            titleColor: '#00d9ff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(0, 217, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
                             callbacks: {
                                 label: function(context) {
                                     return 'Total: ' + getCurrencySymbol() + formatUSD(context.raw);
@@ -5052,17 +5142,18 @@
                     },
                     scales: {
                         x: {
-                            ticks: { color: '#aaa' },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            ticks: { color: '#888', font: { size: 11 }, maxRotation: 45 },
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         },
                         y: {
                             ticks: {
-                                color: '#aaa',
+                                color: '#888',
+                                font: { size: 11 },
                                 callback: function(value) {
                                     return getCurrencySymbol() + formatUSD(value);
                                 }
                             },
-                            grid: { color: 'rgba(255,255,255,0.1)' }
+                            grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false }
                         }
                     }
                 }
@@ -5286,12 +5377,22 @@
             const sortedDates = Object.keys(timelineData).sort();
 
             timelineChart.data.labels = sortedDates.map(d => formatDate(d));
+            const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+            const timelineGradient = timelineCtx.createLinearGradient(0, 0, 0, 280);
+            timelineGradient.addColorStop(0, 'rgba(46, 213, 115, 0.4)');
+            timelineGradient.addColorStop(1, 'rgba(46, 213, 115, 0)');
             timelineChart.data.datasets = [{
                 data: sortedDates.map(d => convertCurrency(timelineData[d])),
                 borderColor: '#2ed573',
-                backgroundColor: 'rgba(46, 213, 115, 0.1)',
+                backgroundColor: timelineGradient,
                 fill: true,
-                tension: 0.3
+                tension: 0.4,
+                borderWidth: 3,
+                pointBackgroundColor: '#2ed573',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
             }];
             timelineChart.update();
 
@@ -5307,7 +5408,12 @@
             companyChart.data.labels = sortedCompanies.map(c => c[0]);
             companyChart.data.datasets = [{
                 data: sortedCompanies.map(c => convertCurrency(c[1])),
-                backgroundColor: chartColors
+                backgroundColor: chartColors.map(c => c + 'cc'),
+                borderColor: chartColors,
+                borderWidth: 2,
+                borderRadius: 6,
+                borderSkipped: false,
+                hoverBackgroundColor: chartColors
             }];
             companyChart.update();
 
@@ -5320,7 +5426,12 @@
             cryptoChart.data.labels = Object.keys(cryptoData);
             cryptoChart.data.datasets = [{
                 data: Object.values(cryptoData).map(v => convertCurrency(v)),
-                backgroundColor: chartColors
+                backgroundColor: chartColors,
+                borderColor: 'rgba(20, 25, 35, 0.8)',
+                borderWidth: 3,
+                hoverBorderColor: '#fff',
+                hoverBorderWidth: 2,
+                hoverOffset: 8
             }];
             cryptoChart.update();
 
@@ -5343,15 +5454,23 @@
             });
 
             cumulativeChart.data.labels = dateLabels.map(d => formatDate(d));
+            const cumulativeCtx = document.getElementById('cumulativeChart').getContext('2d');
+            const cumulativeGradient = cumulativeCtx.createLinearGradient(0, 0, 0, 280);
+            cumulativeGradient.addColorStop(0, 'rgba(0, 217, 255, 0.4)');
+            cumulativeGradient.addColorStop(0.5, 'rgba(0, 255, 136, 0.2)');
+            cumulativeGradient.addColorStop(1, 'rgba(0, 217, 255, 0)');
             cumulativeChart.data.datasets = [{
                 data: cumulativeData.map(v => convertCurrency(v)),
                 borderColor: '#00d9ff',
-                backgroundColor: 'rgba(0, 217, 255, 0.1)',
+                backgroundColor: cumulativeGradient,
                 fill: true,
-                tension: 0.3,
+                tension: 0.4,
+                borderWidth: 3,
                 pointBackgroundColor: '#00d9ff',
-                pointBorderColor: '#00d9ff',
-                pointRadius: 3
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 7
             }];
             cumulativeChart.update();
 
