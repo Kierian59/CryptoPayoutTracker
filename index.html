@@ -2942,16 +2942,12 @@
 
             <!-- Cumulative Earnings -->
             <div class="card">
-                <h2>Cumulative Earnings</h2>
-                <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px; padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
-                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">Total in USD</div>
-                        <div style="font-size: 2rem; font-weight: 700; color: var(--success-color);" id="cumulative-usd">$0</div>
-                    </div>
-                    <div style="flex: 1; min-width: 200px; padding: 20px; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color);">
-                        <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 8px;">Total in EUR</div>
-                        <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color);" id="cumulative-eur">€0</div>
-                    </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Cumulative Earnings</h2>
+                    <button id="cumulative-currency-toggle" class="currency-toggle-btn" onclick="toggleCumulativeCurrency()" title="Switch to EUR">€</button>
+                </div>
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--success-color);" id="cumulative-value">$0</div>
                 </div>
             </div>
 
@@ -4292,15 +4288,29 @@
         }
 
         function updateCumulativeEarnings(totalRevenue) {
-            const cumulativeUsd = getEl('cumulative-usd');
-            const cumulativeEur = getEl('cumulative-eur');
-
-            if (cumulativeUsd) {
-                cumulativeUsd.textContent = '$' + formatUSD(totalRevenue);
+            const cumulativeValue = getEl('cumulative-value');
+            if (cumulativeValue) {
+                if (cumulativeCurrency === 'EUR') {
+                    const eurValue = eurExchangeRate ? totalRevenue * eurExchangeRate : totalRevenue * 0.92;
+                    cumulativeValue.textContent = '€' + formatUSD(eurValue);
+                } else {
+                    cumulativeValue.textContent = '$' + formatUSD(totalRevenue);
+                }
             }
-            if (cumulativeEur) {
-                const eurValue = eurExchangeRate ? totalRevenue * eurExchangeRate : totalRevenue * 0.92;
-                cumulativeEur.textContent = '€' + formatUSD(eurValue);
+            updateCumulativeCurrencyButton();
+        }
+
+        window.toggleCumulativeCurrency = function() {
+            cumulativeCurrency = cumulativeCurrency === 'USD' ? 'EUR' : 'USD';
+            const totalRevenue = payouts.reduce((sum, p) => sum + (p.usd_sold || 0), 0);
+            updateCumulativeEarnings(totalRevenue);
+        };
+
+        function updateCumulativeCurrencyButton() {
+            const btn = getEl('cumulative-currency-toggle');
+            if (btn) {
+                btn.textContent = cumulativeCurrency === 'USD' ? '€' : '$';
+                btn.title = cumulativeCurrency === 'USD' ? 'Switch to EUR' : 'Switch to USD';
             }
         }
 
@@ -4578,6 +4588,7 @@
 
         // Currency settings
         var selectedCurrency = 'USD';
+        var cumulativeCurrency = 'USD';
         var eurExchangeRate = null;
 
         // Cache settings (TTL in milliseconds)
