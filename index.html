@@ -2951,43 +2951,46 @@
                 </div>
             </div>
 
-            <!-- Goal Tracking -->
-            <div class="card">
-                <h2>Monthly Goals</h2>
-                <div class="goal-section" style="margin-top: 0; padding-top: 0; border-top: none;">
-                    <div class="goal-header">
-                        <span class="goal-title">Revenue Goal</span>
-                        <span class="goal-value" id="goal-progress-text">$0 / $10,000</span>
+            <!-- Goals Row -->
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <!-- Monthly Goal Tracking -->
+                <div class="card" style="flex: 1; min-width: 300px;">
+                    <h2>Monthly Goals</h2>
+                    <div class="goal-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                        <div class="goal-header">
+                            <span class="goal-title">Revenue Goal</span>
+                            <span class="goal-value" id="goal-progress-text">$0 / $10,000</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar" id="goal-bar" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="goal-progress">
-                        <div class="goal-progress-bar" id="goal-bar" style="width: 0%"></div>
+                    <div class="goal-section">
+                        <div class="goal-header">
+                            <span class="goal-title">Payouts Goal</span>
+                            <span class="goal-value" id="payouts-goal-text">0 / 50</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar" id="payouts-goal-bar" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
-                <div class="goal-section">
-                    <div class="goal-header">
-                        <span class="goal-title">Payouts Goal</span>
-                        <span class="goal-value" id="payouts-goal-text">0 / 50</span>
-                    </div>
-                    <div class="goal-progress">
-                        <div class="goal-progress-bar" id="payouts-goal-bar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Yearly Goal Tracking -->
-            <div class="card">
-                <h2>Yearly Goal <span id="yearly-goal-year" style="font-size: 0.9rem; color: var(--text-secondary);"></span></h2>
-                <div class="goal-section" style="margin-top: 0; padding-top: 0; border-top: none;">
-                    <div class="goal-header">
-                        <span class="goal-title">Earnings Goal</span>
-                        <span class="goal-value" id="yearly-goal-text">$0 / $100,000</span>
-                    </div>
-                    <div class="goal-progress">
-                        <div class="goal-progress-bar yearly" id="yearly-goal-bar" style="width: 0%"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
-                        <span id="yearly-goal-percent">0% complete</span>
-                        <span id="yearly-goal-remaining">$100,000 remaining</span>
+                <!-- Yearly Goal Tracking -->
+                <div class="card" style="flex: 1; min-width: 300px;">
+                    <h2>Yearly Goal <span id="yearly-goal-year" style="font-size: 0.9rem; color: var(--text-secondary);"></span></h2>
+                    <div class="goal-section" style="margin-top: 0; padding-top: 0; border-top: none;">
+                        <div class="goal-header">
+                            <span class="goal-title">Earnings Goal</span>
+                            <span class="goal-value" id="yearly-goal-text">$0 / $100,000</span>
+                        </div>
+                        <div class="goal-progress">
+                            <div class="goal-progress-bar yearly" id="yearly-goal-bar" style="width: 0%"></div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.85rem; color: var(--text-secondary);">
+                            <span id="yearly-goal-percent">0% complete</span>
+                            <span id="yearly-goal-remaining">$100,000 remaining</span>
+                        </div>
                     </div>
                 </div>
             </div>
