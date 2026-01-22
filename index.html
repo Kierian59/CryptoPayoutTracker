@@ -3303,47 +3303,43 @@
                 <div id="tooltip-unlocks"></div>
             </div>
 
-            <!-- Add Event Form -->
-            <div class="card" style="margin-top: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleEventForm()">
-                    <h2 id="event-form-title" style="margin: 0;">Add Event</h2>
-                    <button type="button" id="event-form-toggle" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;">
-                        <span id="event-form-toggle-icon">&#9660;</span> Show
-                    </button>
-                </div>
-                <div id="event-form-container" style="margin-top: 20px; display: none;">
+            <!-- Add Event Modal -->
+            <div id="add-event-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+                <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3 id="event-modal-title" style="margin: 0; color: var(--text-primary);">Add Event</h3>
+                        <button onclick="closeEventModal()" style="background: transparent; border: none; color: var(--text-secondary); font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>
+                    </div>
                     <form id="crypto-event-form">
                         <input type="hidden" id="event-edit-id">
-                        <div class="vesting-form">
-                            <div class="form-group">
-                                <label for="event-name">Event Name</label>
-                                <input type="text" id="event-name" required placeholder="e.g., LayerZero Airdrop">
-                            </div>
-                            <div class="form-group">
-                                <label for="event-date">Date</label>
-                                <input type="date" id="event-date" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="event-type">Event Type</label>
-                                <select id="event-type" required>
-                                    <option value="">Select type...</option>
-                                    <option value="Airdrop">Airdrop</option>
-                                    <option value="Mainnet">Mainnet Launch</option>
-                                    <option value="NFT Launch">NFT Launch</option>
-                                    <option value="Token Launch">Token Launch (TGE)</option>
-                                    <option value="Testnet">Testnet</option>
-                                    <option value="Snapshot">Snapshot</option>
-                                    <option value="IDO/ICO">IDO / ICO</option>
-                                    <option value="Conference">Conference / Event</option>
-                                    <option value="AMA">AMA</option>
-                                    <option value="Deadline">Deadline</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="event-name" style="display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem;">Event Name</label>
+                            <input type="text" id="event-name" required placeholder="e.g., LayerZero Airdrop" style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);">
                         </div>
-                        <div class="form-actions" style="margin-top: 15px;">
-                            <button type="submit" class="btn btn-primary">Save Event</button>
-                            <button type="button" class="btn btn-secondary" onclick="document.getElementById('crypto-event-form').reset(); document.getElementById('event-edit-id').value=''; document.getElementById('event-form-title').textContent='Add Event';">Clear</button>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label for="event-date" style="display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem;">Date</label>
+                            <input type="date" id="event-date" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="event-type" style="display: block; margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem;">Event Type</label>
+                            <select id="event-type" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--input-bg); color: var(--text-primary);">
+                                <option value="">Select type...</option>
+                                <option value="Airdrop">Airdrop</option>
+                                <option value="Mainnet">Mainnet Launch</option>
+                                <option value="NFT Launch">NFT Launch</option>
+                                <option value="Token Launch">Token Launch (TGE)</option>
+                                <option value="Testnet">Testnet</option>
+                                <option value="Snapshot">Snapshot</option>
+                                <option value="IDO/ICO">IDO / ICO</option>
+                                <option value="Conference">Conference / Event</option>
+                                <option value="AMA">AMA</option>
+                                <option value="Deadline">Deadline</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">Save Event</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeEventModal()">Cancel</button>
                         </div>
                     </form>
                 </div>
@@ -6218,10 +6214,11 @@
                     cryptoEvents.push(event);
                 }
 
-                // Reset form
+                // Reset form and close modal
                 this.reset();
                 document.getElementById('event-edit-id').value = '';
-                document.getElementById('event-form-title').textContent = 'Add Event';
+                document.getElementById('event-modal-title').textContent = 'Add Event';
+                closeEventModal();
 
                 // Re-render calendar
                 renderVestingCalendar();
@@ -6239,14 +6236,11 @@
             document.getElementById('event-name').value = event.name;
             document.getElementById('event-date').value = event.date;
             document.getElementById('event-type').value = event.type;
-            document.getElementById('event-form-title').textContent = 'Edit Event';
+            document.getElementById('event-modal-title').textContent = 'Edit Event';
 
-            // Expand form if collapsed
-            const container = document.getElementById('event-form-container');
-            if (container) container.style.display = 'block';
-
-            // Scroll to form
-            document.getElementById('crypto-event-form')?.scrollIntoView({ behavior: 'smooth' });
+            // Open modal
+            openEventModal();
+            hideCalendarTooltip();
         };
 
         // Delete crypto event
@@ -6261,20 +6255,37 @@
             }
         };
 
-        // Toggle event form visibility
-        window.toggleEventForm = function() {
-            const container = document.getElementById('event-form-container');
-            const toggleBtn = document.getElementById('event-form-toggle');
-            const toggleIcon = document.getElementById('event-form-toggle-icon');
+        // Open event modal
+        window.openEventModal = function(dateStr) {
+            const modal = document.getElementById('add-event-modal');
+            modal.style.display = 'flex';
 
-            if (container.style.display === 'none') {
-                container.style.display = 'block';
-                toggleBtn.innerHTML = '<span id="event-form-toggle-icon">&#9650;</span> Hide';
-            } else {
-                container.style.display = 'none';
-                toggleBtn.innerHTML = '<span id="event-form-toggle-icon">&#9660;</span> Show';
+            // Reset form
+            document.getElementById('crypto-event-form').reset();
+            document.getElementById('event-edit-id').value = '';
+            document.getElementById('event-modal-title').textContent = 'Add Event';
+
+            // Pre-fill date if provided
+            if (dateStr) {
+                document.getElementById('event-date').value = dateStr;
             }
+
+            // Focus on name input
+            setTimeout(() => document.getElementById('event-name').focus(), 100);
         };
+
+        // Close event modal
+        window.closeEventModal = function() {
+            const modal = document.getElementById('add-event-modal');
+            modal.style.display = 'none';
+        };
+
+        // Close modal when clicking outside
+        document.getElementById('add-event-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEventModal();
+            }
+        });
 
         // ============================================
         // CAMPAIGNS FUNCTIONALITY
@@ -7705,10 +7716,14 @@
                 dayEl.appendChild(payoutBadge);
             }
 
-            // Add click event to show tooltip if there are unlocks, events, or payouts
+            // Add click event to show tooltip or add event
             if (hasUnlocks || hasEvents || hasPayouts) {
                 dayEl.addEventListener('click', (e) => showCalendarTooltip(e, dateStr, unlocks || [], events || [], payoutsForDay || []));
                 dayEl.addEventListener('mouseleave', hideCalendarTooltip);
+            } else if (!isOtherMonth) {
+                // Allow clicking empty days to add events
+                dayEl.style.cursor = 'pointer';
+                dayEl.addEventListener('click', () => openEventModal(dateStr));
             }
 
             return dayEl;
@@ -7777,6 +7792,13 @@
                     </div>
                 `}).join('');
             }
+
+            // Add "Add Event" button at the bottom
+            tooltipHtml += `
+                <div style="border-top: 1px solid var(--border-color); margin-top: 12px; padding-top: 12px;">
+                    <button onclick="openEventModal('${dateStr}'); hideCalendarTooltip();" style="width: 100%; padding: 8px; cursor: pointer; border: 1px dashed var(--border-color); background: transparent; color: var(--accent); border-radius: 6px; font-size: 0.85rem;">+ Add Event</button>
+                </div>
+            `;
 
             document.getElementById('tooltip-unlocks').innerHTML = tooltipHtml;
 
