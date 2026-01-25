@@ -5018,7 +5018,7 @@
 
         // Fetch Solana transaction using Solscan API
         async function fetchSolanaTransaction(txHash) {
-            const corsProxy = 'https://corsproxy.io/?';
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
             // Use Solscan public API with CORS proxy
             const response = await fetch(`${corsProxy}${encodeURIComponent('https://public-api.solscan.io/transaction/' + txHash)}`, {
                 headers: { 'Accept': 'application/json' }
@@ -5131,14 +5131,19 @@
 
         async function fetchFromBlockExplorer(txHash, explorer) {
             // Use CORS proxy to bypass browser restrictions
-            const corsProxy = 'https://corsproxy.io/?';
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
 
             // Get transaction details
             const txUrl = `${corsProxy}${encodeURIComponent(explorer.api + '?module=proxy&action=eth_getTransactionByHash&txhash=' + txHash)}`;
+            console.log('Fetching TX from:', explorer.name);
             const txResponse = await fetch(txUrl);
             const txData = await txResponse.json();
+            console.log('TX Response:', explorer.name, txData);
 
-            if (!txData.result || txData.result === null) return null;
+            if (!txData.result || txData.result === null) {
+                console.log('No result for', explorer.name);
+                return null;
+            }
             const tx = txData.result;
 
             // Get transaction receipt for token transfers
@@ -5202,7 +5207,7 @@
 
         // Fetch ERC20 token info using block explorer API
         async function fetchERC20TokenInfo(tokenAddress, apiUrl) {
-            const corsProxy = 'https://corsproxy.io/?';
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
             // Use the tokentx endpoint to get token info, or try the contract ABI endpoint
             const url = `${corsProxy}${encodeURIComponent(apiUrl + '?module=token&action=tokeninfo&contractaddress=' + tokenAddress)}`;
             const response = await fetch(url);
