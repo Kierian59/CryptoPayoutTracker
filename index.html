@@ -5090,23 +5090,26 @@
 
         // Fetch EVM transaction using public RPC
         async function fetchEVMTransaction(txHash) {
-            // Try multiple chains
+            // Try multiple chains with multiple RPC options each
             const chains = [
-                { name: 'Ethereum', rpc: 'https://rpc.ankr.com/eth', coingecko: 'ethereum' },
-                { name: 'Polygon', rpc: 'https://rpc.ankr.com/polygon', coingecko: 'matic-network' },
-                { name: 'BSC', rpc: 'https://rpc.ankr.com/bsc', coingecko: 'binancecoin' },
-                { name: 'Arbitrum', rpc: 'https://rpc.ankr.com/arbitrum', coingecko: 'ethereum' },
-                { name: 'Optimism', rpc: 'https://rpc.ankr.com/optimism', coingecko: 'ethereum' },
-                { name: 'Base', rpc: 'https://rpc.ankr.com/base', coingecko: 'ethereum' },
-                { name: 'Avalanche', rpc: 'https://rpc.ankr.com/avalanche', coingecko: 'avalanche-2' }
+                { name: 'Ethereum', rpcs: ['https://cloudflare-eth.com', 'https://eth.public-rpc.com', 'https://rpc.ankr.com/eth'], coingecko: 'ethereum' },
+                { name: 'Polygon', rpcs: ['https://polygon-rpc.com', 'https://rpc.ankr.com/polygon'], coingecko: 'matic-network' },
+                { name: 'BSC', rpcs: ['https://bsc-dataseed.binance.org', 'https://rpc.ankr.com/bsc'], coingecko: 'binancecoin' },
+                { name: 'Arbitrum', rpcs: ['https://arb1.arbitrum.io/rpc', 'https://rpc.ankr.com/arbitrum'], coingecko: 'ethereum' },
+                { name: 'Optimism', rpcs: ['https://mainnet.optimism.io', 'https://rpc.ankr.com/optimism'], coingecko: 'ethereum' },
+                { name: 'Base', rpcs: ['https://mainnet.base.org', 'https://rpc.ankr.com/base'], coingecko: 'ethereum' },
+                { name: 'Avalanche', rpcs: ['https://api.avax.network/ext/bc/C/rpc', 'https://rpc.ankr.com/avalanche'], coingecko: 'avalanche-2' }
             ];
 
             for (const chain of chains) {
-                try {
-                    const txData = await fetchEVMTransactionFromRPC(txHash, chain);
-                    if (txData) return txData;
-                } catch (e) {
-                    continue;
+                for (const rpc of chain.rpcs) {
+                    try {
+                        const txData = await fetchEVMTransactionFromRPC(txHash, { ...chain, rpc });
+                        if (txData) return txData;
+                    } catch (e) {
+                        console.log(`Failed on ${chain.name} (${rpc}):`, e.message);
+                        continue;
+                    }
                 }
             }
 
