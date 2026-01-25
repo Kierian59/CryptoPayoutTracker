@@ -5003,7 +5003,7 @@
 
         // Fetch Solana transaction using public RPC
         async function fetchSolanaTransaction(txHash) {
-            const rpcUrl = 'https://api.mainnet-beta.solana.com';
+            const rpcUrl = 'https://rpc.ankr.com/solana';
 
             const response = await fetch(rpcUrl, {
                 method: 'POST',
@@ -5116,13 +5116,13 @@
         async function fetchEVMTransaction(txHash) {
             // Try multiple chains
             const chains = [
-                { name: 'Ethereum', rpc: 'https://eth.llamarpc.com', coingecko: 'ethereum' },
-                { name: 'Polygon', rpc: 'https://polygon.llamarpc.com', coingecko: 'matic-network' },
-                { name: 'BSC', rpc: 'https://bsc.llamarpc.com', coingecko: 'binancecoin' },
-                { name: 'Arbitrum', rpc: 'https://arbitrum.llamarpc.com', coingecko: 'ethereum' },
-                { name: 'Optimism', rpc: 'https://optimism.llamarpc.com', coingecko: 'ethereum' },
-                { name: 'Base', rpc: 'https://base.llamarpc.com', coingecko: 'ethereum' },
-                { name: 'Avalanche', rpc: 'https://avalanche.llamarpc.com', coingecko: 'avalanche-2' }
+                { name: 'Ethereum', rpc: 'https://rpc.ankr.com/eth', coingecko: 'ethereum' },
+                { name: 'Polygon', rpc: 'https://rpc.ankr.com/polygon', coingecko: 'matic-network' },
+                { name: 'BSC', rpc: 'https://rpc.ankr.com/bsc', coingecko: 'binancecoin' },
+                { name: 'Arbitrum', rpc: 'https://rpc.ankr.com/arbitrum', coingecko: 'ethereum' },
+                { name: 'Optimism', rpc: 'https://rpc.ankr.com/optimism', coingecko: 'ethereum' },
+                { name: 'Base', rpc: 'https://rpc.ankr.com/base', coingecko: 'ethereum' },
+                { name: 'Avalanche', rpc: 'https://rpc.ankr.com/avalanche', coingecko: 'avalanche-2' }
             ];
 
             for (const chain of chains) {
