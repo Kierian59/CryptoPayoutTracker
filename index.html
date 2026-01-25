@@ -5150,14 +5150,17 @@
             const receiptUrl = `${corsProxy}${encodeURIComponent(explorer.api + '?module=proxy&action=eth_getTransactionReceipt&txhash=' + txHash)}`;
             const receiptResponse = await fetch(receiptUrl);
             const receiptData = await receiptResponse.json();
+            console.log('Receipt:', receiptData);
 
             // Get block for timestamp
             const blockUrl = `${corsProxy}${encodeURIComponent(explorer.api + '?module=proxy&action=eth_getBlockByNumber&tag=' + tx.blockNumber + '&boolean=false')}`;
             const blockResponse = await fetch(blockUrl);
             const blockData = await blockResponse.json();
+            console.log('Block:', blockData);
 
             const timestamp = blockData.result?.timestamp ? parseInt(blockData.result.timestamp, 16) : null;
             const date = timestamp ? new Date(timestamp * 1000).toISOString().split('T')[0] : null;
+            console.log('Date:', date);
 
             // Parse token transfers from logs (ERC20 Transfer event)
             const transferTopic = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
@@ -5166,22 +5169,27 @@
             let tokenAddress = null;
             let recipientWallet = tx.to;
 
+            console.log('Logs:', receiptData.result?.logs);
             if (receiptData.result?.logs) {
                 for (const log of receiptData.result.logs) {
+                    console.log('Checking log:', log.topics[0], 'vs', transferTopic);
                     if (log.topics[0] === transferTopic && log.topics.length >= 3) {
                         // ERC20 transfer: topics[1]=from, topics[2]=to, data=amount
                         tokenAddress = log.address;
+                        console.log('Token address:', tokenAddress, 'Raw data:', log.data);
                         const rawAmount = BigInt(log.data);
                         recipientWallet = '0x' + log.topics[2].slice(26);
 
                         // Try to get token info from explorer API
                         try {
                             const tokenInfo = await fetchERC20TokenInfo(tokenAddress, explorer.api);
+                            console.log('Token info:', tokenInfo);
                             if (tokenInfo) {
                                 tokenSymbol = tokenInfo.symbol;
                                 tokenAmount = Number(rawAmount) / Math.pow(10, tokenInfo.decimals);
                             }
                         } catch (e) {
+                            console.log('Token info error:', e);
                             tokenAmount = Number(rawAmount) / 1e18; // Default to 18 decimals
                         }
                         break;
