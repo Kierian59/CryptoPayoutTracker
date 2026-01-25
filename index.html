@@ -4948,7 +4948,7 @@
 
         // Fetch transaction data from blockchain
         async function fetchTransactionData() {
-            const txHash = document.getElementById('tx-hash').value.trim();
+            let txHash = document.getElementById('tx-hash').value.trim();
             const statusEl = document.getElementById('tx-status');
             const btnText = document.getElementById('fetch-tx-text');
             const btnLoading = document.getElementById('fetch-tx-loading');
@@ -4957,6 +4957,21 @@
                 statusEl.textContent = 'Please enter a transaction hash';
                 statusEl.style.color = '#f44336';
                 return;
+            }
+
+            // Extract hash from URL if user pasted a block explorer link
+            if (txHash.includes('/tx/')) {
+                const match = txHash.match(/\/tx\/(0x[a-fA-F0-9]+|[a-zA-Z0-9]+)/);
+                if (match) {
+                    txHash = match[1];
+                    document.getElementById('tx-hash').value = txHash;
+                }
+            } else if (txHash.includes('/transaction/')) {
+                const match = txHash.match(/\/transaction\/([a-zA-Z0-9]+)/);
+                if (match) {
+                    txHash = match[1];
+                    document.getElementById('tx-hash').value = txHash;
+                }
             }
 
             // Show loading state
