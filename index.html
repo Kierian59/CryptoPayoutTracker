@@ -5168,31 +5168,65 @@
             let tokenSymbol = null;
             let tokenAddress = null;
             let recipientWallet = tx.to;
+            const userAddress = tx.from.toLowerCase();
 
             console.log('Logs:', receiptData.result?.logs);
-            if (receiptData.result?.logs) {
-                for (const log of receiptData.result.logs) {
-                    console.log('Checking log:', log.topics[0], 'vs', transferTopic);
-                    if (log.topics[0] === transferTopic && log.topics.length >= 3) {
-                        // ERC20 transfer: topics[1]=from, topics[2]=to, data=amount
-                        tokenAddress = log.address;
-                        console.log('Token address:', tokenAddress, 'Raw data:', log.data);
-                        const rawAmount = BigInt(log.data);
-                        recipientWallet = '0x' + log.topics[2].slice(26);
+            console.log('User address (tx.from):', userAddress);
 
-                        // Try to get token info from explorer API
-                        try {
-                            const tokenInfo = await fetchERC20TokenInfo(tokenAddress, explorer.api);
-                            console.log('Token info:', tokenInfo);
-                            if (tokenInfo) {
-                                tokenSymbol = tokenInfo.symbol;
-                                tokenAmount = Number(rawAmount) / Math.pow(10, tokenInfo.decimals);
+            if (receiptData.result?.logs) {
+                // First pass: look for transfers where user RECEIVES tokens (for swaps/received)
+                for (const log of receiptData.result.logs) {
+                    if (log.topics[0] === transferTopic && log.topics.length >= 3) {
+                        const toAddress = '0x' + log.topics[2].slice(26).toLowerCase();
+                        console.log('Transfer to:', toAddress, 'user:', userAddress);
+
+                        // Prioritize transfers where user is recipient
+                        if (toAddress === userAddress) {
+                            tokenAddress = log.address;
+                            console.log('Found INCOMING transfer:', tokenAddress, 'Raw data:', log.data);
+                            const rawAmount = BigInt(log.data);
+                            recipientWallet = '0x' + log.topics[2].slice(26);
+
+                            // Try to get token info, but always set amount even if API fails
+                            let decimals = 18;
+                            try {
+                                const tokenInfo = await fetchERC20TokenInfo(tokenAddress, explorer.api);
+                                console.log('Token info:', tokenInfo);
+                                if (tokenInfo) {
+                                    tokenSymbol = tokenInfo.symbol;
+                                    decimals = tokenInfo.decimals;
+                                }
+                            } catch (e) {
+                                console.log('Token info error:', e);
                             }
-                        } catch (e) {
-                            console.log('Token info error:', e);
-                            tokenAmount = Number(rawAmount) / 1e18; // Default to 18 decimals
+                            tokenAmount = Number(rawAmount) / Math.pow(10, decimals);
+                            break;
                         }
-                        break;
+                    }
+                }
+
+                // Second pass: if no incoming transfer found, take any transfer (fallback)
+                if (!tokenAmount) {
+                    for (const log of receiptData.result.logs) {
+                        if (log.topics[0] === transferTopic && log.topics.length >= 3) {
+                            tokenAddress = log.address;
+                            console.log('Fallback transfer:', tokenAddress, 'Raw data:', log.data);
+                            const rawAmount = BigInt(log.data);
+                            recipientWallet = '0x' + log.topics[2].slice(26);
+
+                            let decimals = 18;
+                            try {
+                                const tokenInfo = await fetchERC20TokenInfo(tokenAddress, explorer.api);
+                                if (tokenInfo) {
+                                    tokenSymbol = tokenInfo.symbol;
+                                    decimals = tokenInfo.decimals;
+                                }
+                            } catch (e) {
+                                console.log('Fallback token info error:', e);
+                            }
+                            tokenAmount = Number(rawAmount) / Math.pow(10, decimals);
+                            break;
+                        }
                     }
                 }
             }
