@@ -5001,80 +5001,57 @@
             }
         }
 
-        // Fetch Solana transaction using public RPC
+        // Fetch Solana transaction using Solscan API
         async function fetchSolanaTransaction(txHash) {
-            const rpcUrl = 'https://rpc.ankr.com/solana';
-
-            const response = await fetch(rpcUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    jsonrpc: '2.0',
-                    id: 1,
-                    method: 'getTransaction',
-                    params: [txHash, { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0 }]
-                })
+            // Use Solscan public API (better CORS support)
+            const response = await fetch(`https://public-api.solscan.io/transaction/${txHash}`, {
+                headers: { 'Accept': 'application/json' }
             });
 
-            const data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error.message || 'Failed to fetch Solana transaction');
+            if (!response.ok) {
+                throw new Error('Transaction not found on Solana (status: ' + response.status + ')');
             }
 
-            if (!data.result) {
-                throw new Error('Transaction not found on Solana');
+            const tx = await response.json();
+
+            if (!tx || tx.error) {
+                throw new Error(tx?.error || 'Transaction not found on Solana');
             }
 
-            const tx = data.result;
             const blockTime = tx.blockTime ? new Date(tx.blockTime * 1000).toISOString().split('T')[0] : null;
 
-            // Parse token transfers from the transaction
+            // Parse from Solscan response format
             let tokenAmount = null;
             let tokenSymbol = null;
             let tokenMint = null;
             let recipientWallet = null;
 
-            // Look for token transfers in inner instructions and main instructions
-            const allInstructions = [
-                ...(tx.transaction?.message?.instructions || []),
-                ...(tx.meta?.innerInstructions?.flatMap(i => i.instructions) || [])
-            ];
-
-            for (const instruction of allInstructions) {
-                if (instruction.parsed?.type === 'transferChecked' || instruction.parsed?.type === 'transfer') {
-                    const info = instruction.parsed.info;
-                    if (info.tokenAmount) {
-                        tokenAmount = parseFloat(info.tokenAmount.uiAmountString || info.tokenAmount.uiAmount);
-                        tokenMint = info.mint;
-                    } else if (info.amount && info.decimals !== undefined) {
-                        tokenAmount = parseFloat(info.amount) / Math.pow(10, info.decimals);
-                        tokenMint = info.mint;
-                    } else if (info.lamports) {
-                        // SOL transfer
-                        tokenAmount = info.lamports / 1e9;
-                        tokenSymbol = 'SOL';
-                    }
-                    recipientWallet = info.destination || info.authority;
-                    break;
-                }
-            }
-
-            // Check for SOL transfer in post/pre balances if no token transfer found
-            if (!tokenAmount && tx.meta?.postBalances && tx.meta?.preBalances) {
-                const accountKeys = tx.transaction?.message?.accountKeys || [];
-                for (let i = 0; i < accountKeys.length; i++) {
-                    const diff = (tx.meta.postBalances[i] - tx.meta.preBalances[i]) / 1e9;
-                    if (diff > 0.001) { // Received SOL
-                        tokenAmount = diff;
-                        tokenSymbol = 'SOL';
-                        recipientWallet = accountKeys[i]?.pubkey || accountKeys[i];
+            // Check tokenBalances for token transfers (Solscan format)
+            if (tx.tokenBalances && tx.tokenBalances.length > 0) {
+                for (const balance of tx.tokenBalances) {
+                    const change = parseFloat(balance.amount?.postAmount || 0) - parseFloat(balance.amount?.preAmount || 0);
+                    if (change > 0) {
+                        tokenAmount = change / Math.pow(10, balance.token?.decimals || 0);
+                        tokenSymbol = balance.token?.symbol || null;
+                        tokenMint = balance.token?.tokenAddress || null;
+                        recipientWallet = balance.owner;
                         break;
                     }
                 }
             }
 
-            // Try to get token symbol from metadata if we have a mint
+            // Check for SOL transfer if no token transfer found
+            if (!tokenAmount && tx.lamport) {
+                tokenAmount = tx.lamport / 1e9;
+                tokenSymbol = 'SOL';
+            }
+
+            // Check signer as wallet if not found
+            if (!recipientWallet && tx.signer && tx.signer.length > 0) {
+                recipientWallet = tx.signer[0];
+            }
+
+            // Try to get token symbol from Jupiter if we have mint but no symbol
             if (tokenMint && !tokenSymbol) {
                 try {
                     const tokenInfo = await fetchSolanaTokenInfo(tokenMint);
@@ -5096,9 +5073,8 @@
             };
         }
 
-        // Fetch Solana token info
+        // Fetch Solana token info from Jupiter
         async function fetchSolanaTokenInfo(mint) {
-            // Try Jupiter token list (most comprehensive)
             try {
                 const response = await fetch(`https://token.jup.ag/strict`);
                 const tokens = await response.json();
