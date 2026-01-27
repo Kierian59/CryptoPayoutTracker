@@ -3041,8 +3041,14 @@
                 <!-- Transaction Lookup -->
                 <div class="tx-lookup-section" style="margin-bottom: 1.5rem; padding: 1rem; background: var(--card-bg); border: 1px dashed var(--border-color); border-radius: 8px;">
                     <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Auto-fill from Transaction</label>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                        <input type="text" id="user-wallet" placeholder="Your wallet address (for incoming detection)" style="flex: 1;">
+                        <button type="button" onclick="saveUserWallet()" class="btn btn-secondary" style="white-space: nowrap;" title="Save wallet to remember it">
+                            Save
+                        </button>
+                    </div>
                     <div style="display: flex; gap: 0.5rem;">
-                        <input type="text" id="tx-hash" placeholder="Paste transaction hash (Solana or EVM)" style="flex: 1;">
+                        <input type="text" id="tx-hash" placeholder="Paste transaction hash or block explorer URL" style="flex: 1;">
                         <button type="button" id="fetch-tx-btn" onclick="fetchTransactionData()" class="btn" style="white-space: nowrap;">
                             <span id="fetch-tx-text">Fetch TX</span>
                             <span id="fetch-tx-loading" style="display: none;">Loading...</span>
@@ -4805,6 +4811,7 @@
             // Initialize theme and settings
             initTheme();
             loadSettings();
+            loadUserWallet();
 
             // Check if sidebar should be collapsed
             if (localStorage.getItem('sidebarCollapsed') === 'true') {
@@ -5013,8 +5020,27 @@
                     if (txData.wallet) document.getElementById('wallet').value = txData.wallet;
                     if (txData.coingecko_id) document.getElementById('coingecko-id').value = txData.coingecko_id;
 
-                    statusEl.textContent = `Found: ${txData.amount || '?'} ${txData.crypto || 'tokens'} on ${txData.chain || 'Unknown chain'}`;
-                    statusEl.style.color = '#4caf50';
+                    // Show status with incoming/outgoing indicator
+                    const amount = txData.amount ? txData.amount.toLocaleString(undefined, {maximumFractionDigits: 6}) : '?';
+                    const token = txData.crypto || 'tokens';
+                    const chain = txData.chain || 'Unknown chain';
+
+                    if (txData.isIncoming === true) {
+                        statusEl.innerHTML = `<span style="color: #4caf50;">INCOMING</span> ${amount} ${token} on ${chain}`;
+                        statusEl.style.color = '#4caf50';
+                    } else if (txData.isIncoming === false) {
+                        statusEl.innerHTML = `<span style="color: #ff9800;">OUTGOING</span> ${amount} ${token} on ${chain} <small>(This is a send, not a payout)</small>`;
+                        statusEl.style.color = '#ff9800';
+                    } else {
+                        // Unknown direction (wallet not set)
+                        const userWallet = getUserWallet();
+                        if (!userWallet) {
+                            statusEl.innerHTML = `Found: ${amount} ${token} on ${chain} <small style="color: #ff9800;">(Set your wallet above for incoming/outgoing detection)</small>`;
+                        } else {
+                            statusEl.textContent = `Found: ${amount} ${token} on ${chain}`;
+                        }
+                        statusEl.style.color = '#4caf50';
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching transaction:', error);
@@ -5024,6 +5050,36 @@
                 btnText.style.display = 'inline';
                 btnLoading.style.display = 'none';
             }
+        }
+
+        // Save user wallet address for incoming/outgoing detection
+        function saveUserWallet() {
+            const wallet = document.getElementById('user-wallet').value.trim();
+            if (wallet) {
+                localStorage.setItem('cryptoPayoutTracker_userWallet', wallet.toLowerCase());
+                showToast('Wallet saved!', 'success');
+            } else {
+                localStorage.removeItem('cryptoPayoutTracker_userWallet');
+                showToast('Wallet cleared', 'info');
+            }
+        }
+
+        // Load user wallet on page load
+        function loadUserWallet() {
+            const savedWallet = localStorage.getItem('cryptoPayoutTracker_userWallet');
+            if (savedWallet) {
+                const walletInput = document.getElementById('user-wallet');
+                if (walletInput) {
+                    walletInput.value = savedWallet;
+                }
+            }
+        }
+
+        // Get user wallet (from input or localStorage)
+        function getUserWallet() {
+            const inputWallet = document.getElementById('user-wallet')?.value.trim();
+            if (inputWallet) return inputWallet.toLowerCase();
+            return localStorage.getItem('cryptoPayoutTracker_userWallet')?.toLowerCase() || null;
         }
 
         // CORS proxy list with fallbacks
@@ -5092,17 +5148,53 @@
             let tokenSymbol = null;
             let tokenMint = null;
             let recipientWallet = null;
+            let isIncoming = null;
+
+            // Get user wallet for incoming/outgoing detection
+            const userWallet = getUserWallet();
+            console.log('Solana - User wallet:', userWallet || '(not set)');
 
             // Check tokenBalances for token transfers (Solscan format)
             if (tx.tokenBalances && tx.tokenBalances.length > 0) {
-                for (const balance of tx.tokenBalances) {
-                    const change = parseFloat(balance.amount?.postAmount || 0) - parseFloat(balance.amount?.preAmount || 0);
-                    if (change > 0) {
-                        tokenAmount = change / Math.pow(10, balance.token?.decimals || 0);
-                        tokenSymbol = balance.token?.symbol || null;
-                        tokenMint = balance.token?.tokenAddress || null;
-                        recipientWallet = balance.owner;
-                        break;
+                // First pass: look for incoming transfers to user wallet
+                if (userWallet) {
+                    for (const balance of tx.tokenBalances) {
+                        const change = parseFloat(balance.amount?.postAmount || 0) - parseFloat(balance.amount?.preAmount || 0);
+                        const owner = balance.owner?.toLowerCase();
+
+                        if (owner === userWallet && change > 0) {
+                            // User RECEIVED tokens (incoming)
+                            tokenAmount = change / Math.pow(10, balance.token?.decimals || 0);
+                            tokenSymbol = balance.token?.symbol || null;
+                            tokenMint = balance.token?.tokenAddress || null;
+                            recipientWallet = balance.owner;
+                            isIncoming = true;
+                            console.log('Solana - Found INCOMING transfer:', tokenAmount, tokenSymbol);
+                            break;
+                        } else if (owner === userWallet && change < 0) {
+                            // User SENT tokens (outgoing)
+                            tokenAmount = Math.abs(change) / Math.pow(10, balance.token?.decimals || 0);
+                            tokenSymbol = balance.token?.symbol || null;
+                            tokenMint = balance.token?.tokenAddress || null;
+                            recipientWallet = balance.owner;
+                            isIncoming = false;
+                            console.log('Solana - Found OUTGOING transfer:', tokenAmount, tokenSymbol);
+                            break;
+                        }
+                    }
+                }
+
+                // Fallback: take any positive balance change
+                if (!tokenAmount) {
+                    for (const balance of tx.tokenBalances) {
+                        const change = parseFloat(balance.amount?.postAmount || 0) - parseFloat(balance.amount?.preAmount || 0);
+                        if (change > 0) {
+                            tokenAmount = change / Math.pow(10, balance.token?.decimals || 0);
+                            tokenSymbol = balance.token?.symbol || null;
+                            tokenMint = balance.token?.tokenAddress || null;
+                            recipientWallet = balance.owner;
+                            break;
+                        }
                     }
                 }
             }
@@ -5139,7 +5231,8 @@
                 crypto: tokenSymbol || (tokenMint ? tokenMint.slice(0, 8) + '...' : null),
                 chain: 'Solana',
                 wallet: recipientWallet,
-                coingecko_id: coingeckoId
+                coingecko_id: coingeckoId,
+                isIncoming: isIncoming
             };
         }
 
@@ -5385,24 +5478,31 @@
             let tokenSymbol = null;
             let tokenAddress = null;
             let recipientWallet = tx.to;
-            const userAddress = tx.from.toLowerCase();
+            let isIncoming = null; // true = incoming, false = outgoing, null = unknown
+
+            // Use user's saved wallet address, fallback to tx.from
+            const userWallet = getUserWallet();
+            const userAddress = userWallet || tx.from.toLowerCase();
 
             console.log('Logs:', receiptData.result?.logs);
-            console.log('User address (tx.from):', userAddress);
+            console.log('User wallet:', userWallet || '(not set, using tx.from)');
+            console.log('Checking address:', userAddress);
 
             if (receiptData.result?.logs) {
-                // First pass: look for transfers where user RECEIVES tokens (for swaps/received)
+                // First pass: look for transfers where user RECEIVES tokens (incoming)
                 for (const log of receiptData.result.logs) {
                     if (log.topics[0] === transferTopic && log.topics.length >= 3) {
+                        const fromAddress = '0x' + log.topics[1].slice(26).toLowerCase();
                         const toAddress = '0x' + log.topics[2].slice(26).toLowerCase();
-                        console.log('Transfer to:', toAddress, 'user:', userAddress);
+                        console.log('Transfer:', fromAddress, '->', toAddress);
 
-                        // Prioritize transfers where user is recipient
+                        // Prioritize transfers where user is recipient (INCOMING)
                         if (toAddress === userAddress) {
                             tokenAddress = log.address;
                             console.log('Found INCOMING transfer:', tokenAddress, 'Raw data:', log.data);
                             const rawAmount = BigInt(log.data);
                             recipientWallet = '0x' + log.topics[2].slice(26);
+                            isIncoming = true;
 
                             // Try to get token info, but always set amount even if API fails
                             let decimals = 18;
@@ -5422,7 +5522,39 @@
                     }
                 }
 
-                // Second pass: if no incoming transfer found, take any transfer (fallback)
+                // Second pass: look for transfers where user SENDS tokens (outgoing)
+                if (!tokenAmount) {
+                    for (const log of receiptData.result.logs) {
+                        if (log.topics[0] === transferTopic && log.topics.length >= 3) {
+                            const fromAddress = '0x' + log.topics[1].slice(26).toLowerCase();
+                            const toAddress = '0x' + log.topics[2].slice(26).toLowerCase();
+
+                            // Check if user is sender (OUTGOING)
+                            if (fromAddress === userAddress) {
+                                tokenAddress = log.address;
+                                console.log('Found OUTGOING transfer:', tokenAddress, 'Raw data:', log.data);
+                                const rawAmount = BigInt(log.data);
+                                recipientWallet = '0x' + log.topics[2].slice(26);
+                                isIncoming = false;
+
+                                let decimals = 18;
+                                try {
+                                    const tokenInfo = await fetchERC20TokenInfo(tokenAddress, explorer.api);
+                                    if (tokenInfo) {
+                                        tokenSymbol = tokenInfo.symbol;
+                                        decimals = tokenInfo.decimals;
+                                    }
+                                } catch (e) {
+                                    console.log('Token info error:', e);
+                                }
+                                tokenAmount = Number(rawAmount) / Math.pow(10, decimals);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Third pass: if still nothing, take any transfer (fallback when wallet not set)
                 if (!tokenAmount) {
                     for (const log of receiptData.result.logs) {
                         if (log.topics[0] === transferTopic && log.topics.length >= 3) {
@@ -5463,7 +5595,8 @@
                 crypto: tokenSymbol || (tokenAddress ? tokenAddress.slice(0, 10) + '...' : null),
                 chain: explorer.name,
                 wallet: recipientWallet,
-                coingecko_id: coingeckoId
+                coingecko_id: coingeckoId,
+                isIncoming: isIncoming
             };
         }
 
