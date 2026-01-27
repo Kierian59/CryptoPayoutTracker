@@ -3105,11 +3105,11 @@
                 </div>
             </div>
 
-            <!-- Quick Filter Chips -->
+            <!-- Category Filters -->
             <div class="card">
-                <h2>Quick Filters</h2>
+                <h2>Categories</h2>
                 <div class="filter-chips" id="crypto-filter-chips">
-                    <span class="filter-chip active" data-crypto="all">All Cryptos</span>
+                    <span class="filter-chip active" data-crypto="all">All Categories</span>
                     <!-- More chips populated dynamically -->
                 </div>
             </div>
@@ -7481,20 +7481,11 @@
             if (!chipsContainer) return;
 
             const categories = [...new Set(payouts.map(p => p.category).filter(c => c))];
-            const cryptos = [...new Set(payouts.map(p => p.crypto))];
 
-            let html = `<span class="filter-chip ${selectedCryptoFilter === 'all' ? 'active' : ''}" onclick="filterByCrypto('all')">All Cryptos</span>`;
-            cryptos.forEach(c => {
-                html += `<span class="filter-chip ${selectedCryptoFilter === c ? 'active' : ''}" onclick="filterByCrypto('${c}')">${c}</span>`;
+            let html = `<span class="filter-chip ${selectedCategoryFilter === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">All Categories</span>`;
+            categories.forEach(cat => {
+                html += `<span class="filter-chip ${selectedCategoryFilter === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat}</span>`;
             });
-
-            if (categories.length > 0) {
-                html += `<span style="color: var(--text-secondary); margin: 0 10px;">|</span>`;
-                html += `<span class="filter-chip ${selectedCategoryFilter === 'all' ? 'active' : ''}" onclick="filterByCategory('all')">All Categories</span>`;
-                categories.forEach(cat => {
-                    html += `<span class="filter-chip ${selectedCategoryFilter === cat ? 'active' : ''}" onclick="filterByCategory('${cat}')">${cat}</span>`;
-                });
-            }
 
             chipsContainer.innerHTML = html;
         }
