@@ -4183,6 +4183,10 @@
         var miniPayoutsChart, miniRevenueChart;
 
         function initMiniCharts() {
+            // Destroy existing mini charts if they exist
+            if (miniPayoutsChart) { miniPayoutsChart.destroy(); miniPayoutsChart = null; }
+            if (miniRevenueChart) { miniRevenueChart.destroy(); miniRevenueChart = null; }
+
             const payoutsCtx = document.getElementById('mini-payouts-chart');
             const revenueCtx = document.getElementById('mini-revenue-chart');
 
@@ -4947,6 +4951,12 @@
 
         // Initialize charts
         function initCharts() {
+            // Destroy existing charts if they exist (prevents "Canvas already in use" error)
+            if (timelineChart) { timelineChart.destroy(); timelineChart = null; }
+            if (companyChart) { companyChart.destroy(); companyChart = null; }
+            if (cryptoChart) { cryptoChart.destroy(); cryptoChart = null; }
+            if (cumulativeChart) { cumulativeChart.destroy(); cumulativeChart = null; }
+
             // Register the datalabels plugin
             Chart.register(ChartDataLabels);
 
