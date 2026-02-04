@@ -2927,7 +2927,7 @@
                 <!-- Total Payouts Widget -->
                 <div class="dashboard-card draggable" draggable="true" data-widget="payouts">
                     <div class="dashboard-card-header">
-                        <span class="dashboard-card-title">Total Payouts</span>
+                        <span class="dashboard-card-title">Monthly Payouts</span>
                         <span class="trend up" id="payouts-trend">+0%</span>
                     </div>
                     <div class="dashboard-card-value" id="dash-total-payouts">0</div>
@@ -2939,7 +2939,7 @@
                 <!-- Total Revenue Widget -->
                 <div class="dashboard-card draggable" draggable="true" data-widget="revenue">
                     <div class="dashboard-card-header">
-                        <span class="dashboard-card-title">Total Revenue</span>
+                        <span class="dashboard-card-title">Monthly Revenue</span>
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <button id="dash-currency-toggle" class="currency-toggle-btn" onclick="toggleDashboardCurrency()" title="Switch to EUR">€</button>
                             <span class="trend up" id="revenue-trend">+0%</span>
@@ -2954,7 +2954,7 @@
                 <!-- Projects Widget -->
                 <div class="dashboard-card draggable" draggable="true" data-widget="projects">
                     <div class="dashboard-card-header">
-                        <span class="dashboard-card-title">Active Projects</span>
+                        <span class="dashboard-card-title">Projects This Month</span>
                     </div>
                     <div class="dashboard-card-value" id="dash-projects">0</div>
                     <div class="filter-chips" id="project-chips">
@@ -2965,7 +2965,7 @@
                 <!-- Recent Activity Widget -->
                 <div class="dashboard-card draggable" draggable="true" data-widget="activity">
                     <div class="dashboard-card-header">
-                        <span class="dashboard-card-title">Recent Activity</span>
+                        <span class="dashboard-card-title">Activity This Month</span>
                     </div>
                     <div class="recent-activity" id="recent-activity">
                         <!-- Activity items populated dynamically -->
@@ -4239,21 +4239,7 @@
 
         // Dashboard Updates
         function updateDashboard() {
-            // Update values
-            const totalPayouts = payouts.length;
-            const totalRevenue = payouts.reduce((sum, p) => sum + (p.usd_sold || 0), 0);
-            const uniqueProjects = new Set(payouts.map(p => p.company.toLowerCase())).size;
-
-            const elDashPayouts = getEl('dash-total-payouts');
-            const elDashRevenue = getEl('dash-total-revenue');
-            const elDashProjects = getEl('dash-projects');
-
-            if (elDashPayouts) elDashPayouts.textContent = totalPayouts;
-            if (elDashRevenue) elDashRevenue.textContent = getCurrencySymbol() + formatUSD(convertCurrency(totalRevenue));
-            if (elDashProjects) elDashProjects.textContent = uniqueProjects;
-            updateDashboardCurrencyButton();
-
-            // Calculate trends (compare to previous month)
+            // Calculate current month data
             const now = new Date();
             const thisMonth = now.toISOString().substring(0, 7);
             const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).toISOString().substring(0, 7);
@@ -4261,13 +4247,30 @@
             const thisMonthPayouts = payouts.filter(p => p.date.startsWith(thisMonth));
             const lastMonthPayouts = payouts.filter(p => p.date.startsWith(lastMonth));
 
+            // Monthly stats
+            const monthlyPayoutsCount = thisMonthPayouts.length;
+            const monthlyRevenue = thisMonthPayouts.reduce((sum, p) => sum + (p.usd_sold || 0), 0);
+            const monthlyProjects = new Set(thisMonthPayouts.map(p => p.company.toLowerCase())).size;
+
+            // Total revenue for cumulative earnings
+            const totalRevenue = payouts.reduce((sum, p) => sum + (p.usd_sold || 0), 0);
+
+            const elDashPayouts = getEl('dash-total-payouts');
+            const elDashRevenue = getEl('dash-total-revenue');
+            const elDashProjects = getEl('dash-projects');
+
+            if (elDashPayouts) elDashPayouts.textContent = monthlyPayoutsCount;
+            if (elDashRevenue) elDashRevenue.textContent = getCurrencySymbol() + formatUSD(convertCurrency(monthlyRevenue));
+            if (elDashProjects) elDashProjects.textContent = monthlyProjects;
+            updateDashboardCurrencyButton();
+
+            // Calculate trends (compare to previous month)
             const payoutsTrend = lastMonthPayouts.length > 0
-                ? ((thisMonthPayouts.length - lastMonthPayouts.length) / lastMonthPayouts.length * 100).toFixed(0)
+                ? ((monthlyPayoutsCount - lastMonthPayouts.length) / lastMonthPayouts.length * 100).toFixed(0)
                 : 0;
-            const thisMonthRev = thisMonthPayouts.reduce((s, p) => s + (p.usd_sold || 0), 0);
             const lastMonthRev = lastMonthPayouts.reduce((s, p) => s + (p.usd_sold || 0), 0);
             const revenueTrend = lastMonthRev > 0
-                ? ((thisMonthRev - lastMonthRev) / lastMonthRev * 100).toFixed(0)
+                ? ((monthlyRevenue - lastMonthRev) / lastMonthRev * 100).toFixed(0)
                 : 0;
 
             const payoutsTrendEl = getEl('payouts-trend');
@@ -4282,20 +4285,20 @@
                 revenueTrendEl.className = 'trend ' + (revenueTrend >= 0 ? 'up' : 'down');
             }
 
-            // Update project chips
+            // Update project chips (this month's projects)
             const projectChips = getEl('project-chips');
             if (projectChips) {
-                const projects = [...new Set(payouts.map(p => p.company))].slice(0, 5);
+                const projects = [...new Set(thisMonthPayouts.map(p => p.company))].slice(0, 5);
                 projectChips.innerHTML = projects.map(p =>
                     `<span class="filter-chip" onclick="filterByProject('${p}')">${p}</span>`
-                ).join('');
+                ).join('') || '<span style="color: var(--text-secondary); font-size: 0.85rem;">No projects this month</span>';
             }
 
-            // Update recent activity
+            // Update monthly activity
             const recentActivity = getEl('recent-activity');
             if (recentActivity) {
-                const recent = payouts.slice(0, 5);
-                recentActivity.innerHTML = recent.map(p => `
+                const monthlyActivity = thisMonthPayouts.slice(0, 5);
+                recentActivity.innerHTML = monthlyActivity.map(p => `
                     <div class="activity-item">
                         <div class="activity-icon">${p.crypto.charAt(0)}</div>
                         <div class="activity-details">
@@ -4304,7 +4307,7 @@
                         </div>
                         <div class="activity-amount">${p.usd_sold ? getCurrencySymbol() + formatUSD(convertCurrency(p.usd_sold)) : '-'}</div>
                     </div>
-                `).join('') || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No activity yet</div>';
+                `).join('') || '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">No activity this month</div>';
             }
 
             // Update goals
