@@ -15,13 +15,51 @@
             --bg-card-hover: rgba(255, 255, 255, 0.08);
             --text-primary: #e0e0e0;
             --text-secondary: #aaa;
+            --text-muted: #777;
             --accent: #00d9ff;
+            --accent-light: rgba(0, 217, 255, 0.15);
             --accent-green: #2ed573;
+            --accent-green-light: rgba(46, 213, 115, 0.15);
             --accent-red: #ff4757;
+            --accent-red-light: rgba(255, 71, 87, 0.15);
             --accent-orange: #ffa502;
+            --accent-orange-light: rgba(255, 165, 2, 0.15);
             --border-color: rgba(255, 255, 255, 0.1);
+            --border-color-hover: rgba(255, 255, 255, 0.2);
             --sidebar-width: 260px;
             --sidebar-collapsed: 70px;
+
+            /* Spacing system */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+
+            /* Shadows */
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.25);
+            --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.3);
+
+            /* Transitions */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.25s ease;
+            --transition-slow: 0.4s ease;
+
+            /* Border radius */
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            /* Input styling */
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --input-focus-border: var(--accent);
+
+            /* Success color alias */
+            --success-color: var(--accent-green);
         }
 
         [data-theme="light"] {
@@ -31,7 +69,19 @@
             --bg-card-hover: rgba(0, 0, 0, 0.06);
             --text-primary: #1a1a2e;
             --text-secondary: #666;
+            --text-muted: #999;
             --border-color: rgba(0, 0, 0, 0.1);
+            --border-color-hover: rgba(0, 0, 0, 0.2);
+            --accent-light: rgba(0, 217, 255, 0.1);
+            --accent-green-light: rgba(46, 213, 115, 0.1);
+            --accent-red-light: rgba(255, 71, 87, 0.1);
+            --accent-orange-light: rgba(255, 165, 2, 0.1);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.2);
+            --input-bg: rgba(0, 0, 0, 0.05);
+            --input-border: rgba(0, 0, 0, 0.15);
         }
 
         * {
@@ -147,22 +197,47 @@
             align-items: center;
             gap: 12px;
             padding: 12px 15px;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 5px;
+            transition: all var(--transition-fast);
+            margin-bottom: 6px;
             text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--accent);
+            border-radius: 0 2px 2px 0;
+            transition: height var(--transition-fast);
         }
 
         .nav-item:hover {
-            background: rgba(0, 217, 255, 0.1);
+            background: var(--accent-light);
             color: var(--accent);
+            padding-left: 18px;
+        }
+
+        .nav-item:hover::before {
+            height: 60%;
         }
 
         .nav-item.active {
             background: rgba(0, 217, 255, 0.2);
             color: var(--accent);
+            padding-left: 18px;
+        }
+
+        .nav-item.active::before {
+            height: 70%;
         }
 
         .nav-icon {
@@ -446,25 +521,46 @@
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
             animation: fadeInUp 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
         }
 
         .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-            border-color: rgba(0, 217, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(0, 217, 255, 0.08);
+            border-color: var(--border-color-hover);
         }
 
         .card h2 {
-            margin-bottom: 20px;
+            margin-bottom: var(--space-md);
             color: var(--accent);
-            font-size: 1.2rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .card.success-flash {
+            animation: borderGlow 1s ease;
         }
 
         /* Skeleton Loading */
@@ -494,6 +590,48 @@
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        @keyframes progressBar {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        @keyframes highlightRow {
+            0% { background: var(--accent-green-light); }
+            100% { background: transparent; }
+        }
+
+        @keyframes countUp {
+            from { opacity: 0.5; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { border-color: var(--accent); box-shadow: 0 0 5px var(--accent-light); }
+            50% { border-color: var(--accent-green); box-shadow: 0 0 15px var(--accent-green-light); }
         }
 
         /* Quick Filter Chips */
@@ -765,21 +903,32 @@
             padding: 12px 20px;
             background: transparent;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             color: var(--text-secondary);
             cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            transition: all var(--transition-fast);
+            position: relative;
         }
 
         .main-tab:hover {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+        }
+
+        .main-tab:active {
+            transform: scale(0.98);
         }
 
         .main-tab.active {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), #0099cc);
             color: #000;
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 217, 255, 0.3);
+        }
+
+        .main-tab.active:hover {
+            background: linear-gradient(135deg, var(--accent), #0099cc);
         }
 
         .tab-content {
@@ -802,9 +951,34 @@
         .dashboard-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
             border: 1px solid var(--border-color);
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-green));
+            opacity: 0;
+            transition: opacity var(--transition-normal);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-color-hover);
+        }
+
+        .dashboard-card:hover::before {
+            opacity: 1;
         }
 
         .dashboard-card-header {
@@ -820,9 +994,15 @@
         }
 
         .dashboard-card-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: var(--accent);
+            transition: all var(--transition-fast);
+            line-height: 1.2;
+        }
+
+        .dashboard-card-value.updating {
+            animation: countUp 0.4s ease-out;
         }
 
         .dashboard-card-value.green {
@@ -831,7 +1011,7 @@
 
         .mini-chart {
             height: 60px;
-            margin-top: 10px;
+            margin-top: var(--space-md);
         }
 
         .recent-activity {
@@ -884,61 +1064,205 @@
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
+            gap: var(--space-md);
+        }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            margin-bottom: var(--space-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-section-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: var(--space-md);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .form-group label {
-            margin-bottom: 6px;
+            margin-bottom: var(--space-sm);
             font-size: 0.9rem;
-            color: #aaa;
+            color: var(--text-secondary);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: var(--space-xs);
+        }
+
+        .form-group label .label-icon {
+            opacity: 0.6;
+            font-size: 0.85rem;
+        }
+
+        .form-group .helper-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: var(--space-xs);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper .input-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: color var(--transition-fast);
+        }
+
+        .input-wrapper input:focus + .input-icon,
+        .input-wrapper input:not(:placeholder-shown) + .input-icon {
+            color: var(--accent);
+        }
+
+        .input-wrapper input {
+            padding-left: 40px;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
-            padding: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
+            padding: 12px 14px;
+            border: 1px solid var(--input-border);
+            border-radius: var(--radius-sm);
+            background: var(--input-bg);
+            color: var(--text-primary);
             font-size: 1rem;
-            transition: border-color 0.2s;
+            transition: all var(--transition-fast);
+            width: 100%;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: var(--border-color-hover);
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #00d9ff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
         }
 
         .form-group.full-width {
             grid-column: 1 / -1;
         }
 
+        .form-group.has-error input,
+        .form-group.has-error select {
+            border-color: var(--accent-red);
+            animation: shake 0.4s ease;
+        }
+
+        .form-group .error-message {
+            color: var(--accent-red);
+            font-size: 0.8rem;
+            margin-top: var(--space-xs);
+            display: none;
+        }
+
+        .form-group.has-error .error-message {
+            display: block;
+        }
+
+        .form-group.is-valid input {
+            border-color: var(--accent-green);
+        }
+
+        .form-group .valid-indicator {
+            position: absolute;
+            right: 12px;
+            top: 38px;
+            color: var(--accent-green);
+            font-size: 1rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all var(--transition-fast);
+        }
+
+        .form-group.is-valid .valid-indicator {
+            opacity: 1;
+            transform: scale(1);
+        }
+
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-size: 1rem;
             font-weight: 600;
-            transition: all 0.2s;
+            transition: all var(--transition-fast);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            background: linear-gradient(135deg, var(--accent), #0099cc);
             color: #000;
         }
 
-        .btn-primary:hover {
+        .btn-primary:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: translateY(0) scale(0.97);
+        }
+
+        .btn .btn-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: var(--space-sm);
+        }
+
+        .btn.loading .btn-spinner {
+            display: inline-block;
+        }
+
+        .btn.loading .btn-text {
+            opacity: 0.7;
         }
 
         .btn-danger {
@@ -984,6 +1308,48 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 0.75rem;
+        }
+
+        .recurring-badge {
+            display: inline-block;
+            background: rgba(0, 217, 255, 0.2);
+            color: #00d9ff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            text-transform: capitalize;
+        }
+
+        .recurring-expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .recurring-expense-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .recurring-expense-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .recurring-expense-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
         .form-actions {
             margin-top: 20px;
             display: flex;
@@ -992,33 +1358,88 @@
 
         .table-container {
             overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
         }
 
         th, td {
-            padding: 12px;
+            padding: 14px 16px;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-color);
         }
 
         th {
-            background: rgba(0, 217, 255, 0.1);
-            color: #00d9ff;
+            background: var(--accent-light);
+            color: var(--accent);
             font-weight: 600;
             cursor: pointer;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            white-space: nowrap;
+            transition: background var(--transition-fast);
+            user-select: none;
+        }
+
+        th::after {
+            content: '';
+            display: inline-block;
+            width: 0;
+            height: 0;
+            margin-left: 6px;
+            vertical-align: middle;
+            opacity: 0.4;
+        }
+
+        th.sort-asc::after {
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 5px solid currentColor;
+            opacity: 1;
+        }
+
+        th.sort-desc::after {
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid currentColor;
+            opacity: 1;
         }
 
         th:hover {
-            background: rgba(0, 217, 255, 0.2);
+            background: rgba(0, 217, 255, 0.25);
         }
 
-        tr:hover {
-            background: rgba(255, 255, 255, 0.05);
+        tbody tr {
+            transition: all var(--transition-fast);
+        }
+
+        tbody tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        tbody tr:hover {
+            background: var(--accent-light);
+        }
+
+        tbody tr.highlight-new {
+            animation: highlightRow 2s ease-out;
+        }
+
+        tbody tr.deleting {
+            animation: slideOutRight 0.4s ease forwards;
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        td:last-child {
+            white-space: nowrap;
         }
 
         .stats {
@@ -1029,20 +1450,38 @@
         }
 
         .stat-box {
-            background: rgba(0, 217, 255, 0.1);
-            padding: 15px;
-            border-radius: 12px;
+            background: var(--accent-light);
+            padding: var(--space-md);
+            border-radius: var(--radius-md);
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all var(--transition-normal);
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            border: 1px solid transparent;
+        }
+
+        .stat-box::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-green));
+            transform: scaleX(0);
+            transition: transform var(--transition-normal);
         }
 
         .stat-box:hover {
-            background: rgba(0, 217, 255, 0.15);
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 217, 255, 0.2);
+            background: rgba(0, 217, 255, 0.18);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--accent-light);
+        }
+
+        .stat-box:hover::before {
+            transform: scaleX(1);
         }
 
         .stat-box .value {
@@ -1057,6 +1496,10 @@
 
         .stat-box .value.usd {
             color: var(--accent-green);
+        }
+
+        .stat-box .value.expense-red {
+            color: #ff6b6b;
         }
 
         .stat-box .label {
@@ -1111,8 +1554,105 @@
 
         .no-data {
             text-align: center;
-            padding: 40px;
-            color: #666;
+            padding: 60px 40px;
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+            opacity: 0.3;
+        }
+
+        .empty-state-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-sm);
+        }
+
+        .empty-state-text {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-lg);
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        .empty-state .btn {
+            margin-top: var(--space-sm);
+        }
+
+        /* Tooltips */
+        [data-tooltip] {
+            position: relative;
+            cursor: help;
+        }
+
+        [data-tooltip]::before {
+            content: attr(data-tooltip-text);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-5px);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-fast);
+            z-index: 1000;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            max-width: 250px;
+            white-space: normal;
+            text-align: left;
+        }
+
+        [data-tooltip]::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--bg-secondary);
+            opacity: 0;
+            visibility: hidden;
+            transition: all var(--transition-fast);
+        }
+
+        [data-tooltip]:hover::before,
+        [data-tooltip]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Info icon tooltip trigger */
+        .info-tooltip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--accent-light);
+            color: var(--accent);
+            border-radius: 50%;
+            font-size: 0.7rem;
+            font-weight: bold;
+            cursor: help;
+            margin-left: 4px;
         }
 
         .header-actions {
@@ -2708,12 +3248,59 @@
             transform: translateX(-50%) translateY(100px);
             background: var(--accent-green);
             color: #000;
-            padding: 15px 25px;
-            border-radius: 10px;
+            padding: 0;
+            border-radius: var(--radius-md);
             font-weight: 500;
             z-index: 3001;
             opacity: 0;
             transition: all 0.3s;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            min-width: 280px;
+            max-width: 400px;
+        }
+
+        .toast-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+        }
+
+        .toast-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            padding: 4px;
+            transition: opacity var(--transition-fast);
+        }
+
+        .toast-close:hover {
+            opacity: 1;
+        }
+
+        .toast-progress {
+            height: 3px;
+            background: rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+
+        .toast-progress-bar {
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            animation: progressBar 3s linear forwards;
         }
 
         .toast.show {
@@ -2724,6 +3311,16 @@
         .toast.error {
             background: var(--accent-red);
             color: #fff;
+        }
+
+        .toast.warning {
+            background: var(--accent-orange);
+            color: #000;
+        }
+
+        .toast.info {
+            background: var(--accent);
+            color: #000;
         }
     </style>
 </head>
@@ -2804,6 +3401,10 @@
             <div class="nav-item" data-tab="campaigns" onclick="switchMainTab('campaigns')">
                 <span class="nav-icon">&#128230;</span>
                 <span class="nav-label">Campaigns</span>
+            </div>
+            <div class="nav-item" data-tab="expenses" onclick="switchMainTab('expenses')">
+                <span class="nav-icon">&#128176;</span>
+                <span class="nav-label">Expenses</span>
             </div>
             <div class="nav-item" data-tab="settings" onclick="switchMainTab('settings')">
                 <span class="nav-icon">&#9881;</span>
@@ -2918,6 +3519,7 @@
             <button class="main-tab" data-tab="history" onclick="switchMainTab('history')">History</button>
             <button class="main-tab" data-tab="vesting" onclick="switchMainTab('vesting')">Events & Vesting</button>
             <button class="main-tab" data-tab="campaigns" onclick="switchMainTab('campaigns')">Campaigns</button>
+            <button class="main-tab" data-tab="expenses" onclick="switchMainTab('expenses')">Expenses</button>
             <button class="main-tab" data-tab="settings" onclick="switchMainTab('settings')">Settings</button>
         </div>
 
@@ -3034,60 +3636,96 @@
 
         <!-- Entry Form -->
         <div class="card">
-            <h2 id="form-title">Add New Payout</h2>
+            <h2 id="form-title"><span class="card-icon">&#128178;</span> Add New Payout</h2>
             <form id="payout-form">
                 <input type="hidden" id="edit-id">
 
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="company">Project</label>
-                        <input type="text" id="company" required placeholder="e.g., Coinbase">
-                    </div>
-                    <div class="form-group">
-                        <label for="date">Date</label>
-                        <input type="date" id="date" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="amount">Amount of Tokens</label>
-                        <input type="number" id="amount" step="any" required placeholder="0.00">
-                    </div>
-                    <div class="form-group">
-                        <label for="crypto">Cryptocurrency</label>
-                        <input type="text" id="crypto" required placeholder="e.g., BTC, ETH, SOL...">
-                    </div>
-                    <div class="form-group">
-                        <label for="coingecko-id">CoinGecko ID (optional)</label>
-                        <input type="text" id="coingecko-id" placeholder="e.g., bitcoin, ethereum">
-                    </div>
-                    <div class="form-group">
-                        <label for="usd-sold">Amount Sold (USD)</label>
-                        <input type="number" id="usd-sold" step="any" placeholder="0.00" oninput="updateEurPreview()">
-                        <div class="eur-preview" id="eur-preview"></div>
-                    </div>
-                    <div class="form-group">
-                        <label for="chain">Chain (optional)</label>
-                        <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC...">
-                    </div>
-                    <div class="form-group">
-                        <label for="category">Category</label>
-                        <select id="category">
-                            <option value="">Select category...</option>
-                            <option value="Airdrop">Airdrop</option>
-                            <option value="Paid Deal">Paid Deal</option>
-                            <option value="Staking">Staking</option>
-                            <option value="Mining">Mining</option>
-                            <option value="Trading">Trading</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="wallet">Wallet Address (optional)</label>
-                        <input type="text" id="wallet" placeholder="0x... or wallet address">
+                <!-- Basic Info Section -->
+                <div class="form-section">
+                    <div class="form-section-title"><span>&#128203;</span> Basic Information</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="company"><span class="label-icon">&#128188;</span> Project</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="company" required placeholder="Enter project name (e.g., Uniswap, Aave)">
+                            </div>
+                            <span class="valid-indicator">&#10003;</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="date"><span class="label-icon">&#128197;</span> Date</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="category"><span class="label-icon">&#127991;</span> Category</label>
+                            <select id="category">
+                                <option value="">Select category...</option>
+                                <option value="Airdrop">Airdrop</option>
+                                <option value="Paid Deal">Paid Deal</option>
+                                <option value="Staking">Staking</option>
+                                <option value="Mining">Mining</option>
+                                <option value="Trading">Trading</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Token Details Section -->
+                <div class="form-section">
+                    <div class="form-section-title"><span>&#129689;</span> Token Details</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="amount"><span class="label-icon">&#128178;</span> Amount of Tokens</label>
+                            <input type="number" id="amount" step="any" required placeholder="Enter token amount">
+                            <span class="helper-text">The number of tokens received</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="crypto"><span class="label-icon">&#9883;</span> Cryptocurrency</label>
+                            <input type="text" id="crypto" required placeholder="Token symbol (e.g., BTC, ETH, SOL)">
+                        </div>
+                        <div class="form-group">
+                            <label for="coingecko-id"><span class="label-icon">&#128202;</span> CoinGecko ID</label>
+                            <input type="text" id="coingecko-id" placeholder="e.g., bitcoin, ethereum">
+                            <span class="helper-text" data-tooltip="coingecko">Used to fetch live price data. Find at coingecko.com</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Section -->
+                <div class="form-section">
+                    <div class="form-section-title"><span>&#128176;</span> Financial</div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="usd-sold"><span class="label-icon">&#128181;</span> Amount Sold (USD)</label>
+                            <input type="number" id="usd-sold" step="any" placeholder="Enter USD value" oninput="updateEurPreview()">
+                            <div class="eur-preview" id="eur-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="chain"><span class="label-icon">&#128279;</span> Chain</label>
+                            <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC">
+                            <span class="helper-text">The blockchain network</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Optional Section -->
+                <div class="form-section" style="opacity: 0.85;">
+                    <div class="form-section-title"><span>&#128203;</span> Optional Details</div>
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="wallet"><span class="label-icon">&#128091;</span> Wallet Address</label>
+                            <input type="text" id="wallet" placeholder="0x... or your wallet address">
+                            <span class="helper-text">Your receiving wallet address</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="form-actions">
-                    <button type="submit" class="btn btn-primary" id="submit-btn">Add Payout</button>
-                    <button type="button" class="btn" id="cancel-btn" style="display:none; background: #666;">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text">Add Payout</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancel-btn" style="display:none;">Cancel</button>
                 </div>
             </form>
         </div>
@@ -3238,7 +3876,14 @@
                     <tbody id="payout-body">
                     </tbody>
                 </table>
-                <div class="no-data" id="no-data">No payouts recorded yet. Add your first payout above!</div>
+                <div class="empty-state" id="no-data">
+                    <div class="empty-state-icon">&#128200;</div>
+                    <div class="empty-state-title">No payouts yet</div>
+                    <div class="empty-state-text">Start tracking your crypto earnings by adding your first payout. You'll see all your transactions here.</div>
+                    <button class="btn btn-primary" onclick="switchMainTab('add-payout')">
+                        <span class="btn-text">&#43; Add Your First Payout</span>
+                    </button>
+                </div>
             </div>
         </div>
         </div>
@@ -3598,6 +4243,138 @@
         </div>
         <!-- End Campaigns Tab -->
 
+        <!-- Expenses Tab -->
+        <div class="tab-content" id="tab-expenses">
+            <!-- Expense Summary Stats -->
+            <div class="card">
+                <h2>Monthly Expense Summary</h2>
+                <div class="expense-month-selector" style="margin-bottom: 15px;">
+                    <label for="expense-month-filter">Month: </label>
+                    <input type="month" id="expense-month-filter" onchange="renderExpensesTab()">
+                </div>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div class="value expense-red" id="total-expenses-count">0</div>
+                        <div class="label">Total Expenses</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value expense-red" id="total-expenses-amount">$0.00</div>
+                        <div class="label">Total Amount</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="avg-expense-amount">$0.00</div>
+                        <div class="label">Average Expense</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="value" id="top-expense-category">-</div>
+                        <div class="label">Top Category</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Expense Form -->
+            <div class="card">
+                <h2 id="expense-form-title">Add New Expense</h2>
+                <form id="expense-form">
+                    <input type="hidden" id="expense-edit-id">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="expense-date">Date</label>
+                            <input type="date" id="expense-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-category">Category</label>
+                            <select id="expense-category" required>
+                                <option value="">Select category...</option>
+                                <optgroup label="Crypto">
+                                    <option value="Gas Fees">Gas Fees</option>
+                                    <option value="Trading Fees">Trading Fees</option>
+                                    <option value="Hardware Wallet">Hardware Wallet</option>
+                                    <option value="Mining Costs">Mining Costs</option>
+                                    <option value="Staking Fees">Staking Fees</option>
+                                    <option value="Crypto Subscriptions">Crypto Subscriptions</option>
+                                </optgroup>
+                                <optgroup label="Business">
+                                    <option value="Travel">Travel</option>
+                                    <option value="Equipment">Equipment</option>
+                                    <option value="Software">Software</option>
+                                    <option value="Services">Services</option>
+                                    <option value="Food & Entertainment">Food & Entertainment</option>
+                                    <option value="Office Supplies">Office Supplies</option>
+                                    <option value="Other">Other</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-amount">Amount (USD)</label>
+                            <input type="number" id="expense-amount" step="0.01" min="0" required placeholder="0.00">
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-description">Description</label>
+                            <input type="text" id="expense-description" placeholder="Optional notes...">
+                        </div>
+                        <div class="form-group">
+                            <label for="expense-recurring">
+                                <input type="checkbox" id="expense-recurring" onchange="toggleRecurringOptions()">
+                                Recurring Expense
+                            </label>
+                        </div>
+                        <div class="form-group" id="recurring-options" style="display: none;">
+                            <label for="expense-frequency">Frequency</label>
+                            <select id="expense-frequency">
+                                <option value="weekly">Weekly</option>
+                                <option value="monthly" selected>Monthly</option>
+                                <option value="yearly">Yearly</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" id="expense-submit-btn">Add Expense</button>
+                        <button type="button" class="btn" id="expense-cancel-btn" style="display: none; background: #666;" onclick="cancelExpenseEdit()">Cancel</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Active Recurring Expenses -->
+            <div class="card" id="recurring-expenses-card">
+                <div class="header-actions">
+                    <h2>Active Recurring Expenses</h2>
+                </div>
+                <div id="recurring-expenses-list">
+                    <div class="no-data" id="no-recurring-expenses">No recurring expenses set up yet.</div>
+                </div>
+            </div>
+
+            <!-- Expense History -->
+            <div class="card">
+                <div class="header-actions">
+                    <h2>Expense History</h2>
+                    <div>
+                        <input type="text" class="search-box" id="expense-search" placeholder="Search expenses..." oninput="renderExpenseTable()">
+                        <button class="btn btn-export" onclick="exportExpensesCSV()">Export CSV</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="expense-table">
+                        <thead>
+                            <tr>
+                                <th onclick="sortExpenseTable('date')">Date</th>
+                                <th onclick="sortExpenseTable('category')">Category</th>
+                                <th onclick="sortExpenseTable('amount')">Amount</th>
+                                <th onclick="sortExpenseTable('description')">Description</th>
+                                <th>Recurring</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expense-table-body">
+                        </tbody>
+                    </table>
+                    <div class="no-data" id="no-expenses">No expenses recorded yet. Add your first expense above!</div>
+                </div>
+            </div>
+        </div>
+        <!-- End Expenses Tab -->
+
         <!-- Settings Tab -->
         <div class="tab-content" id="tab-settings">
             <div class="settings-grid">
@@ -3751,7 +4528,14 @@
     </div>
 
     <!-- Toast Notification -->
-    <div class="toast" id="toast"></div>
+    <div class="toast" id="toast">
+        <div class="toast-content">
+            <span class="toast-icon" id="toast-icon">&#10003;</span>
+            <span class="toast-message" id="toast-message"></span>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+        <div class="toast-progress"><div class="toast-progress-bar"></div></div>
+    </div>
 
     <script>
         // ============================================
@@ -3852,13 +4636,43 @@
         };
 
         // Show toast notification
-        function showToast(message, isError = false) {
+        function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+            const progressBar = toast.querySelector('.toast-progress-bar');
+
             if (!toast) return;
-            toast.textContent = message;
-            toast.className = 'toast' + (isError ? ' error' : '');
+
+            // Set message
+            toastMessage.textContent = message;
+
+            // Set icon and class based on type
+            const icons = {
+                success: '&#10003;',
+                error: '&#10007;',
+                warning: '&#9888;',
+                info: '&#8505;'
+            };
+
+            toastIcon.innerHTML = icons[type] || icons.success;
+            toast.className = 'toast ' + type;
+
+            // Reset and restart progress animation
+            progressBar.style.animation = 'none';
+            progressBar.offsetHeight; // Trigger reflow
+            progressBar.style.animation = 'progressBar 3s linear forwards';
+
             toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+
+            // Auto hide after 3 seconds
+            clearTimeout(window.toastTimeout);
+            window.toastTimeout = setTimeout(() => hideToast(), 3000);
+        }
+
+        function hideToast() {
+            const toast = document.getElementById('toast');
+            if (toast) toast.classList.remove('show');
         }
 
         // Clear all notifications
@@ -3926,7 +4740,7 @@
 
                     showToast('Data imported successfully');
                 } catch (err) {
-                    showToast('Error importing data: Invalid file format', true);
+                    showToast('Error importing data: Invalid file format', 'error');
                 }
             };
             reader.readAsText(file);
@@ -3988,7 +4802,7 @@
                 hideClearDataConfirm();
                 showToast('All data has been cleared');
             } catch (err) {
-                showToast('Error clearing data: ' + err.message, true);
+                showToast('Error clearing data: ' + err.message, 'error');
             }
         };
 
@@ -4609,6 +5423,9 @@
 
         // Data storage
         var payouts = [];
+        var expenses = [];
+        var expenseSortField = 'date';
+        var expenseSortDirection = 'desc';
         var currentUser = null;
         var sortField = 'date';
         var sortDirection = 'desc';
@@ -4833,7 +5650,8 @@
                 loadPayouts(),
                 loadVestings(),
                 loadCryptoEvents(),
-                loadCampaigns()
+                loadCampaigns(),
+                loadExpenses()
             ]);
 
             // Auto-refresh vestings every hour to keep unclaimed tokens up to date
@@ -4938,6 +5756,394 @@
             }
 
             return true;
+        }
+
+        // ============ EXPENSE FUNCTIONS ============
+
+        async function loadExpenses() {
+            var result = await window.supabaseClient
+                .from('expenses')
+                .select('*')
+                .order('date', { ascending: false });
+
+            if (result.error) {
+                console.error('Error loading expenses:', result.error);
+                return;
+            }
+
+            expenses = (result.data || []).map(e => ({
+                ...e,
+                amount: parseFloat(e.amount) || 0
+            }));
+
+            // Generate recurring entries for current month
+            await generateRecurringExpenses();
+            renderExpensesTab();
+        }
+
+        async function saveExpense(expense) {
+            var result = await window.supabaseClient
+                .from('expenses')
+                .insert([{
+                    user_id: currentUser.id,
+                    date: expense.date,
+                    category: expense.category,
+                    amount: expense.amount,
+                    description: expense.description || null,
+                    is_recurring: expense.is_recurring || false,
+                    recurring_frequency: expense.recurring_frequency || null,
+                    recurring_parent_id: expense.recurring_parent_id || null,
+                    created_at: new Date().toISOString()
+                }])
+                .select();
+
+            if (result.error) {
+                console.error('Error saving expense:', result.error);
+                alert('Error saving expense: ' + result.error.message);
+                return null;
+            }
+
+            const saved = result.data[0];
+            return { ...saved, amount: parseFloat(saved.amount) || 0 };
+        }
+
+        async function updateExpenseInDB(id, expense) {
+            var result = await window.supabaseClient
+                .from('expenses')
+                .update({
+                    date: expense.date,
+                    category: expense.category,
+                    amount: expense.amount,
+                    description: expense.description || null,
+                    is_recurring: expense.is_recurring || false,
+                    recurring_frequency: expense.recurring_frequency || null
+                })
+                .eq('id', id)
+                .select();
+
+            if (result.error) {
+                console.error('Error updating expense:', result.error);
+                alert('Error updating expense: ' + result.error.message);
+                return null;
+            }
+
+            const updated = result.data[0];
+            return { ...updated, amount: parseFloat(updated.amount) || 0 };
+        }
+
+        async function deleteExpenseFromDB(id) {
+            var result = await window.supabaseClient
+                .from('expenses')
+                .delete()
+                .eq('id', id);
+
+            if (result.error) {
+                console.error('Error deleting expense:', result.error);
+                alert('Error deleting expense: ' + result.error.message);
+                return false;
+            }
+
+            return true;
+        }
+
+        // Render expenses tab
+        function renderExpensesTab() {
+            // Set default date if empty
+            const dateInput = getEl('expense-date');
+            if (dateInput && !dateInput.value) {
+                dateInput.valueAsDate = new Date();
+            }
+            renderExpenseStats();
+            renderExpenseTable();
+            renderRecurringExpensesList();
+        }
+
+        // Generate recurring expense entries for current month
+        async function generateRecurringExpenses() {
+            const now = new Date();
+            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+
+            // Get all recurring templates (parent entries without recurring_parent_id)
+            const templates = expenses.filter(e => e.is_recurring && !e.recurring_parent_id);
+
+            for (const template of templates) {
+                // Check if entry already exists for current month
+                const exists = expenses.some(e =>
+                    e.recurring_parent_id === template.id &&
+                    e.date.startsWith(currentMonth)
+                );
+
+                if (!exists) {
+                    // Determine the date for this month's entry
+                    const templateDate = new Date(template.date);
+                    const dayOfMonth = templateDate.getDate();
+                    const newDate = new Date(now.getFullYear(), now.getMonth(), Math.min(dayOfMonth, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()));
+                    const dateStr = newDate.toISOString().split('T')[0];
+
+                    // Create the recurring entry
+                    const newExpense = {
+                        date: dateStr,
+                        category: template.category,
+                        amount: template.amount,
+                        description: template.description,
+                        is_recurring: false,
+                        recurring_frequency: null,
+                        recurring_parent_id: template.id
+                    };
+
+                    const saved = await saveExpense(newExpense);
+                    if (saved) {
+                        expenses.unshift(saved);
+                    }
+                }
+            }
+        }
+
+        function renderExpenseStats() {
+            const monthFilter = getEl('expense-month-filter');
+            if (!monthFilter.value) {
+                // Default to current month
+                const now = new Date();
+                monthFilter.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            }
+
+            const [year, month] = monthFilter.value.split('-').map(Number);
+            const filteredExpenses = expenses.filter(e => {
+                const expenseDate = new Date(e.date);
+                return expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
+            });
+
+            const totalCount = filteredExpenses.length;
+            const totalAmount = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
+            const avgAmount = totalCount > 0 ? totalAmount / totalCount : 0;
+
+            // Find top category
+            const categoryTotals = {};
+            filteredExpenses.forEach(e => {
+                categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
+            });
+            let topCategory = '-';
+            let maxAmount = 0;
+            for (const [cat, amt] of Object.entries(categoryTotals)) {
+                if (amt > maxAmount) {
+                    maxAmount = amt;
+                    topCategory = cat;
+                }
+            }
+
+            getEl('total-expenses-count').textContent = totalCount;
+            getEl('total-expenses-amount').textContent = '$' + formatUSD(totalAmount);
+            getEl('avg-expense-amount').textContent = '$' + formatUSD(avgAmount);
+            getEl('top-expense-category').textContent = topCategory;
+        }
+
+        function renderExpenseTable() {
+            const searchTerm = (getEl('expense-search')?.value || '').toLowerCase();
+            const monthFilter = getEl('expense-month-filter');
+            const tbody = getEl('expense-table-body');
+            const noData = getEl('no-expenses');
+
+            if (!monthFilter.value) {
+                const now = new Date();
+                monthFilter.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            }
+
+            const [year, month] = monthFilter.value.split('-').map(Number);
+
+            let filtered = expenses.filter(e => {
+                const expenseDate = new Date(e.date);
+                const matchesMonth = expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
+                const matchesSearch = e.category.toLowerCase().includes(searchTerm) ||
+                    (e.description || '').toLowerCase().includes(searchTerm);
+                return matchesMonth && matchesSearch;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                let aVal = a[expenseSortField];
+                let bVal = b[expenseSortField];
+                if (expenseSortField === 'amount') {
+                    aVal = parseFloat(aVal) || 0;
+                    bVal = parseFloat(bVal) || 0;
+                } else if (expenseSortField === 'date') {
+                    aVal = new Date(aVal);
+                    bVal = new Date(bVal);
+                } else {
+                    aVal = (aVal || '').toLowerCase();
+                    bVal = (bVal || '').toLowerCase();
+                }
+                if (aVal < bVal) return expenseSortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return expenseSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '';
+                noData.style.display = 'block';
+                return;
+            }
+
+            noData.style.display = 'none';
+            tbody.innerHTML = filtered.map(e => {
+                const recurringBadge = e.is_recurring ?
+                    `<span class="recurring-badge">${e.recurring_frequency}</span>` : '-';
+                return `
+                    <tr>
+                        <td>${formatDate(e.date)}</td>
+                        <td>${escapeHtml(e.category)}</td>
+                        <td style="color: #ff6b6b;">-$${formatUSD(e.amount)}</td>
+                        <td>${escapeHtml(e.description) || '-'}</td>
+                        <td>${recurringBadge}</td>
+                        <td>
+                            <button class="btn btn-edit" onclick="editExpense('${e.id}')">Edit</button>
+                            <button class="btn btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderRecurringExpensesList() {
+            const container = getEl('recurring-expenses-list');
+            const noData = getEl('no-recurring-expenses');
+
+            const recurringExpenses = expenses.filter(e => e.is_recurring && !e.recurring_parent_id);
+
+            if (recurringExpenses.length === 0) {
+                container.innerHTML = '';
+                container.appendChild(noData);
+                noData.style.display = 'block';
+                return;
+            }
+
+            noData.style.display = 'none';
+            container.innerHTML = recurringExpenses.map(e => `
+                <div class="recurring-expense-item">
+                    <div class="recurring-expense-info">
+                        <strong>${escapeHtml(e.category)}</strong>
+                        <span class="recurring-badge">${e.recurring_frequency}</span>
+                        <span style="color: #aaa;">${escapeHtml(e.description) || ''}</span>
+                    </div>
+                    <div class="recurring-expense-amount">
+                        <span style="color: #ff6b6b; font-weight: bold;">-$${formatUSD(e.amount)}</span>
+                        <button class="btn btn-danger btn-sm" onclick="stopRecurringExpense('${e.id}')">Stop</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.sortExpenseTable = function(field) {
+            if (expenseSortField === field) {
+                expenseSortDirection = expenseSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                expenseSortField = field;
+                expenseSortDirection = 'desc';
+            }
+            renderExpenseTable();
+        };
+
+        window.editExpense = function(id) {
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            getEl('expense-date').value = expense.date;
+            getEl('expense-category').value = expense.category;
+            getEl('expense-amount').value = expense.amount;
+            getEl('expense-description').value = expense.description || '';
+            getEl('expense-recurring').checked = expense.is_recurring || false;
+            getEl('expense-frequency').value = expense.recurring_frequency || 'monthly';
+            getEl('expense-edit-id').value = id;
+
+            toggleRecurringOptions();
+
+            getEl('expense-form-title').textContent = 'Edit Expense';
+            getEl('expense-submit-btn').textContent = 'Update Expense';
+            getEl('expense-cancel-btn').style.display = 'inline-block';
+
+            // Scroll to form
+            getEl('expense-form').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.cancelExpenseEdit = function() {
+            getEl('expense-form').reset();
+            getEl('expense-edit-id').value = '';
+            getEl('expense-form-title').textContent = 'Add New Expense';
+            getEl('expense-submit-btn').textContent = 'Add Expense';
+            getEl('expense-cancel-btn').style.display = 'none';
+            getEl('recurring-options').style.display = 'none';
+        };
+
+        window.deleteExpense = async function(id) {
+            if (!confirm('Are you sure you want to delete this expense?')) return;
+
+            const success = await deleteExpenseFromDB(id);
+            if (success) {
+                expenses = expenses.filter(e => e.id !== id);
+                renderExpensesTab();
+            }
+        };
+
+        window.stopRecurringExpense = async function(id) {
+            if (!confirm('Stop this recurring expense? Future entries will not be generated.')) return;
+
+            const expense = expenses.find(e => e.id === id);
+            if (!expense) return;
+
+            // Update to mark as non-recurring
+            const updated = await updateExpenseInDB(id, { ...expense, is_recurring: false, recurring_frequency: null });
+            if (updated) {
+                const index = expenses.findIndex(e => e.id === id);
+                if (index !== -1) {
+                    expenses[index] = updated;
+                }
+                renderExpensesTab();
+            }
+        };
+
+        window.toggleRecurringOptions = function() {
+            const checkbox = getEl('expense-recurring');
+            const options = getEl('recurring-options');
+            options.style.display = checkbox.checked ? 'block' : 'none';
+        };
+
+        function exportExpensesCSV() {
+            if (expenses.length === 0) {
+                alert('No expenses to export');
+                return;
+            }
+
+            const monthFilter = getEl('expense-month-filter');
+            const [year, month] = monthFilter.value.split('-').map(Number);
+
+            const filtered = expenses.filter(e => {
+                const expenseDate = new Date(e.date);
+                return expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
+            });
+
+            if (filtered.length === 0) {
+                alert('No expenses for selected month');
+                return;
+            }
+
+            const headers = ['Date', 'Category', 'Amount (USD)', 'Description', 'Recurring', 'Frequency'];
+            const rows = filtered.map(e => [
+                e.date,
+                e.category,
+                e.amount.toFixed(2),
+                e.description || '',
+                e.is_recurring ? 'Yes' : 'No',
+                e.recurring_frequency || ''
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `expenses_${monthFilter.value}.csv`;
+            link.click();
         }
 
         // Format USD
@@ -5287,6 +6493,43 @@
             fetchPayoutTokenImages(); // Fetch new token image if added
             e.target.reset();
             document.getElementById('date').valueAsDate = new Date();
+        });
+
+        // Expense form submission
+        document.getElementById('expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const editId = document.getElementById('expense-edit-id').value;
+            const isRecurring = document.getElementById('expense-recurring').checked;
+            const expense = {
+                date: document.getElementById('expense-date').value,
+                category: document.getElementById('expense-category').value,
+                amount: parseFloat(document.getElementById('expense-amount').value),
+                description: document.getElementById('expense-description').value.trim(),
+                is_recurring: isRecurring,
+                recurring_frequency: isRecurring ? document.getElementById('expense-frequency').value : null
+            };
+
+            if (editId) {
+                const updated = await updateExpenseInDB(editId, expense);
+                if (updated) {
+                    const index = expenses.findIndex(exp => exp.id === editId);
+                    if (index !== -1) {
+                        expenses[index] = updated;
+                    }
+                }
+                cancelExpenseEdit();
+            } else {
+                const saved = await saveExpense(expense);
+                if (saved) {
+                    expenses.unshift(saved);
+                }
+            }
+
+            renderExpensesTab();
+            e.target.reset();
+            document.getElementById('expense-date').valueAsDate = new Date();
+            document.getElementById('recurring-options').style.display = 'none';
         });
 
         // Render table
@@ -5984,7 +7227,7 @@
 
             if (result.error) {
                 console.error('Error saving vesting:', result.error);
-                showToast('Error saving vesting: ' + result.error.message, true);
+                showToast('Error saving vesting: ' + result.error.message, 'error');
                 return false;
             }
             return true;
@@ -6087,7 +7330,7 @@
 
             const claimedAmount = parseFloat(amount);
             if (isNaN(claimedAmount) || claimedAmount < 0) {
-                showToast('Invalid amount', true);
+                showToast('Invalid amount', 'error');
                 return;
             }
 
@@ -6110,7 +7353,7 @@
 
             if (result.error) {
                 console.error('Error deleting vesting:', result.error);
-                showToast('Error deleting vesting: ' + result.error.message, true);
+                showToast('Error deleting vesting: ' + result.error.message, 'error');
                 return false;
             }
             return true;
