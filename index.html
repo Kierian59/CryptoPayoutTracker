@@ -2143,6 +2143,37 @@
             cursor: pointer;
         }
 
+        /* Bilky Modal Styles */
+        .bilky-modal-content {
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .bilky-modal-body {
+            padding: 10px 0;
+        }
+
+        .bilky-modal-body p {
+            color: var(--text-secondary);
+            margin-bottom: 25px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .bilky-modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .bilky-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+
         /* Category Badges */
         .category-badge {
             display: inline-block;
@@ -4527,6 +4558,25 @@
         </div>
     </div>
 
+    <!-- Bilky Redirect Modal (for Paid Deals) -->
+    <div class="modal-overlay" id="bilky-modal">
+        <div class="modal-content bilky-modal-content">
+            <div class="modal-header">
+                <h3>Paid Deal Added!</h3>
+                <button class="modal-close" onclick="closeBilkyModal()">&times;</button>
+            </div>
+            <div class="bilky-modal-body">
+                <p>Don't forget to declare this paid deal on Bilky for invoicing.</p>
+                <div class="bilky-modal-actions">
+                    <button class="btn btn-primary bilky-btn" onclick="openBilkyAndClose()">
+                        Open Bilky
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeBilkyModal()">Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast">
         <div class="toast-content">
@@ -4897,6 +4947,22 @@
         window.closeQuickAdd = function() {
             document.getElementById('quick-add-modal').classList.remove('active');
             document.getElementById('fab').classList.remove('active');
+        };
+
+        // Bilky Modal Functions (for Paid Deals)
+        const BILKY_URL = 'https://benavidesasociados.bilky.es/auth/login';
+
+        window.openBilkyModal = function() {
+            document.getElementById('bilky-modal').classList.add('active');
+        };
+
+        window.closeBilkyModal = function() {
+            document.getElementById('bilky-modal').classList.remove('active');
+        };
+
+        window.openBilkyAndClose = function() {
+            window.open(BILKY_URL, '_blank');
+            closeBilkyModal();
         };
 
         // Onboarding Tour
@@ -6485,6 +6551,10 @@
                 const saved = await savePayout(payout);
                 if (saved) {
                     payouts.unshift(saved);
+                    // Show Bilky modal for Paid Deals
+                    if (payout.category === 'Paid Deal') {
+                        openBilkyModal();
+                    }
                 }
             }
 
@@ -6902,6 +6972,10 @@
                 closeQuickAdd();
                 e.target.reset();
                 addNotification('Payout Added', `Added ${payout.amount} ${payout.crypto} from ${payout.company}`, 'info');
+                // Show Bilky modal for Paid Deals
+                if (payout.category === 'Paid Deal') {
+                    openBilkyModal();
+                }
             }
         });
 
@@ -6909,6 +6983,13 @@
         document.getElementById('quick-add-modal').addEventListener('click', (e) => {
             if (e.target.id === 'quick-add-modal') {
                 closeQuickAdd();
+            }
+        });
+
+        // Close Bilky modal on backdrop click
+        document.getElementById('bilky-modal').addEventListener('click', (e) => {
+            if (e.target.id === 'bilky-modal') {
+                closeBilkyModal();
             }
         });
 
@@ -6926,6 +7007,7 @@
             // Escape to close modals
             if (e.key === 'Escape') {
                 closeQuickAdd();
+                closeBilkyModal();
                 document.getElementById('notification-panel').classList.remove('open');
                 endTour();
             }
