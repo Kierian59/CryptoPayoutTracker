@@ -1872,6 +1872,141 @@
             color: var(--text-secondary);
         }
 
+        /* Asset Type Selector */
+        .asset-type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .asset-type-btn {
+            background: var(--bg-card);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .asset-type-btn:hover {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .asset-type-btn.active {
+            border-color: var(--accent);
+            background: var(--accent-light);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .asset-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .asset-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .asset-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Large Search Box */
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 18px;
+            font-size: 1.3rem;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .search-box-large {
+            width: 100%;
+            padding: 18px 18px 18px 55px;
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            transition: all var(--transition-normal);
+        }
+
+        .search-box-large::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-box-large:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .search-box-large:focus::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Quick Access Buttons */
+        .quick-access {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .quick-access-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .quick-access-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .quick-btn {
+            padding: 10px 18px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .quick-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .quick-btn span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         /* Month Tabs */
         .month-tabs {
             display: flex;
@@ -4600,39 +4735,101 @@
 
         <!-- Crypto Prices Tab -->
         <div class="tab-content" id="tab-crypto-prices">
-            <!-- Search Section -->
+            <!-- Asset Type Selector -->
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2><span class="card-icon">&#128200;</span> Price Search</h2>
-                    <div class="filter-chips">
-                        <span class="filter-chip active" data-asset-type="crypto" onclick="switchAssetType('crypto')">Crypto</span>
-                        <span class="filter-chip" data-asset-type="stocks" onclick="switchAssetType('stocks')">Stocks</span>
-                    </div>
+                <h2 style="margin-bottom: 20px;"><span class="card-icon">&#128200;</span> Search Prices</h2>
+
+                <!-- Large Asset Type Buttons -->
+                <div class="asset-type-selector">
+                    <button class="asset-type-btn active" data-asset-type="crypto" onclick="switchAssetType('crypto')">
+                        <span class="asset-icon">₿</span>
+                        <span class="asset-label">Cryptocurrencies</span>
+                        <span class="asset-desc">Bitcoin, Ethereum, and more</span>
+                    </button>
+                    <button class="asset-type-btn" data-asset-type="stocks" onclick="switchAssetType('stocks')">
+                        <span class="asset-icon">📈</span>
+                        <span class="asset-label">Stocks</span>
+                        <span class="asset-desc">Apple, Microsoft, Tesla, and more</span>
+                    </button>
                 </div>
-                <div class="crypto-search-container">
-                    <input type="text"
-                           id="crypto-search-input"
-                           class="search-box"
-                           placeholder="Search by name or symbol (e.g., Bitcoin, BTC)..."
-                           autocomplete="off"
-                           style="width: 100%;">
+
+                <!-- Search Bar -->
+                <div class="crypto-search-container" style="margin-top: 20px;">
+                    <div class="search-input-wrapper">
+                        <span class="search-icon">🔍</span>
+                        <input type="text"
+                               id="crypto-search-input"
+                               class="search-box-large"
+                               placeholder="Search by name or symbol (e.g., Bitcoin, BTC)..."
+                               autocomplete="off">
+                    </div>
                     <div class="crypto-search-results" id="crypto-search-results" style="display: none;">
                         <!-- Search results populated dynamically -->
                     </div>
                 </div>
+
+                <!-- Quick Access Buttons -->
+                <div class="quick-access" id="quick-access-crypto">
+                    <div class="quick-access-label">Quick Add:</div>
+                    <div class="quick-access-buttons">
+                        <button class="quick-btn" onclick="quickAddAsset('bitcoin', 'Bitcoin')">
+                            <span>Bitcoin</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddAsset('ethereum', 'Ethereum')">
+                            <span>Ethereum</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddAsset('binancecoin', 'BNB')">
+                            <span>BNB</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddAsset('solana', 'Solana')">
+                            <span>Solana</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddAsset('cardano', 'Cardano')">
+                            <span>Cardano</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="quick-access" id="quick-access-stocks" style="display: none;">
+                    <div class="quick-access-label">Quick Add:</div>
+                    <div class="quick-access-buttons">
+                        <button class="quick-btn" onclick="quickAddStock('AAPL', 'Apple Inc.')">
+                            <span>Apple</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddStock('MSFT', 'Microsoft')">
+                            <span>Microsoft</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddStock('GOOGL', 'Google')">
+                            <span>Google</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddStock('TSLA', 'Tesla')">
+                            <span>Tesla</span>
+                        </button>
+                        <button class="quick-btn" onclick="quickAddStock('AMZN', 'Amazon')">
+                            <span>Amazon</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <!-- Trending Section -->
+            <!-- Price Display Section -->
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2 id="tracker-title">Price Tracker</h2>
+                    <div>
+                        <h2 id="tracker-title">Trending Cryptocurrencies</h2>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px;">Live prices updated every 5 minutes</p>
+                    </div>
                     <button class="btn btn-secondary btn-sm" onclick="refreshTrendingCoins()">
                         <span class="btn-text">↻ Refresh</span>
                     </button>
                 </div>
                 <div class="filter-chips">
-                    <span class="filter-chip active" data-view="trending" onclick="switchCryptoView('trending')">Trending</span>
-                    <span class="filter-chip" data-view="watchlist" onclick="switchCryptoView('watchlist')">My Watchlist</span>
+                    <span class="filter-chip active" data-view="trending" onclick="switchCryptoView('trending')">
+                        <span>🔥</span> Trending
+                    </span>
+                    <span class="filter-chip" data-view="watchlist" onclick="switchCryptoView('watchlist')">
+                        <span>⭐</span> My Watchlist (<span id="watchlist-count">0</span>)
+                    </span>
                 </div>
             </div>
 
@@ -4643,9 +4840,12 @@
 
             <!-- Empty State for Watchlist -->
             <div class="empty-state" id="empty-watchlist" style="display: none;">
-                <div class="empty-state-icon">&#128200;</div>
-                <div class="empty-state-title">No cryptos in watchlist</div>
-                <div class="empty-state-text">Search for cryptocurrencies and add them to your watchlist for quick price tracking.</div>
+                <div class="empty-state-icon">⭐</div>
+                <div class="empty-state-title">Your watchlist is empty</div>
+                <div class="empty-state-text">
+                    <p>Search for cryptocurrencies or stocks above and click the star icon to add them to your watchlist.</p>
+                    <p style="margin-top: 10px;">Or use the <strong>Quick Add</strong> buttons for popular assets!</p>
+                </div>
             </div>
         </div>
         <!-- End Crypto Prices Tab -->
@@ -5039,6 +5239,7 @@
 
             // Initialize crypto prices tab when switched to
             if (tabName === 'crypto-prices') {
+                updateWatchlistCount();
                 const hasWatchlist = currentAssetType === 'crypto' ? cryptoWatchlist.length > 0 : stockWatchlist.length > 0;
                 if (!hasWatchlist && currentCryptoView === 'watchlist') {
                     currentCryptoView = 'trending';
@@ -7085,7 +7286,7 @@
                         const coins = data.coins || [];
 
                         if (coins.length === 0) {
-                            resultsContainer.innerHTML = '<div class="crypto-search-empty">No results found</div>';
+                            resultsContainer.innerHTML = '<div class="crypto-search-empty">No results found. Try a different search term or use the Quick Add buttons below!</div>';
                             return;
                         }
 
@@ -7110,7 +7311,7 @@
                         const results = await searchStocks(query);
 
                         if (results.length === 0) {
-                            resultsContainer.innerHTML = '<div class="crypto-search-empty">No results found</div>';
+                            resultsContainer.innerHTML = '<div class="crypto-search-empty">No results found. Try a different search term or use the Quick Add buttons below!</div>';
                             return;
                         }
 
@@ -7146,6 +7347,7 @@
             if (!cryptoWatchlist.includes(coingeckoId)) {
                 cryptoWatchlist.push(coingeckoId);
                 saveCryptoWatchlist();
+                updateWatchlistCount();
                 showToast('Added to Watchlist', `${name} added to your watchlist`, 'success');
 
                 // Close search results
@@ -7165,6 +7367,7 @@
         window.removeFromWatchlist = function(coingeckoId) {
             cryptoWatchlist = cryptoWatchlist.filter(id => id !== coingeckoId);
             saveCryptoWatchlist();
+            updateWatchlistCount();
             renderCryptoCards();
             showToast('Removed from Watchlist', 'Crypto removed from your watchlist', 'success');
         };
@@ -7331,6 +7534,7 @@
                 showToast('Added', `${name} added to watchlist`, 'success');
             }
             saveCryptoWatchlist();
+            updateWatchlistCount();
             renderCryptoCards();
         };
 
@@ -7354,9 +7558,9 @@
         window.switchAssetType = function(type) {
             currentAssetType = type;
 
-            // Update asset type chips
-            document.querySelectorAll('[data-asset-type]').forEach(chip => {
-                chip.classList.toggle('active', chip.dataset['assetType'] === type);
+            // Update asset type buttons
+            document.querySelectorAll('.asset-type-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset['assetType'] === type);
             });
 
             // Update search placeholder
@@ -7371,17 +7575,71 @@
             searchInput.value = '';
             document.getElementById('crypto-search-results').style.display = 'none';
 
-            // Update tracker title
+            // Toggle quick access sections
+            const cryptoQuick = document.getElementById('quick-access-crypto');
+            const stockQuick = document.getElementById('quick-access-stocks');
+            if (cryptoQuick && stockQuick) {
+                cryptoQuick.style.display = type === 'crypto' ? 'block' : 'none';
+                stockQuick.style.display = type === 'stocks' ? 'block' : 'none';
+            }
+
+            // Update tracker title and subtitle
             const titleEl = document.getElementById('tracker-title');
             if (titleEl) {
-                titleEl.textContent = type === 'crypto' ? 'Crypto Tracker' : 'Stock Tracker';
+                titleEl.textContent = type === 'crypto' ? 'Trending Cryptocurrencies' : 'Popular Stocks';
             }
+
+            // Update watchlist count
+            updateWatchlistCount();
 
             // Render appropriate cards
             if (type === 'crypto') {
                 renderCryptoCards();
             } else {
                 renderStockCards();
+            }
+        };
+
+        // Update watchlist count display
+        function updateWatchlistCount() {
+            const countEl = document.getElementById('watchlist-count');
+            if (countEl) {
+                const count = currentAssetType === 'crypto' ? cryptoWatchlist.length : stockWatchlist.length;
+                countEl.textContent = count;
+            }
+        }
+
+        // Quick add crypto asset
+        window.quickAddAsset = function(coinId, name) {
+            if (!cryptoWatchlist.includes(coinId)) {
+                cryptoWatchlist.push(coinId);
+                saveCryptoWatchlist();
+                updateWatchlistCount();
+                showToast('Added!', `${name} added to your watchlist`, 'success');
+
+                // If on watchlist view, refresh
+                if (currentCryptoView === 'watchlist') {
+                    renderCryptoCards();
+                }
+            } else {
+                showToast('Already Added', `${name} is already in your watchlist`, 'info');
+            }
+        };
+
+        // Quick add stock
+        window.quickAddStock = function(symbol, name) {
+            if (!stockWatchlist.includes(symbol)) {
+                stockWatchlist.push(symbol);
+                saveStockWatchlist();
+                updateWatchlistCount();
+                showToast('Added!', `${name} added to your watchlist`, 'success');
+
+                // If on watchlist view, refresh
+                if (currentCryptoView === 'watchlist') {
+                    renderStockCards();
+                }
+            } else {
+                showToast('Already Added', `${name} is already in your watchlist`, 'info');
             }
         };
 
@@ -7439,6 +7697,7 @@
             if (!stockWatchlist.includes(symbol)) {
                 stockWatchlist.push(symbol);
                 saveStockWatchlist();
+                updateWatchlistCount();
                 showToast('Added to Watchlist', `${name} added to your watchlist`, 'success');
 
                 // Close search results
@@ -7596,6 +7855,7 @@
                 showToast('Added', `${name} added to watchlist`, 'success');
             }
             saveStockWatchlist();
+            updateWatchlistCount();
             renderStockCards();
         };
 
