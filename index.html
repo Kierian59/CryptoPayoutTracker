@@ -7732,23 +7732,32 @@
 
                     if (response.ok) {
                         const quote = await response.json();
+                        console.log(`Finnhub response for ${symbol}:`, quote);
+
                         // Finnhub returns: { c: current, h: high, l: low, o: open, pc: prev close, t: timestamp }
-                        if (quote.c && quote.c > 0) {
-                            const change = quote.c - quote.pc;
-                            const changePercent = ((quote.c - quote.pc) / quote.pc) * 100;
+                        // Check if we have valid data (c can be 0 when market is closed, use pc as fallback)
+                        if (quote && (quote.c !== undefined || quote.pc !== undefined)) {
+                            const currentPrice = quote.c || quote.pc;
+                            const prevClose = quote.pc || quote.c;
+                            const change = currentPrice - prevClose;
+                            const changePercent = prevClose > 0 ? ((currentPrice - prevClose) / prevClose) * 100 : 0;
 
                             return {
                                 symbol: symbol,
-                                price: quote.c,
+                                price: currentPrice,
                                 change: change,
                                 changePercent: changePercent,
-                                high: quote.h,
-                                low: quote.l,
-                                open: quote.o,
-                                prevClose: quote.pc,
+                                high: quote.h || 0,
+                                low: quote.l || 0,
+                                open: quote.o || 0,
+                                prevClose: prevClose,
                                 name: symbol
                             };
+                        } else {
+                            console.warn(`Invalid data for ${symbol}:`, quote);
                         }
+                    } else {
+                        console.error(`API error for ${symbol}: ${response.status} ${response.statusText}`);
                     }
                 } catch (error) {
                     console.error(`Error fetching stock ${symbol}:`, error);
