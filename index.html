@@ -7335,7 +7335,7 @@
                         }).join('');
                     } catch (error) {
                         console.error('Stock search error:', error);
-                        resultsContainer.innerHTML = '<div class="crypto-search-empty">Error loading results. Get free API key at <a href="https://finnhub.io/register" target="_blank" style="color: var(--accent);">finnhub.io</a></div>';
+                        resultsContainer.innerHTML = '<div class="crypto-search-empty">Error loading results. Get free API key at <a href="https://twelvedata.com/apikey" target="_blank" style="color: var(--accent);">twelvedata.com</a></div>';
                     }
                 }
             }, 500); // 500ms debounce
@@ -7666,14 +7666,14 @@
             }
         }
 
-        // Search stocks using Finnhub API
+        // Search stocks using Twelve Data API
         async function searchStocks(query) {
             try {
-                // Using Finnhub API free tier (60 calls/min)
-                // Get your free key at https://finnhub.io/register
-                const apiKey = 'd8298bhr01qmgc0f6afgd8298bhr01qmgc0f6ag0';
+                // Using Twelve Data API free tier (800 requests/day, 8 calls/min)
+                // Get your free key at https://twelvedata.com/apikey
+                const apiKey = 'demo'; // Demo key for testing - replace with your own
                 const response = await fetch(
-                    `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${apiKey}`
+                    `https://api.twelvedata.com/symbol_search?symbol=${encodeURIComponent(query)}&apikey=${apiKey}`
                 );
 
                 if (!response.ok) {
@@ -7681,11 +7681,15 @@
                 }
 
                 const data = await response.json();
-                // Finnhub returns: { count, result: [{ description, displaySymbol, symbol, type }] }
+                // Twelve Data returns: { data: [{ symbol, instrument_name, exchange, country, currency }] }
                 // Filter for US stocks only
-                const results = (data.result || [])
-                    .filter(item => item.type === 'Common Stock' && !item.symbol.includes('.'))
-                    .slice(0, 10);
+                const results = (data.data || [])
+                    .filter(item => item.country === 'United States' && item.instrument_type === 'Common Stock')
+                    .slice(0, 10)
+                    .map(item => ({
+                        symbol: item.symbol,
+                        description: item.instrument_name
+                    }));
                 return results;
             } catch (error) {
                 console.error('Stock search error:', error);
@@ -7714,59 +7718,62 @@
             }
         };
 
-        // Fetch stock data using Finnhub
+        // Fetch stock data using Twelve Data
         async function fetchStockData(symbols) {
             if (!symbols || symbols.length === 0) {
                 return [];
             }
 
             const results = [];
-            const apiKey = 'd8298bhr01qmgc0f6afgd8298bhr01qmgc0f6ag0';
+            const apiKey = 'demo'; // Demo key for testing
 
-            // Fetch all stocks in parallel (Finnhub has 60 calls/min free tier)
-            const promises = symbols.slice(0, 12).map(async (symbol) => {
-                try {
-                    const response = await fetch(
-                        `https://finnhub.io/api/v1/quote?symbol=${symbol}&token=${apiKey}`
-                    );
+            // Twelve Data allows batch requests - fetch up to 8 at once (free tier limit)
+            const symbolString = symbols.slice(0, 8).join(',');
 
-                    if (response.ok) {
-                        const quote = await response.json();
-                        console.log(`Finnhub response for ${symbol}:`, quote);
+            try {
+                const response = await fetch(
+                    `https://api.twelvedata.com/quote?symbol=${symbolString}&apikey=${apiKey}`
+                );
 
-                        // Finnhub returns: { c: current, h: high, l: low, o: open, pc: prev close, t: timestamp }
-                        // Check if we have valid data (c can be 0 when market is closed, use pc as fallback)
-                        if (quote && (quote.c !== undefined || quote.pc !== undefined)) {
-                            const currentPrice = quote.c || quote.pc;
-                            const prevClose = quote.pc || quote.c;
-                            const change = currentPrice - prevClose;
-                            const changePercent = prevClose > 0 ? ((currentPrice - prevClose) / prevClose) * 100 : 0;
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Twelve Data response:', data);
 
-                            return {
+                    // If single symbol, wrap in object. If multiple, data is already an object with symbol keys
+                    const quotes = symbols.length === 1 ? { [symbols[0]]: data } : data;
+
+                    for (const symbol of symbols.slice(0, 8)) {
+                        const quote = quotes[symbol];
+
+                        if (quote && quote.close) {
+                            const currentPrice = parseFloat(quote.close);
+                            const prevClose = parseFloat(quote.previous_close || quote.close);
+                            const change = parseFloat(quote.change || 0);
+                            const changePercent = parseFloat(quote.percent_change || 0);
+
+                            results.push({
                                 symbol: symbol,
                                 price: currentPrice,
                                 change: change,
                                 changePercent: changePercent,
-                                high: quote.h || 0,
-                                low: quote.l || 0,
-                                open: quote.o || 0,
+                                high: parseFloat(quote.high || 0),
+                                low: parseFloat(quote.low || 0),
+                                open: parseFloat(quote.open || 0),
                                 prevClose: prevClose,
                                 name: symbol
-                            };
+                            });
                         } else {
                             console.warn(`Invalid data for ${symbol}:`, quote);
                         }
-                    } else {
-                        console.error(`API error for ${symbol}: ${response.status} ${response.statusText}`);
                     }
-                } catch (error) {
-                    console.error(`Error fetching stock ${symbol}:`, error);
+                } else {
+                    console.error(`API error: ${response.status} ${response.statusText}`);
                 }
-                return null;
-            });
+            } catch (error) {
+                console.error('Error fetching stock data:', error);
+            }
 
-            const settled = await Promise.all(promises);
-            return settled.filter(item => item !== null);
+            return results;
         }
 
         // Render stock cards
@@ -7797,7 +7804,7 @@
             const stockData = await fetchStockData(symbols);
 
             if (stockData.length === 0) {
-                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-secondary);">No stock data available. Get your free API key (60 calls/min) at <a href="https://finnhub.io/register" target="_blank" style="color: var(--accent);">finnhub.io</a></div>';
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-secondary);">No stock data available. Get your free API key (800 requests/day) at <a href="https://twelvedata.com/apikey" target="_blank" style="color: var(--accent);">twelvedata.com</a></div>';
                 return;
             }
 
