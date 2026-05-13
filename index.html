@@ -3671,83 +3671,54 @@
             <form id="payout-form">
                 <input type="hidden" id="edit-id">
 
-                <!-- Basic Info Section -->
-                <div class="form-section">
-                    <div class="form-section-title"><span>&#128203;</span> Basic Information</div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="company"><span class="label-icon">&#128188;</span> Project</label>
-                            <div class="input-wrapper">
-                                <input type="text" id="company" required placeholder="Enter project name (e.g., Uniswap, Aave)">
-                            </div>
-                            <span class="valid-indicator">&#10003;</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="date"><span class="label-icon">&#128197;</span> Date</label>
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="category"><span class="label-icon">&#127991;</span> Category</label>
-                            <select id="category">
-                                <option value="">Select category...</option>
-                                <option value="Airdrop">Airdrop</option>
-                                <option value="Paid Deal">Paid Deal</option>
-                                <option value="Staking">Staking</option>
-                                <option value="Mining">Mining</option>
-                                <option value="Trading">Trading</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="company"><span class="label-icon">&#128188;</span> Project Name</label>
+                        <input type="text" id="company" required placeholder="Enter project name">
                     </div>
-                </div>
 
-                <!-- Token Details Section -->
-                <div class="form-section">
-                    <div class="form-section-title"><span>&#129689;</span> Token Details</div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="amount"><span class="label-icon">&#128178;</span> Amount of Tokens</label>
-                            <input type="number" id="amount" step="any" required placeholder="Enter token amount">
-                            <span class="helper-text">The number of tokens received</span>
-                        </div>
-                        <div class="form-group">
-                            <label for="crypto"><span class="label-icon">&#9883;</span> Cryptocurrency</label>
-                            <input type="text" id="crypto" required placeholder="Token symbol (e.g., BTC, ETH, SOL)">
-                        </div>
-                        <div class="form-group">
-                            <label for="coingecko-id"><span class="label-icon">&#128202;</span> CoinGecko ID</label>
-                            <input type="text" id="coingecko-id" placeholder="e.g., bitcoin, ethereum">
-                            <span class="helper-text" data-tooltip="coingecko">Used to fetch live price data. Find at coingecko.com</span>
-                        </div>
+                    <div class="form-group">
+                        <label for="date"><span class="label-icon">&#128197;</span> Date Received</label>
+                        <input type="date" id="date" required>
                     </div>
-                </div>
 
-                <!-- Financial Section -->
-                <div class="form-section">
-                    <div class="form-section-title"><span>&#128176;</span> Financial</div>
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="usd-sold"><span class="label-icon">&#128181;</span> Amount Sold (USD)</label>
-                            <input type="number" id="usd-sold" step="any" placeholder="Enter USD value" oninput="updateEurPreview()">
-                            <div class="eur-preview" id="eur-preview"></div>
-                        </div>
-                        <div class="form-group">
-                            <label for="chain"><span class="label-icon">&#128279;</span> Chain</label>
-                            <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC">
-                            <span class="helper-text">The blockchain network</span>
-                        </div>
+                    <div class="form-group">
+                        <label for="category"><span class="label-icon">&#127991;</span> Category</label>
+                        <select id="category">
+                            <option value="">Select category...</option>
+                            <option value="Airdrop">Airdrop</option>
+                            <option value="Paid Deal">Paid Deal</option>
+                            <option value="Staking">Staking</option>
+                            <option value="Mining">Mining</option>
+                            <option value="Trading">Trading</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
-                </div>
 
-                <!-- Optional Section -->
-                <div class="form-section" style="opacity: 0.85;">
-                    <div class="form-section-title"><span>&#128203;</span> Optional Details</div>
-                    <div class="form-grid">
-                        <div class="form-group full-width">
-                            <label for="wallet"><span class="label-icon">&#128091;</span> Wallet Address</label>
-                            <input type="text" id="wallet" placeholder="0x... or your wallet address">
-                            <span class="helper-text">Your receiving wallet address</span>
-                        </div>
+                    <div class="form-group">
+                        <label for="crypto"><span class="label-icon">&#9883;</span> Cryptocurrency</label>
+                        <input type="text" id="crypto" required placeholder="e.g., BTC, ETH, SOL">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="coingecko-id"><span class="label-icon">&#128202;</span> CoinGecko ID</label>
+                        <input type="text" id="coingecko-id" placeholder="e.g., bitcoin, ethereum">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usd-sold"><span class="label-icon">&#128181;</span> Amount Sold (USD)</label>
+                        <input type="number" id="usd-sold" step="any" placeholder="Enter USD value" oninput="updateEurPreview()">
+                        <div class="eur-preview" id="eur-preview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="chain"><span class="label-icon">&#128279;</span> Chain</label>
+                        <input type="text" id="chain" placeholder="e.g., Ethereum, Solana, BSC">
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="wallet"><span class="label-icon">&#128091;</span> Wallet Address</label>
+                        <input type="text" id="wallet" placeholder="0x... or your wallet address">
                     </div>
                 </div>
 
@@ -3894,7 +3865,6 @@
                         <tr>
                             <th onclick="sortTable('date')">Date</th>
                             <th onclick="sortTable('company')">Project</th>
-                            <th onclick="sortTable('amount')">Tokens</th>
                             <th onclick="sortTable('crypto')">Crypto</th>
                             <th onclick="sortTable('category')">Category</th>
                             <th onclick="sortTable('chain')">Chain</th>
@@ -6528,7 +6498,7 @@
             const payout = {
                 company: document.getElementById('company').value.trim(),
                 date: document.getElementById('date').value,
-                amount: parseFloat(document.getElementById('amount').value),
+                amount: 0,
                 crypto: document.getElementById('crypto').value.toUpperCase(),
                 coingecko_id: document.getElementById('coingecko-id').value.trim().toLowerCase(),
                 usd_sold: usdValue,
@@ -6646,7 +6616,6 @@
                 <tr>
                     <td>${formatDate(p.date)}</td>
                     <td>${escapeHtml(p.company)}</td>
-                    <td>${p.amount}</td>
                     <td>
                         <div style="display: flex; align-items: center; gap: 6px;">
                             ${tokenImage ? `<img src="${tokenImage}" alt="${p.crypto}" style="width: 20px; height: 20px; border-radius: 50%;">` : ''}
@@ -6861,7 +6830,6 @@
             document.getElementById('edit-id').value = payout.id;
             document.getElementById('company').value = payout.company;
             document.getElementById('date').value = payout.date;
-            document.getElementById('amount').value = payout.amount;
             document.getElementById('crypto').value = payout.crypto;
             document.getElementById('coingecko-id').value = payout.coingecko_id || '';
             document.getElementById('usd-sold').value = payout.usd_sold || '';
@@ -6912,16 +6880,17 @@
                 return;
             }
 
-            const headers = ['Date', 'Project', 'Tokens', 'Cryptocurrency', 'Chain', 'USD Sold', 'EUR Value', 'Wallet'];
+            const headers = ['Date', 'Project', 'Cryptocurrency', 'CoinGecko ID', 'Chain', 'USD Sold', 'EUR Value', 'Wallet', 'Category'];
             const rows = filtered.map(p => [
                 p.date,
                 `"${p.company.replace(/"/g, '""')}"`,
-                p.amount,
                 p.crypto,
+                p.coingecko_id || '',
                 `"${(p.chain || '').replace(/"/g, '""')}"`,
                 (p.usd_sold || 0).toFixed(2),
                 (p.eur_value || 0).toFixed(2),
-                `"${(p.wallet || '').replace(/"/g, '""')}"`
+                `"${(p.wallet || '').replace(/"/g, '""')}"`,
+                p.category || ''
             ]);
 
             const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
@@ -6971,7 +6940,7 @@
                 renderAll();
                 closeQuickAdd();
                 e.target.reset();
-                addNotification('Payout Added', `Added ${payout.amount} ${payout.crypto} from ${payout.company}`, 'info');
+                addNotification('Payout Added', `Added ${payout.crypto} payout from ${payout.company}`, 'info');
                 // Show Bilky modal for Paid Deals
                 if (payout.category === 'Paid Deal') {
                     openBilkyModal();
