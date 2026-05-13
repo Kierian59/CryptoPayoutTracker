@@ -7671,7 +7671,7 @@
             try {
                 // Using Finnhub API free tier (60 calls/min)
                 // Get your free key at https://finnhub.io/register
-                const apiKey = 'cti86f9r01qr7bb4nf1gcti86f9r01qr7bb4nf20'; // Demo key - users can get their own free key
+                const apiKey = 'd8298bhr01qmgc0f6afgd8298bhr01qmgc0f6ag0';
                 const response = await fetch(
                     `https://finnhub.io/api/v1/search?q=${encodeURIComponent(query)}&token=${apiKey}`
                 );
@@ -7721,7 +7721,7 @@
             }
 
             const results = [];
-            const apiKey = 'cti86f9r01qr7bb4nf1gcti86f9r01qr7bb4nf20'; // Demo key
+            const apiKey = 'd8298bhr01qmgc0f6afgd8298bhr01qmgc0f6ag0';
 
             // Fetch all stocks in parallel (Finnhub has 60 calls/min free tier)
             const promises = symbols.slice(0, 12).map(async (symbol) => {
