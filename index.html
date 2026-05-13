@@ -7671,7 +7671,7 @@
             try {
                 // Using Twelve Data API free tier (800 requests/day, 8 calls/min)
                 // Get your free key at https://twelvedata.com/apikey
-                const apiKey = 'demo'; // Demo key for testing - replace with your own
+                const apiKey = '72d2994db34842bc9f46293b47f35246';
                 const response = await fetch(
                     `https://api.twelvedata.com/symbol_search?symbol=${encodeURIComponent(query)}&apikey=${apiKey}`
                 );
@@ -7725,7 +7725,7 @@
             }
 
             const results = [];
-            const apiKey = 'demo'; // Demo key for testing
+            const apiKey = '72d2994db34842bc9f46293b47f35246';
 
             // Twelve Data allows batch requests - fetch up to 8 at once (free tier limit)
             const symbolString = symbols.slice(0, 8).join(',');
