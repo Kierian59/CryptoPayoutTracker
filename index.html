@@ -1014,6 +1014,126 @@
             margin-top: var(--space-md);
         }
 
+        /* Crypto Price Cards */
+        .crypto-card {
+            position: relative;
+        }
+
+        .crypto-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: var(--space-md);
+        }
+
+        .crypto-card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .crypto-card-info {
+            flex: 1;
+        }
+
+        .crypto-card-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .crypto-card-symbol {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .crypto-card-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: var(--space-sm);
+        }
+
+        .crypto-card-changes {
+            display: flex;
+            gap: 15px;
+            margin-bottom: var(--space-md);
+        }
+
+        .crypto-card-change {
+            flex: 1;
+        }
+
+        .crypto-card-change-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        .crypto-card-change-value {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .crypto-card-change-value.trend-up {
+            color: var(--accent-green);
+        }
+
+        .crypto-card-change-value.trend-down {
+            color: var(--accent-red);
+        }
+
+        .crypto-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: var(--space-md);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Watchlist Star Button */
+        .watchlist-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: 1.2rem;
+        }
+
+        .watchlist-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent);
+        }
+
+        .watchlist-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #000;
+        }
+
         .recent-activity {
             max-height: 300px;
             overflow-y: auto;
@@ -1677,6 +1797,72 @@
             border-color: #00d9ff;
         }
 
+        /* Crypto Search Container */
+        .crypto-search-container {
+            position: relative;
+        }
+
+        .crypto-search-results {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            max-height: 400px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+        }
+
+        .crypto-search-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .crypto-search-item:last-child {
+            border-bottom: none;
+        }
+
+        .crypto-search-item:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .crypto-search-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+
+        .crypto-search-item-details {
+            flex: 1;
+        }
+
+        .crypto-search-item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .crypto-search-item-symbol {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .crypto-search-loading,
+        .crypto-search-empty {
+            padding: 20px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
         /* Month Tabs */
         .month-tabs {
             display: flex;
@@ -2172,6 +2358,25 @@
             gap: 8px;
             padding: 12px 24px;
             font-size: 1rem;
+        }
+
+        /* Crypto Detail Modal */
+        .crypto-detail-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .crypto-detail-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .crypto-detail-body::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .crypto-detail-body::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
         }
 
         /* Category Badges */
@@ -3433,9 +3638,9 @@
                 <span class="nav-icon">&#128230;</span>
                 <span class="nav-label">Campaigns</span>
             </div>
-            <div class="nav-item" data-tab="expenses" onclick="switchMainTab('expenses')">
-                <span class="nav-icon">&#128176;</span>
-                <span class="nav-label">Expenses</span>
+            <div class="nav-item" data-tab="crypto-prices" onclick="switchMainTab('crypto-prices')">
+                <span class="nav-icon">&#128200;</span>
+                <span class="nav-label">Crypto Prices</span>
             </div>
             <div class="nav-item" data-tab="settings" onclick="switchMainTab('settings')">
                 <span class="nav-icon">&#9881;</span>
@@ -3550,7 +3755,7 @@
             <button class="main-tab" data-tab="history" onclick="switchMainTab('history')">History</button>
             <button class="main-tab" data-tab="vesting" onclick="switchMainTab('vesting')">Events & Vesting</button>
             <button class="main-tab" data-tab="campaigns" onclick="switchMainTab('campaigns')">Campaigns</button>
-            <button class="main-tab" data-tab="expenses" onclick="switchMainTab('expenses')">Expenses</button>
+            <button class="main-tab" data-tab="crypto-prices" onclick="switchMainTab('crypto-prices')">Crypto Prices</button>
             <button class="main-tab" data-tab="settings" onclick="switchMainTab('settings')">Settings</button>
         </div>
 
@@ -4244,137 +4449,6 @@
         </div>
         <!-- End Campaigns Tab -->
 
-        <!-- Expenses Tab -->
-        <div class="tab-content" id="tab-expenses">
-            <!-- Expense Summary Stats -->
-            <div class="card">
-                <h2>Monthly Expense Summary</h2>
-                <div class="expense-month-selector" style="margin-bottom: 15px;">
-                    <label for="expense-month-filter">Month: </label>
-                    <input type="month" id="expense-month-filter" onchange="renderExpensesTab()">
-                </div>
-                <div class="stats">
-                    <div class="stat-box">
-                        <div class="value expense-red" id="total-expenses-count">0</div>
-                        <div class="label">Total Expenses</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="value expense-red" id="total-expenses-amount">$0.00</div>
-                        <div class="label">Total Amount</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="value" id="avg-expense-amount">$0.00</div>
-                        <div class="label">Average Expense</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="value" id="top-expense-category">-</div>
-                        <div class="label">Top Category</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Add Expense Form -->
-            <div class="card">
-                <h2 id="expense-form-title">Add New Expense</h2>
-                <form id="expense-form">
-                    <input type="hidden" id="expense-edit-id">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="expense-date">Date</label>
-                            <input type="date" id="expense-date" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="expense-category">Category</label>
-                            <select id="expense-category" required>
-                                <option value="">Select category...</option>
-                                <optgroup label="Crypto">
-                                    <option value="Gas Fees">Gas Fees</option>
-                                    <option value="Trading Fees">Trading Fees</option>
-                                    <option value="Hardware Wallet">Hardware Wallet</option>
-                                    <option value="Mining Costs">Mining Costs</option>
-                                    <option value="Staking Fees">Staking Fees</option>
-                                    <option value="Crypto Subscriptions">Crypto Subscriptions</option>
-                                </optgroup>
-                                <optgroup label="Business">
-                                    <option value="Travel">Travel</option>
-                                    <option value="Equipment">Equipment</option>
-                                    <option value="Software">Software</option>
-                                    <option value="Services">Services</option>
-                                    <option value="Food & Entertainment">Food & Entertainment</option>
-                                    <option value="Office Supplies">Office Supplies</option>
-                                    <option value="Other">Other</option>
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="expense-amount">Amount (USD)</label>
-                            <input type="number" id="expense-amount" step="0.01" min="0" required placeholder="0.00">
-                        </div>
-                        <div class="form-group">
-                            <label for="expense-description">Description</label>
-                            <input type="text" id="expense-description" placeholder="Optional notes...">
-                        </div>
-                        <div class="form-group">
-                            <label for="expense-recurring">
-                                <input type="checkbox" id="expense-recurring" onchange="toggleRecurringOptions()">
-                                Recurring Expense
-                            </label>
-                        </div>
-                        <div class="form-group" id="recurring-options" style="display: none;">
-                            <label for="expense-frequency">Frequency</label>
-                            <select id="expense-frequency">
-                                <option value="weekly">Weekly</option>
-                                <option value="monthly" selected>Monthly</option>
-                                <option value="yearly">Yearly</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" id="expense-submit-btn">Add Expense</button>
-                        <button type="button" class="btn" id="expense-cancel-btn" style="display: none; background: #666;" onclick="cancelExpenseEdit()">Cancel</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Active Recurring Expenses -->
-            <div class="card" id="recurring-expenses-card">
-                <div class="header-actions">
-                    <h2>Active Recurring Expenses</h2>
-                </div>
-                <div id="recurring-expenses-list">
-                    <div class="no-data" id="no-recurring-expenses">No recurring expenses set up yet.</div>
-                </div>
-            </div>
-
-            <!-- Expense History -->
-            <div class="card">
-                <div class="header-actions">
-                    <h2>Expense History</h2>
-                    <div>
-                        <input type="text" class="search-box" id="expense-search" placeholder="Search expenses..." oninput="renderExpenseTable()">
-                        <button class="btn btn-export" onclick="exportExpensesCSV()">Export CSV</button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table id="expense-table">
-                        <thead>
-                            <tr>
-                                <th onclick="sortExpenseTable('date')">Date</th>
-                                <th onclick="sortExpenseTable('category')">Category</th>
-                                <th onclick="sortExpenseTable('amount')">Amount</th>
-                                <th onclick="sortExpenseTable('description')">Description</th>
-                                <th>Recurring</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expense-table-body">
-                        </tbody>
-                    </table>
-                    <div class="no-data" id="no-expenses">No expenses recorded yet. Add your first expense above!</div>
-                </div>
-            </div>
-        </div>
-        <!-- End Expenses Tab -->
 
         <!-- Settings Tab -->
         <div class="tab-content" id="tab-settings">
@@ -4514,6 +4588,52 @@
             </div>
         </div>
         <!-- End Settings Tab -->
+
+        <!-- Crypto Prices Tab -->
+        <div class="tab-content" id="tab-crypto-prices">
+            <!-- Search Section -->
+            <div class="card">
+                <h2><span class="card-icon">&#128200;</span> Search Cryptocurrencies</h2>
+                <div class="crypto-search-container">
+                    <input type="text"
+                           id="crypto-search-input"
+                           class="search-box"
+                           placeholder="Search by name or symbol (e.g., Bitcoin, BTC)..."
+                           autocomplete="off"
+                           style="width: 100%;">
+                    <div class="crypto-search-results" id="crypto-search-results" style="display: none;">
+                        <!-- Search results populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trending Section -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2>Price Tracker</h2>
+                    <button class="btn btn-secondary btn-sm" onclick="refreshTrendingCoins()">
+                        <span class="btn-text">↻ Refresh</span>
+                    </button>
+                </div>
+                <div class="filter-chips">
+                    <span class="filter-chip active" data-view="trending" onclick="switchCryptoView('trending')">Trending</span>
+                    <span class="filter-chip" data-view="watchlist" onclick="switchCryptoView('watchlist')">My Watchlist</span>
+                </div>
+            </div>
+
+            <!-- Crypto Cards Grid -->
+            <div class="dashboard-grid" id="crypto-cards-grid">
+                <!-- Cards populated dynamically -->
+            </div>
+
+            <!-- Empty State for Watchlist -->
+            <div class="empty-state" id="empty-watchlist" style="display: none;">
+                <div class="empty-state-icon">&#128200;</div>
+                <div class="empty-state-title">No cryptos in watchlist</div>
+                <div class="empty-state-text">Search for cryptocurrencies and add them to your watchlist for quick price tracking.</div>
+            </div>
+        </div>
+        <!-- End Crypto Prices Tab -->
     </div>
 
     <!-- Clear Data Confirmation Dialog -->
@@ -4542,6 +4662,67 @@
                         Open Bilky
                     </button>
                     <button class="btn btn-secondary" onclick="closeBilkyModal()">Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Crypto Detail Modal -->
+    <div class="modal-overlay" id="crypto-detail-modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <img id="crypto-detail-image" src="" alt="" style="width: 32px; height: 32px; border-radius: 50%;">
+                    <h3 id="crypto-detail-name">Bitcoin</h3>
+                </div>
+                <button class="modal-close" onclick="closeCryptoDetailModal()">&times;</button>
+            </div>
+            <div class="crypto-detail-body">
+                <!-- Price Section -->
+                <div style="text-align: center; padding: 20px; border-bottom: 1px solid var(--border-color);">
+                    <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent);" id="crypto-detail-price">$0</div>
+                    <div style="display: flex; gap: 20px; justify-content: center; margin-top: 15px;">
+                        <div>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">24h Change</span>
+                            <div id="crypto-detail-change-24h" class="trend">0%</div>
+                        </div>
+                        <div>
+                            <span style="color: var(--text-secondary); font-size: 0.85rem;">7d Change</span>
+                            <div id="crypto-detail-change-7d" class="trend">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 20px; border-bottom: 1px solid var(--border-color);">
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;">Market Cap</div>
+                        <div id="crypto-detail-market-cap" style="font-weight: 600;">N/A</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;">24h Volume</div>
+                        <div id="crypto-detail-volume" style="font-weight: 600;">N/A</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;">24h High</div>
+                        <div id="crypto-detail-high" style="font-weight: 600;">N/A</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-secondary); font-size: 0.85rem;">24h Low</div>
+                        <div id="crypto-detail-low" style="font-weight: 600;">N/A</div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div style="padding: 20px;">
+                    <div class="filter-chips" style="margin-bottom: 20px;">
+                        <span class="filter-chip active" data-period="1" onclick="switchChartPeriod('1')">24h</span>
+                        <span class="filter-chip" data-period="7" onclick="switchChartPeriod('7')">7d</span>
+                        <span class="filter-chip" data-period="30" onclick="switchChartPeriod('30')">30d</span>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="crypto-detail-chart"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5459,9 +5640,6 @@
 
         // Data storage
         var payouts = [];
-        var expenses = [];
-        var expenseSortField = 'date';
-        var expenseSortDirection = 'desc';
         var currentUser = null;
         var sortField = 'date';
         var sortDirection = 'desc';
@@ -5686,8 +5864,7 @@
                 loadPayouts(),
                 loadVestings(),
                 loadCryptoEvents(),
-                loadCampaigns(),
-                loadExpenses()
+                loadCampaigns()
             ]);
 
             // Auto-refresh vestings every hour to keep unclaimed tokens up to date
@@ -5723,6 +5900,28 @@
             updateMonthTabs();
             renderAll();
             fetchPayoutTokenImages(); // Fetch token images for payouts with CoinGecko IDs
+        }
+
+        // Load watchlist from localStorage
+        function loadCryptoWatchlist() {
+            const saved = localStorage.getItem('cryptoWatchlist');
+            if (saved) {
+                try {
+                    cryptoWatchlist = JSON.parse(saved);
+                } catch (e) {
+                    console.error('Error loading watchlist:', e);
+                    cryptoWatchlist = [];
+                }
+            }
+        }
+
+        // Save watchlist to localStorage
+        function saveCryptoWatchlist() {
+            try {
+                localStorage.setItem('cryptoWatchlist', JSON.stringify(cryptoWatchlist));
+            } catch (e) {
+                console.error('Error saving watchlist:', e);
+            }
         }
 
         async function savePayout(payout) {
@@ -5794,393 +5993,6 @@
             return true;
         }
 
-        // ============ EXPENSE FUNCTIONS ============
-
-        async function loadExpenses() {
-            var result = await window.supabaseClient
-                .from('expenses')
-                .select('*')
-                .order('date', { ascending: false });
-
-            if (result.error) {
-                console.error('Error loading expenses:', result.error);
-                return;
-            }
-
-            expenses = (result.data || []).map(e => ({
-                ...e,
-                amount: parseFloat(e.amount) || 0
-            }));
-
-            // Generate recurring entries for current month
-            await generateRecurringExpenses();
-            renderExpensesTab();
-        }
-
-        async function saveExpense(expense) {
-            var result = await window.supabaseClient
-                .from('expenses')
-                .insert([{
-                    user_id: currentUser.id,
-                    date: expense.date,
-                    category: expense.category,
-                    amount: expense.amount,
-                    description: expense.description || null,
-                    is_recurring: expense.is_recurring || false,
-                    recurring_frequency: expense.recurring_frequency || null,
-                    recurring_parent_id: expense.recurring_parent_id || null,
-                    created_at: new Date().toISOString()
-                }])
-                .select();
-
-            if (result.error) {
-                console.error('Error saving expense:', result.error);
-                alert('Error saving expense: ' + result.error.message);
-                return null;
-            }
-
-            const saved = result.data[0];
-            return { ...saved, amount: parseFloat(saved.amount) || 0 };
-        }
-
-        async function updateExpenseInDB(id, expense) {
-            var result = await window.supabaseClient
-                .from('expenses')
-                .update({
-                    date: expense.date,
-                    category: expense.category,
-                    amount: expense.amount,
-                    description: expense.description || null,
-                    is_recurring: expense.is_recurring || false,
-                    recurring_frequency: expense.recurring_frequency || null
-                })
-                .eq('id', id)
-                .select();
-
-            if (result.error) {
-                console.error('Error updating expense:', result.error);
-                alert('Error updating expense: ' + result.error.message);
-                return null;
-            }
-
-            const updated = result.data[0];
-            return { ...updated, amount: parseFloat(updated.amount) || 0 };
-        }
-
-        async function deleteExpenseFromDB(id) {
-            var result = await window.supabaseClient
-                .from('expenses')
-                .delete()
-                .eq('id', id);
-
-            if (result.error) {
-                console.error('Error deleting expense:', result.error);
-                alert('Error deleting expense: ' + result.error.message);
-                return false;
-            }
-
-            return true;
-        }
-
-        // Render expenses tab
-        function renderExpensesTab() {
-            // Set default date if empty
-            const dateInput = getEl('expense-date');
-            if (dateInput && !dateInput.value) {
-                dateInput.valueAsDate = new Date();
-            }
-            renderExpenseStats();
-            renderExpenseTable();
-            renderRecurringExpensesList();
-        }
-
-        // Generate recurring expense entries for current month
-        async function generateRecurringExpenses() {
-            const now = new Date();
-            const currentMonth = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-
-            // Get all recurring templates (parent entries without recurring_parent_id)
-            const templates = expenses.filter(e => e.is_recurring && !e.recurring_parent_id);
-
-            for (const template of templates) {
-                // Check if entry already exists for current month
-                const exists = expenses.some(e =>
-                    e.recurring_parent_id === template.id &&
-                    e.date.startsWith(currentMonth)
-                );
-
-                if (!exists) {
-                    // Determine the date for this month's entry
-                    const templateDate = new Date(template.date);
-                    const dayOfMonth = templateDate.getDate();
-                    const newDate = new Date(now.getFullYear(), now.getMonth(), Math.min(dayOfMonth, new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()));
-                    const dateStr = newDate.toISOString().split('T')[0];
-
-                    // Create the recurring entry
-                    const newExpense = {
-                        date: dateStr,
-                        category: template.category,
-                        amount: template.amount,
-                        description: template.description,
-                        is_recurring: false,
-                        recurring_frequency: null,
-                        recurring_parent_id: template.id
-                    };
-
-                    const saved = await saveExpense(newExpense);
-                    if (saved) {
-                        expenses.unshift(saved);
-                    }
-                }
-            }
-        }
-
-        function renderExpenseStats() {
-            const monthFilter = getEl('expense-month-filter');
-            if (!monthFilter.value) {
-                // Default to current month
-                const now = new Date();
-                monthFilter.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-            }
-
-            const [year, month] = monthFilter.value.split('-').map(Number);
-            const filteredExpenses = expenses.filter(e => {
-                const expenseDate = new Date(e.date);
-                return expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
-            });
-
-            const totalCount = filteredExpenses.length;
-            const totalAmount = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
-            const avgAmount = totalCount > 0 ? totalAmount / totalCount : 0;
-
-            // Find top category
-            const categoryTotals = {};
-            filteredExpenses.forEach(e => {
-                categoryTotals[e.category] = (categoryTotals[e.category] || 0) + e.amount;
-            });
-            let topCategory = '-';
-            let maxAmount = 0;
-            for (const [cat, amt] of Object.entries(categoryTotals)) {
-                if (amt > maxAmount) {
-                    maxAmount = amt;
-                    topCategory = cat;
-                }
-            }
-
-            getEl('total-expenses-count').textContent = totalCount;
-            getEl('total-expenses-amount').textContent = '$' + formatUSD(totalAmount);
-            getEl('avg-expense-amount').textContent = '$' + formatUSD(avgAmount);
-            getEl('top-expense-category').textContent = topCategory;
-        }
-
-        function renderExpenseTable() {
-            const searchTerm = (getEl('expense-search')?.value || '').toLowerCase();
-            const monthFilter = getEl('expense-month-filter');
-            const tbody = getEl('expense-table-body');
-            const noData = getEl('no-expenses');
-
-            if (!monthFilter.value) {
-                const now = new Date();
-                monthFilter.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
-            }
-
-            const [year, month] = monthFilter.value.split('-').map(Number);
-
-            let filtered = expenses.filter(e => {
-                const expenseDate = new Date(e.date);
-                const matchesMonth = expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
-                const matchesSearch = e.category.toLowerCase().includes(searchTerm) ||
-                    (e.description || '').toLowerCase().includes(searchTerm);
-                return matchesMonth && matchesSearch;
-            });
-
-            // Sort
-            filtered.sort((a, b) => {
-                let aVal = a[expenseSortField];
-                let bVal = b[expenseSortField];
-                if (expenseSortField === 'amount') {
-                    aVal = parseFloat(aVal) || 0;
-                    bVal = parseFloat(bVal) || 0;
-                } else if (expenseSortField === 'date') {
-                    aVal = new Date(aVal);
-                    bVal = new Date(bVal);
-                } else {
-                    aVal = (aVal || '').toLowerCase();
-                    bVal = (bVal || '').toLowerCase();
-                }
-                if (aVal < bVal) return expenseSortDirection === 'asc' ? -1 : 1;
-                if (aVal > bVal) return expenseSortDirection === 'asc' ? 1 : -1;
-                return 0;
-            });
-
-            if (filtered.length === 0) {
-                tbody.innerHTML = '';
-                noData.style.display = 'block';
-                return;
-            }
-
-            noData.style.display = 'none';
-            tbody.innerHTML = filtered.map(e => {
-                const recurringBadge = e.is_recurring ?
-                    `<span class="recurring-badge">${e.recurring_frequency}</span>` : '-';
-                return `
-                    <tr>
-                        <td>${formatDate(e.date)}</td>
-                        <td>${escapeHtml(e.category)}</td>
-                        <td style="color: #ff6b6b;">-$${formatUSD(e.amount)}</td>
-                        <td>${escapeHtml(e.description) || '-'}</td>
-                        <td>${recurringBadge}</td>
-                        <td>
-                            <button class="btn btn-edit" onclick="editExpense('${e.id}')">Edit</button>
-                            <button class="btn btn-danger" onclick="deleteExpense('${e.id}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        function renderRecurringExpensesList() {
-            const container = getEl('recurring-expenses-list');
-            const noData = getEl('no-recurring-expenses');
-
-            const recurringExpenses = expenses.filter(e => e.is_recurring && !e.recurring_parent_id);
-
-            if (recurringExpenses.length === 0) {
-                container.innerHTML = '';
-                container.appendChild(noData);
-                noData.style.display = 'block';
-                return;
-            }
-
-            noData.style.display = 'none';
-            container.innerHTML = recurringExpenses.map(e => `
-                <div class="recurring-expense-item">
-                    <div class="recurring-expense-info">
-                        <strong>${escapeHtml(e.category)}</strong>
-                        <span class="recurring-badge">${e.recurring_frequency}</span>
-                        <span style="color: #aaa;">${escapeHtml(e.description) || ''}</span>
-                    </div>
-                    <div class="recurring-expense-amount">
-                        <span style="color: #ff6b6b; font-weight: bold;">-$${formatUSD(e.amount)}</span>
-                        <button class="btn btn-danger btn-sm" onclick="stopRecurringExpense('${e.id}')">Stop</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        window.sortExpenseTable = function(field) {
-            if (expenseSortField === field) {
-                expenseSortDirection = expenseSortDirection === 'asc' ? 'desc' : 'asc';
-            } else {
-                expenseSortField = field;
-                expenseSortDirection = 'desc';
-            }
-            renderExpenseTable();
-        };
-
-        window.editExpense = function(id) {
-            const expense = expenses.find(e => e.id === id);
-            if (!expense) return;
-
-            getEl('expense-date').value = expense.date;
-            getEl('expense-category').value = expense.category;
-            getEl('expense-amount').value = expense.amount;
-            getEl('expense-description').value = expense.description || '';
-            getEl('expense-recurring').checked = expense.is_recurring || false;
-            getEl('expense-frequency').value = expense.recurring_frequency || 'monthly';
-            getEl('expense-edit-id').value = id;
-
-            toggleRecurringOptions();
-
-            getEl('expense-form-title').textContent = 'Edit Expense';
-            getEl('expense-submit-btn').textContent = 'Update Expense';
-            getEl('expense-cancel-btn').style.display = 'inline-block';
-
-            // Scroll to form
-            getEl('expense-form').scrollIntoView({ behavior: 'smooth' });
-        };
-
-        window.cancelExpenseEdit = function() {
-            getEl('expense-form').reset();
-            getEl('expense-edit-id').value = '';
-            getEl('expense-form-title').textContent = 'Add New Expense';
-            getEl('expense-submit-btn').textContent = 'Add Expense';
-            getEl('expense-cancel-btn').style.display = 'none';
-            getEl('recurring-options').style.display = 'none';
-        };
-
-        window.deleteExpense = async function(id) {
-            if (!confirm('Are you sure you want to delete this expense?')) return;
-
-            const success = await deleteExpenseFromDB(id);
-            if (success) {
-                expenses = expenses.filter(e => e.id !== id);
-                renderExpensesTab();
-            }
-        };
-
-        window.stopRecurringExpense = async function(id) {
-            if (!confirm('Stop this recurring expense? Future entries will not be generated.')) return;
-
-            const expense = expenses.find(e => e.id === id);
-            if (!expense) return;
-
-            // Update to mark as non-recurring
-            const updated = await updateExpenseInDB(id, { ...expense, is_recurring: false, recurring_frequency: null });
-            if (updated) {
-                const index = expenses.findIndex(e => e.id === id);
-                if (index !== -1) {
-                    expenses[index] = updated;
-                }
-                renderExpensesTab();
-            }
-        };
-
-        window.toggleRecurringOptions = function() {
-            const checkbox = getEl('expense-recurring');
-            const options = getEl('recurring-options');
-            options.style.display = checkbox.checked ? 'block' : 'none';
-        };
-
-        function exportExpensesCSV() {
-            if (expenses.length === 0) {
-                alert('No expenses to export');
-                return;
-            }
-
-            const monthFilter = getEl('expense-month-filter');
-            const [year, month] = monthFilter.value.split('-').map(Number);
-
-            const filtered = expenses.filter(e => {
-                const expenseDate = new Date(e.date);
-                return expenseDate.getFullYear() === year && (expenseDate.getMonth() + 1) === month;
-            });
-
-            if (filtered.length === 0) {
-                alert('No expenses for selected month');
-                return;
-            }
-
-            const headers = ['Date', 'Category', 'Amount (USD)', 'Description', 'Recurring', 'Frequency'];
-            const rows = filtered.map(e => [
-                e.date,
-                e.category,
-                e.amount.toFixed(2),
-                e.description || '',
-                e.is_recurring ? 'Yes' : 'No',
-                e.recurring_frequency || ''
-            ]);
-
-            const csvContent = [headers, ...rows]
-                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-                .join('\n');
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `expenses_${monthFilter.value}.csv`;
-            link.click();
-        }
 
         // Format USD
         function formatUSD(value) {
@@ -6535,42 +6347,6 @@
             document.getElementById('date').valueAsDate = new Date();
         });
 
-        // Expense form submission
-        document.getElementById('expense-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const editId = document.getElementById('expense-edit-id').value;
-            const isRecurring = document.getElementById('expense-recurring').checked;
-            const expense = {
-                date: document.getElementById('expense-date').value,
-                category: document.getElementById('expense-category').value,
-                amount: parseFloat(document.getElementById('expense-amount').value),
-                description: document.getElementById('expense-description').value.trim(),
-                is_recurring: isRecurring,
-                recurring_frequency: isRecurring ? document.getElementById('expense-frequency').value : null
-            };
-
-            if (editId) {
-                const updated = await updateExpenseInDB(editId, expense);
-                if (updated) {
-                    const index = expenses.findIndex(exp => exp.id === editId);
-                    if (index !== -1) {
-                        expenses[index] = updated;
-                    }
-                }
-                cancelExpenseEdit();
-            } else {
-                const saved = await saveExpense(expense);
-                if (saved) {
-                    expenses.unshift(saved);
-                }
-            }
-
-            renderExpensesTab();
-            e.target.reset();
-            document.getElementById('expense-date').valueAsDate = new Date();
-            document.getElementById('recurring-options').style.display = 'none';
-        });
 
         // Render table
         function renderTable() {
@@ -7093,6 +6869,18 @@
         var tokenImages = {};
         var pricesLastUpdated = null;
         var pendingTokenFetch = null; // Prevent duplicate concurrent fetches
+
+        // Crypto Price Checker State
+        var cryptoWatchlist = []; // Array of CoinGecko IDs
+        var cryptoSearchCache = null; // Cache for search results
+        var cryptoSearchTimeout = null; // Debounce timer
+        var cryptoDetailChart = null; // Chart.js instance for detail view
+        var currentCryptoView = 'trending'; // 'trending' or 'watchlist'
+        var trendingCoinsCache = null;
+        var trendingCacheTime = null;
+        var selectedCryptoForDetail = null;
+        var currentChartPeriod = '1'; // 1, 7, or 30 days
+        var cryptoHistoricalDataCache = {}; // Cache for historical price data
 
         // Unified function to fetch all token data from CoinGecko
         async function fetchAllTokenData() {
