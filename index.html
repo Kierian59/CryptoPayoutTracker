@@ -5021,6 +5021,17 @@
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.toggle('active', content.id === 'tab-' + tabName);
             });
+
+            // Initialize crypto prices tab when switched to
+            if (tabName === 'crypto-prices') {
+                if (!cryptoWatchlist.length && currentCryptoView === 'watchlist') {
+                    currentCryptoView = 'trending';
+                    document.querySelectorAll('[data-view]').forEach(chip => {
+                        chip.classList.toggle('active', chip.dataset.view === 'trending');
+                    });
+                }
+                renderCryptoCards();
+            }
         };
 
         // Notification System
@@ -5866,6 +5877,9 @@
                 loadCryptoEvents(),
                 loadCampaigns()
             ]);
+
+            // Load crypto watchlist from localStorage
+            loadCryptoWatchlist();
 
             // Auto-refresh vestings every hour to keep unclaimed tokens up to date
             setInterval(function() {
@@ -6738,6 +6752,35 @@
             }
         });
 
+        // Crypto search event listener
+        const cryptoSearchInput = document.getElementById('crypto-search-input');
+        if (cryptoSearchInput) {
+            cryptoSearchInput.addEventListener('input', (e) => {
+                handleCryptoSearch(e.target.value);
+            });
+        }
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchContainer = e.target.closest('.crypto-search-container');
+            if (!searchContainer) {
+                const resultsEl = document.getElementById('crypto-search-results');
+                if (resultsEl) {
+                    resultsEl.style.display = 'none';
+                }
+            }
+        });
+
+        // Close crypto detail modal on backdrop click
+        const cryptoDetailModal = document.getElementById('crypto-detail-modal');
+        if (cryptoDetailModal) {
+            cryptoDetailModal.addEventListener('click', (e) => {
+                if (e.target.id === 'crypto-detail-modal') {
+                    closeCryptoDetailModal();
+                }
+            });
+        }
+
         // Close notification panel on outside click
         document.addEventListener('click', (e) => {
             const panel = document.getElementById('notification-panel');
@@ -6753,6 +6796,7 @@
             if (e.key === 'Escape') {
                 closeQuickAdd();
                 closeBilkyModal();
+                closeCryptoDetailModal();
                 document.getElementById('notification-panel').classList.remove('open');
                 endTour();
             }
@@ -6979,6 +7023,491 @@
         function getTokenImage(coingeckoId) {
             if (!coingeckoId || !tokenImages[coingeckoId]) return null;
             return tokenImages[coingeckoId];
+        }
+
+        // ============ CRYPTO PRICE CHECKER FUNCTIONS ============
+
+        // Crypto search with debounce
+        function handleCryptoSearch(query) {
+            clearTimeout(cryptoSearchTimeout);
+
+            const resultsContainer = document.getElementById('crypto-search-results');
+
+            if (!query || query.trim().length < 2) {
+                resultsContainer.style.display = 'none';
+                return;
+            }
+
+            resultsContainer.style.display = 'block';
+            resultsContainer.innerHTML = '<div class="crypto-search-loading">Searching...</div>';
+
+            cryptoSearchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(
+                        `https://api.coingecko.com/api/v3/search?query=${encodeURIComponent(query)}`
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('Search failed');
+                    }
+
+                    const data = await response.json();
+                    const coins = data.coins || [];
+
+                    if (coins.length === 0) {
+                        resultsContainer.innerHTML = '<div class="crypto-search-empty">No results found</div>';
+                        return;
+                    }
+
+                    // Show top 10 results
+                    resultsContainer.innerHTML = coins.slice(0, 10).map(coin => `
+                        <div class="crypto-search-item" onclick="addCryptoToWatchlist('${coin.id}', '${escapeHtml(coin.name)}', '${coin.symbol}', '${coin.large}')">
+                            <img src="${coin.large}" alt="${escapeHtml(coin.name)}">
+                            <div class="crypto-search-item-details">
+                                <div class="crypto-search-item-name">${escapeHtml(coin.name)}</div>
+                                <div class="crypto-search-item-symbol">${coin.symbol}</div>
+                            </div>
+                            <span style="color: var(--text-secondary);">+</span>
+                        </div>
+                    `).join('');
+                } catch (error) {
+                    console.error('Search error:', error);
+                    resultsContainer.innerHTML = '<div class="crypto-search-empty">Error loading results</div>';
+                }
+            }, 500); // 500ms debounce
+        }
+
+        // Add crypto to watchlist
+        window.addCryptoToWatchlist = function(coingeckoId, name, symbol, imageUrl) {
+            if (!cryptoWatchlist.includes(coingeckoId)) {
+                cryptoWatchlist.push(coingeckoId);
+                saveCryptoWatchlist();
+                showToast('Added to Watchlist', `${name} added to your watchlist`, 'success');
+
+                // Close search results
+                document.getElementById('crypto-search-results').style.display = 'none';
+                document.getElementById('crypto-search-input').value = '';
+
+                // If we're on watchlist view, refresh
+                if (currentCryptoView === 'watchlist') {
+                    renderCryptoCards();
+                }
+            } else {
+                showToast('Already in Watchlist', `${name} is already in your watchlist`, 'info');
+            }
+        };
+
+        // Remove from watchlist
+        window.removeFromWatchlist = function(coingeckoId) {
+            cryptoWatchlist = cryptoWatchlist.filter(id => id !== coingeckoId);
+            saveCryptoWatchlist();
+            renderCryptoCards();
+            showToast('Removed from Watchlist', 'Crypto removed from your watchlist', 'success');
+        };
+
+        // Fetch trending coins from CoinGecko
+        async function fetchTrendingCoins() {
+            // Check cache (5 minute TTL)
+            const now = Date.now();
+            if (trendingCacheTime && (now - trendingCacheTime) < 300000 && trendingCoinsCache) {
+                return trendingCoinsCache;
+            }
+
+            try {
+                const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch trending coins');
+                }
+
+                const data = await response.json();
+                const trendingIds = data.coins.map(item => item.item.id).slice(0, 12); // Top 12
+
+                trendingCoinsCache = trendingIds;
+                trendingCacheTime = now;
+
+                return trendingIds;
+            } catch (error) {
+                console.error('Error fetching trending coins:', error);
+                // Return default popular coins as fallback
+                return ['bitcoin', 'ethereum', 'binancecoin', 'cardano', 'solana', 'polkadot'];
+            }
+        }
+
+        window.refreshTrendingCoins = async function() {
+            trendingCacheTime = null;
+            trendingCoinsCache = null;
+            if (currentCryptoView === 'trending') {
+                await renderCryptoCards();
+                showToast('Refreshed', 'Trending coins updated', 'success');
+            }
+        };
+
+        // Fetch detailed crypto data for display
+        async function fetchCryptoDataForCards(coingeckoIds) {
+            if (!coingeckoIds || coingeckoIds.length === 0) {
+                return [];
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${coingeckoIds.join(',')}&order=market_cap_desc&sparkline=false&price_change_percentage=24h,7d`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch crypto data');
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching crypto data:', error);
+                return [];
+            }
+        }
+
+        // Render crypto price cards
+        async function renderCryptoCards() {
+            const grid = document.getElementById('crypto-cards-grid');
+            const emptyState = document.getElementById('empty-watchlist');
+
+            if (!grid) return;
+
+            let coingeckoIds = [];
+
+            if (currentCryptoView === 'trending') {
+                coingeckoIds = await fetchTrendingCoins();
+                emptyState.style.display = 'none';
+            } else {
+                coingeckoIds = cryptoWatchlist;
+                if (coingeckoIds.length === 0) {
+                    grid.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+                emptyState.style.display = 'none';
+            }
+
+            grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-secondary);">Loading...</div>';
+
+            const cryptoData = await fetchCryptoDataForCards(coingeckoIds);
+
+            if (cryptoData.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--text-secondary);">No data available</div>';
+                return;
+            }
+
+            grid.innerHTML = cryptoData.map(crypto => {
+                const change24h = crypto.price_change_percentage_24h || 0;
+                const change7d = crypto.price_change_percentage_7d_in_currency || 0;
+                const isInWatchlist = cryptoWatchlist.includes(crypto.id);
+
+                return `
+                    <div class="dashboard-card crypto-card">
+                        <button class="watchlist-btn ${isInWatchlist ? 'active' : ''}"
+                                onclick="event.stopPropagation(); toggleWatchlist('${crypto.id}', '${escapeHtml(crypto.name)}')">
+                            ${isInWatchlist ? '★' : '☆'}
+                        </button>
+
+                        <div class="crypto-card-header">
+                            <img src="${crypto.image}" alt="${escapeHtml(crypto.name)}" class="crypto-card-icon">
+                            <div class="crypto-card-info">
+                                <div class="crypto-card-name">${escapeHtml(crypto.name)}</div>
+                                <div class="crypto-card-symbol">${crypto.symbol.toUpperCase()}</div>
+                            </div>
+                        </div>
+
+                        <div class="crypto-card-price">$${formatCryptoPrice(crypto.current_price)}</div>
+
+                        <div class="crypto-card-changes">
+                            <div class="crypto-card-change">
+                                <div class="crypto-card-change-label">24h</div>
+                                <div class="crypto-card-change-value ${change24h >= 0 ? 'trend-up' : 'trend-down'}">
+                                    ${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%
+                                </div>
+                            </div>
+                            <div class="crypto-card-change">
+                                <div class="crypto-card-change-label">7d</div>
+                                <div class="crypto-card-change-value ${change7d >= 0 ? 'trend-up' : 'trend-down'}">
+                                    ${change7d >= 0 ? '+' : ''}${change7d.toFixed(2)}%
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="crypto-card-actions">
+                            <button class="btn btn-primary btn-sm" onclick="openCryptoDetailModal('${crypto.id}')">
+                                <span class="btn-text">View Details</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Format crypto price (handles very small and very large numbers)
+        function formatCryptoPrice(price) {
+            if (price >= 1) {
+                return price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else if (price >= 0.01) {
+                return price.toFixed(4);
+            } else if (price >= 0.0001) {
+                return price.toFixed(6);
+            } else {
+                return price.toFixed(8);
+            }
+        }
+
+        // Toggle watchlist status
+        window.toggleWatchlist = function(coingeckoId, name) {
+            const index = cryptoWatchlist.indexOf(coingeckoId);
+            if (index > -1) {
+                cryptoWatchlist.splice(index, 1);
+                showToast('Removed', `${name} removed from watchlist`, 'success');
+            } else {
+                cryptoWatchlist.push(coingeckoId);
+                showToast('Added', `${name} added to watchlist`, 'success');
+            }
+            saveCryptoWatchlist();
+            renderCryptoCards();
+        };
+
+        // Switch between trending and watchlist view
+        window.switchCryptoView = function(view) {
+            currentCryptoView = view;
+
+            // Update filter chips
+            document.querySelectorAll('[data-view]').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.view === view);
+            });
+
+            renderCryptoCards();
+        };
+
+        // Open crypto detail modal
+        window.openCryptoDetailModal = async function(coingeckoId) {
+            selectedCryptoForDetail = coingeckoId;
+            currentChartPeriod = '1';
+
+            const modal = document.getElementById('crypto-detail-modal');
+            modal.classList.add('active');
+
+            // Show loading state
+            document.getElementById('crypto-detail-price').textContent = 'Loading...';
+
+            try {
+                // Fetch detailed coin data
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/coins/${coingeckoId}?localization=false&tickers=false&community_data=false&developer_data=false`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch crypto details');
+                }
+
+                const data = await response.json();
+
+                // Update modal with data
+                document.getElementById('crypto-detail-image').src = data.image.large;
+                document.getElementById('crypto-detail-name').textContent = data.name;
+                document.getElementById('crypto-detail-price').textContent = '$' + formatCryptoPrice(data.market_data.current_price.usd);
+
+                const change24h = data.market_data.price_change_percentage_24h || 0;
+                const change7d = data.market_data.price_change_percentage_7d || 0;
+
+                const change24hEl = document.getElementById('crypto-detail-change-24h');
+                change24hEl.textContent = (change24h >= 0 ? '+' : '') + change24h.toFixed(2) + '%';
+                change24hEl.className = 'trend ' + (change24h >= 0 ? 'up' : 'down');
+
+                const change7dEl = document.getElementById('crypto-detail-change-7d');
+                change7dEl.textContent = (change7d >= 0 ? '+' : '') + change7d.toFixed(2) + '%';
+                change7dEl.className = 'trend ' + (change7d >= 0 ? 'up' : 'down');
+
+                document.getElementById('crypto-detail-market-cap').textContent = '$' + formatCurrencyValue(data.market_data.market_cap.usd, 'USD', true);
+                document.getElementById('crypto-detail-volume').textContent = '$' + formatCurrencyValue(data.market_data.total_volume.usd, 'USD', true);
+                document.getElementById('crypto-detail-high').textContent = '$' + formatCryptoPrice(data.market_data.high_24h.usd);
+                document.getElementById('crypto-detail-low').textContent = '$' + formatCryptoPrice(data.market_data.low_24h.usd);
+
+                // Load and render chart
+                await renderCryptoDetailChart(coingeckoId, '1');
+
+            } catch (error) {
+                console.error('Error loading crypto details:', error);
+                showToast('Error', 'Failed to load crypto details', 'error');
+                closeCryptoDetailModal();
+            }
+        };
+
+        // Close crypto detail modal
+        window.closeCryptoDetailModal = function() {
+            document.getElementById('crypto-detail-modal').classList.remove('active');
+            if (cryptoDetailChart) {
+                cryptoDetailChart.destroy();
+                cryptoDetailChart = null;
+            }
+        };
+
+        // Switch chart period (1d, 7d, 30d)
+        window.switchChartPeriod = async function(days) {
+            currentChartPeriod = days;
+
+            // Update filter chips
+            document.querySelectorAll('[data-period]').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.period === days);
+            });
+
+            await renderCryptoDetailChart(selectedCryptoForDetail, days);
+        };
+
+        // Fetch historical price data
+        async function fetchHistoricalPriceData(coingeckoId, days) {
+            const cacheKey = `${coingeckoId}_${days}`;
+            const now = Date.now();
+
+            // Check cache (5 minute TTL)
+            if (cryptoHistoricalDataCache[cacheKey] &&
+                (now - cryptoHistoricalDataCache[cacheKey].timestamp) < 300000) {
+                return cryptoHistoricalDataCache[cacheKey].data;
+            }
+
+            try {
+                const response = await fetch(
+                    `https://api.coingecko.com/api/v3/coins/${coingeckoId}/market_chart?vs_currency=usd&days=${days}`
+                );
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch historical data');
+                }
+
+                const data = await response.json();
+
+                // Cache the result
+                cryptoHistoricalDataCache[cacheKey] = {
+                    data: data,
+                    timestamp: now
+                };
+
+                return data;
+            } catch (error) {
+                console.error('Error fetching historical data:', error);
+                return null;
+            }
+        }
+
+        // Render crypto detail chart
+        async function renderCryptoDetailChart(coingeckoId, days) {
+            const canvas = document.getElementById('crypto-detail-chart');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+
+            // Destroy existing chart
+            if (cryptoDetailChart) {
+                cryptoDetailChart.destroy();
+                cryptoDetailChart = null;
+            }
+
+            // Fetch historical data
+            const historicalData = await fetchHistoricalPriceData(coingeckoId, days);
+
+            if (!historicalData || !historicalData.prices) {
+                console.error('No historical data available');
+                return;
+            }
+
+            // Prepare chart data
+            const prices = historicalData.prices;
+            const labels = prices.map(p => {
+                const date = new Date(p[0]);
+                if (days === '1') {
+                    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                } else {
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+            });
+            const values = prices.map(p => p[1]);
+
+            // Determine gradient color based on trend
+            const firstPrice = values[0];
+            const lastPrice = values[values.length - 1];
+            const isPositive = lastPrice >= firstPrice;
+            const lineColor = isPositive ? '#2ed573' : '#ff4757';
+            const gradientColorStart = isPositive ? 'rgba(46, 213, 115, 0.3)' : 'rgba(255, 71, 87, 0.3)';
+            const gradientColorEnd = isPositive ? 'rgba(46, 213, 115, 0)' : 'rgba(255, 71, 87, 0)';
+
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, gradientColorStart);
+            gradient.addColorStop(1, gradientColorEnd);
+
+            // Create chart
+            cryptoDetailChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        borderColor: lineColor,
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 6,
+                        pointHoverBackgroundColor: lineColor,
+                        pointHoverBorderColor: '#fff',
+                        pointHoverBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: lineColor,
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + formatCryptoPrice(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: days === '1' ? 8 : 7
+                            }
+                        },
+                        y: {
+                            display: true,
+                            position: 'right',
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.6)',
+                                callback: function(value) {
+                                    return '$' + (value >= 1 ? value.toFixed(2) : value.toFixed(6));
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    }
+                }
+            });
         }
 
         // Format currency value (abbreviated by default, set abbreviate=false for full numbers)
