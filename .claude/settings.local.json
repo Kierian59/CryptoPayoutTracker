@@ -4,7 +4,13 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git -C \"C:\\\\Users\\\\Usuario\\\\Desktop\\\\projectmanagement\" log -1 --format=%B)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:kierian59.github.io)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl:*)",
+      "Bash(where:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(start index.html)"
     ]
   }
 }
